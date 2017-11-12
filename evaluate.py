@@ -5,6 +5,7 @@ import codecs
 import random
 import argparse
 import typo_model
+import time
 
 FNAME = 'sherlockholmes.txt'
 
@@ -59,39 +60,50 @@ class HunspellCorrector(Corrector):
         word = sentence[position]
         if self.__model.spell(word):
             return word
-        self.__model.suggest(word)
+        return self.__model.suggest(word)[0]
 
 def evaluateCorrector(corrector, originalText, erroredText):
     assert len(originalText) == len(erroredText)
     totalErrors = 0
+    lastTime = time.time()
     for pos in xrange(len(originalText)):
+        erroredWord = erroredText[pos]
         originalWord = originalText[pos]
         fixedWord = corrector.correct(erroredText, pos)
         if fixedWord != originalWord:
             totalErrors += 1
+        if pos % 50 == 0 and pos and time.time() - lastTime > 4.0:
+            print '[debug] processed %.2f%%, error rate: %.2f%%' % (100.0 * pos / len(originalText), 100.0 * totalErrors / pos)
+            lastTime = time.time()
+
     return float(totalErrors) / len(originalText)
 
 def main():
     parser = argparse.ArgumentParser(description='spelling correctors evaluation')
-    parser.add_argument("file", type=str, help="text file to use for evaluation")
+    parser.add_argument('file', type=str, help='text file to use for evaluation')
+    parser.add_argument('-hs', '--hunspell' , type=str, help='path to hunspell model')
     args = parser.parse_args()
+
+    correctors = {
+        'dummy': DummyCorrector(),
+    }
+
+    if args.hunspell:
+        correctors['hunspell'] = HunspellCorrector(args.hunspell)
 
     random.seed(42)
     print '[info] loading text'
     originalText = loadText(args.file)
+
     print '[info] generating typos'
     erroredText = generateTypos(originalText)
 
     print '[info] total words: %d' % len(originalText)
     print '[info] evaluating'
 
-    correctors = {
-        'dummy': DummyCorrector(),
-    }
-
     for correctorName, corrector in correctors.iteritems():
         errorsRate = evaluateCorrector(corrector, originalText, erroredText)
-        print '[info] %s: %.2f%%' % (correctorName, 100.0 * errorsRate)
+        print '[info] "%s": %.2f%%' % (correctorName, 100.0 * errorsRate)
 
 
 if __name__ == '__main__':

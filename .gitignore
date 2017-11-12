@@ -1,3 +1,6 @@
 .idea/
 *.txt
 *.pyc
+*.aff
+*.dic
+
