@@ -7,7 +7,7 @@ from scipy.stats import binom
 
 #todo: calculate correct typo probabilities
 
-TYPO_PROB = 0.02 # chance of making typo for a single letter
+TYPO_PROB = 0.03 # chance of making typo for a single letter
 TYPO_COUNT_PROB = [0.8, 0.15, 0.04, 0.01] # chance of making multiple typos
 REPLACE_PROB = 0.7
 INSERT_PROB = 0.1
@@ -55,6 +55,8 @@ def swapLetter(s, i, j):
     return ''.join(lst)
 
 def typoTranspose(word):
+    if not word:
+        return word
     l = random.randint(0, len(word) - 1)
     d = weightedChoice(enumerate(TRANSPOSE_DISTANCE_PROB)) + 1
     l1 = max(0, l - d / 2)
@@ -65,11 +67,16 @@ def typoTranspose(word):
 TYPO_TYPES = [REPLACE_PROB, INSERT_PROB, REMOVE_PROB, TRANSPOSE_PROB]
 TYPO_GENERATORS = [typoReplace, typoInsert, typoRemove, typoTranspose]
 
+LEN_TO_PROB = {}
+
 def getWordTypoChance(word):
     l = len(word)
-    noTypoChance = 1.0 - TYPO_PROB
-    wordNoTypoChance = binom.pmf(l, l, noTypoChance)
-    return 1.0 - wordNoTypoChance
+    prob = LEN_TO_PROB.get(l)
+    if prob is None:
+        noTypoChance = 1.0 - TYPO_PROB
+        prob = 1.0 - binom.pmf(l, l, noTypoChance)
+    LEN_TO_PROB[l] = prob
+    return prob
 
 def generateTypo(word):
     if random.random() > getWordTypoChance(word):
