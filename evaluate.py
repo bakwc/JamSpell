@@ -35,6 +35,42 @@ def loadText(fname):
 def generateTypos(text):
     return map(typo_model.generateTypo, text)
 
+class Corrector(object):
+    def __init__(self):
+        pass
+
+    def correct(self, sentence, position):
+        pass
+
+class DummyCorrector(Corrector):
+    def __init__(self):
+        super(DummyCorrector, self).__init__()
+
+    def correct(self, sentence, position):
+        return sentence[position]
+
+class HunspellCorrector(Corrector):
+    def __init__(self, modelPath):
+        super(HunspellCorrector, self).__init__()
+        import hunspell
+        self.__model = hunspell.HunSpell(modelPath + '.dic', modelPath + '.aff')
+
+    def correct(self, sentence, position):
+        word = sentence[position]
+        if self.__model.spell(word):
+            return word
+        self.__model.suggest(word)
+
+def evaluateCorrector(corrector, originalText, erroredText):
+    assert len(originalText) == len(erroredText)
+    totalErrors = 0
+    for pos in xrange(len(originalText)):
+        originalWord = originalText[pos]
+        fixedWord = corrector.correct(erroredText, pos)
+        if fixedWord != originalWord:
+            totalErrors += 1
+    return float(totalErrors) / len(originalText)
+
 def main():
     parser = argparse.ArgumentParser(description='spelling correctors evaluation')
     parser.add_argument("file", type=str, help="text file to use for evaluation")
@@ -44,20 +80,18 @@ def main():
     print '[info] loading text'
     originalText = loadText(args.file)
     print '[info] generating typos'
-    errorsText = generateTypos(originalText)
+    erroredText = generateTypos(originalText)
 
-    assert len(originalText) == len(errorsText)
+    print '[info] total words: %d' % len(originalText)
+    print '[info] evaluating'
 
-    totalErrors = 0
+    correctors = {
+        'dummy': DummyCorrector(),
+    }
 
-    for i in xrange(len(originalText)):
-        if originalText[i] != errorsText[i]:
-            totalErrors += 1
-
-    print '[info] Total words: %d, errors: %d (%.2f%%)' % (
-                                                        len(originalText),
-                                                        totalErrors,
-                                                        100.0 * totalErrors / len(originalText))
+    for correctorName, corrector in correctors.iteritems():
+        errorsRate = evaluateCorrector(corrector, originalText, erroredText)
+        print '[info] %s: %.2f%%' % (correctorName, 100.0 * errorsRate)
 
 
 if __name__ == '__main__':
