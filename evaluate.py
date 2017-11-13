@@ -73,6 +73,15 @@ class NorvigCorrector(Corrector):
         import norvig_spell
         return norvig_spell.correction(word)
 
+class ContextCorrector(Corrector):
+    def __init__(self, modelPath):
+        super(ContextCorrector, self).__init__()
+        import context_spell
+        context_spell.init(modelPath + '.txt', modelPath + '.arpa')
+
+    def correct(self, sentence, position):
+        import context_spell
+        return context_spell.correction(sentence, position)
 
 def evaluateCorrector(corrector, originalText, erroredText):
     assert len(originalText) == len(erroredText)
@@ -95,6 +104,7 @@ def main():
     parser.add_argument('file', type=str, help='text file to use for evaluation')
     parser.add_argument('-hs', '--hunspell' , type=str, help='path to hunspell model')
     parser.add_argument('-ns', '--norvig', type=str, help='path to train file for Norvig spell corrector')
+    parser.add_argument('-cs', '--context', type=str, help='path to context spell model')
     args = parser.parse_args()
 
     correctors = {
@@ -106,6 +116,9 @@ def main():
 
     if args.norvig:
         correctors['norvig'] = NorvigCorrector(args.norvig)
+
+    if args.context:
+        correctors['context'] = ContextCorrector(args.context)
 
     random.seed(42)
     print '[info] loading text'
