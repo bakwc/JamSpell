@@ -7,6 +7,11 @@ import argparse
 import typo_model
 import time
 
+try:
+    import readline
+except:
+    pass
+
 FNAME = 'sherlockholmes.txt'
 
 class STATE:
@@ -99,26 +104,43 @@ def evaluateCorrector(corrector, originalText, erroredText):
 
     return float(totalErrors) / len(originalText)
 
+def testMode(corrector):
+    while True:
+        sentence = raw_input(">> ").lower().strip()
+        sentence = normalize(sentence).split()
+        if not sentence:
+            continue
+        newSentence = []
+        for i in xrange(len(sentence)):
+            newSentence.append(corrector.correct(sentence, i))
+        print ' '.join(newSentence)
+
+
 def main():
     parser = argparse.ArgumentParser(description='spelling correctors evaluation')
     parser.add_argument('file', type=str, help='text file to use for evaluation')
     parser.add_argument('-hs', '--hunspell' , type=str, help='path to hunspell model')
     parser.add_argument('-ns', '--norvig', type=str, help='path to train file for Norvig spell corrector')
     parser.add_argument('-cs', '--context', type=str, help='path to context spell model')
+    parser.add_argument('-t', '--test', action="store_true")
     args = parser.parse_args()
 
     correctors = {
         'dummy': DummyCorrector(),
     }
+    corrector = correctors['dummy']
 
     if args.hunspell:
-        correctors['hunspell'] = HunspellCorrector(args.hunspell)
+        corrector = correctors['hunspell'] = HunspellCorrector(args.hunspell)
 
     if args.norvig:
-        correctors['norvig'] = NorvigCorrector(args.norvig)
+        corrector = correctors['norvig'] = NorvigCorrector(args.norvig)
 
     if args.context:
-        correctors['context'] = ContextCorrector(args.context)
+        corrector = correctors['context'] = ContextCorrector(args.context)
+
+    if args.test:
+        return testMode(corrector)
 
     random.seed(42)
     print '[info] loading text'
