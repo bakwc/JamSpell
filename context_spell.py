@@ -16,11 +16,6 @@ def init(filename = 'big.txt', modelName = 'big.arpa'):
     TOTAL_WORDS = sum(WORDS.values())
     LANG_MODEL = kenlm.Model(modelName)
 
-def P2(word, N=None):
-    "Probability of `word`."
-    N = N or TOTAL_WORDS
-    return WORDS[word] / N
-
 def P(word, sentence, pos):
     subsent = sentence[max(0,pos-2):pos] + [word] + sentence[pos+1:pos+3]
     subsent = ' '.join(subsent)
