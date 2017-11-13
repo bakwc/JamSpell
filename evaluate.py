@@ -62,6 +62,18 @@ class HunspellCorrector(Corrector):
             return word
         return self.__model.suggest(word)[0]
 
+class NorvigCorrector(Corrector):
+    def __init__(self, trainFile):
+        super(NorvigCorrector, self).__init__()
+        import norvig_spell
+        norvig_spell.init(trainFile)
+
+    def correct(self, sentence, position):
+        word = sentence[position]
+        import norvig_spell
+        return norvig_spell.correction(word)
+
+
 def evaluateCorrector(corrector, originalText, erroredText):
     assert len(originalText) == len(erroredText)
     totalErrors = 0
@@ -82,6 +94,7 @@ def main():
     parser = argparse.ArgumentParser(description='spelling correctors evaluation')
     parser.add_argument('file', type=str, help='text file to use for evaluation')
     parser.add_argument('-hs', '--hunspell' , type=str, help='path to hunspell model')
+    parser.add_argument('-ns', '--norvig', type=str, help='path to train file for Norvig spell corrector')
     args = parser.parse_args()
 
     correctors = {
@@ -90,6 +103,9 @@ def main():
 
     if args.hunspell:
         correctors['hunspell'] = HunspellCorrector(args.hunspell)
+
+    if args.norvig:
+        correctors['norvig'] = NorvigCorrector(args.norvig)
 
     random.seed(42)
     print '[info] loading text'
