@@ -79,6 +79,9 @@ def getWordTypoChance(word):
     return prob
 
 def generateTypo(word):
+    if word == '.':
+        return word
+
     if random.random() > getWordTypoChance(word):
         return word
 

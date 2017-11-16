@@ -16,10 +16,15 @@ def init(filename = 'big.txt', modelName = 'big.arpa'):
     TOTAL_WORDS = sum(WORDS.values())
     LANG_MODEL = kenlm.Model(modelName)
 
+# def P(word, sentence, pos):
+#     subsent = sentence[max(0,pos-2):pos] + [word] + sentence[pos+1:pos+3]
+#     subsent = ' '.join(subsent)
+#     return LANG_MODEL.score(subsent, bos = False, eos = False)
+
 def P(word, sentence, pos):
-    subsent = sentence[max(0,pos-2):pos] + [word] + sentence[pos+1:pos+3]
-    subsent = ' '.join(subsent)
-    return LANG_MODEL.score(subsent, bos = False, eos = False)
+    subsent = sentence[:pos] + [word] + sentence[pos+1:]
+    subsent = ' '.join(subsent) + ' .'
+    return LANG_MODEL.score(subsent, bos = True, eos = True)
 
 def correction(sentence, pos):
     "Most probable spelling correction for word."
