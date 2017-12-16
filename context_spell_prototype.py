@@ -56,8 +56,12 @@ def correction(sentence, pos):
     if not cands:
         cands = candidates(word, False)
     if not cands:
-        return sentence[pos]
-    return max(cands, key=lambda w: P(w, sentence, pos))[0]
+        return word
+    cands = sorted(cands, key=lambda w: P(w, sentence, pos), reverse=True)
+    cands = [c[0] for c in cands]
+    if cands[0] == word:
+        return word
+    return cands
 
 def candidates(word, nearest=True):
     res = {}

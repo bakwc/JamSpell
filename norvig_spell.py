@@ -18,12 +18,12 @@ def P(word, N=None):
     return WORDS[word] / N
 
 def correction(word):
-    "Most probable spelling correction for word."
-    return max(candidates(word), key=P)
-
-def candidates(word):
-    "Generate possible spelling corrections for word."
-    return (known([word]) or known(edits1(word)) or known(edits2(word)) or [word])
+    if known([word]):
+        return word
+    cands = known(edits1(word)) or known(edits2(word))
+    if not cands:
+        return word
+    return sorted(cands, key=P, reverse=True)
 
 def known(words):
     "The subset of `words` that appear in the dictionary of WORDS."

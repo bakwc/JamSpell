@@ -29,7 +29,10 @@ def P(word, sentence, pos):
 def correction(sentence, pos):
     "Most probable spelling correction for word."
     word = sentence[pos]
-    return max(candidates(word), key=lambda w: P(w, sentence, pos))
+    cands = candidates(word)
+    if len(cands) == 1 and word in cands:
+        return word
+    return sorted(cands, key=lambda w: P(w, sentence, pos), reverse=True)
 
 def candidates(word):
     "Generate possible spelling corrections for word."

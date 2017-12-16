@@ -84,7 +84,7 @@ class HunspellCorrector(Corrector):
         word = sentence[position]
         if self.__model.spell(word):
             return word
-        return self.__model.suggest(word)[0]
+        return self.__model.suggest(word)
 
 class NorvigCorrector(Corrector):
     def __init__(self, trainFile):
@@ -122,6 +122,7 @@ def evaluateCorrector(correctorName, corrector, originalSentences, erroredSenten
     origErrors = 0
     fixedErrors = 0
     broken = 0
+    topNtotalErrors = 0
 
     erroredSentences = copy.deepcopy(erroredSentences)
 
@@ -133,7 +134,15 @@ def evaluateCorrector(correctorName, corrector, originalSentences, erroredSenten
         for pos in xrange(len(originalText)):
             erroredWord = erroredText[pos]
             originalWord = originalText[pos]
-            fixedWord = corrector.correct(erroredText, pos)
+            fixedCandidates = corrector.correct(erroredText, pos)
+            if isinstance(fixedCandidates, list):
+                fixedCandidates = fixedCandidates[:7]
+                fixedWord = fixedCandidates[0]
+                fixedWords = set(fixedCandidates)
+            else:
+                fixedWord = fixedCandidates
+                fixedWords = [fixedCandidates]
+
             erroredText[pos] = fixedWord
             n += 1
 
@@ -147,6 +156,10 @@ def evaluateCorrector(correctorName, corrector, originalSentences, erroredSenten
 
             if fixedWord != originalWord:
                 totalErrors += 1
+
+            if originalWord not in fixedWords:
+                topNtotalErrors += 1
+
             if sentID % 1 == 0 and pos and time.time() - lastTime > 4.0:
                 progress = float(sentID) / len(originalSentences)
                 err_rate = float(totalErrors) / n
@@ -168,7 +181,10 @@ def evaluateCorrector(correctorName, corrector, originalSentences, erroredSenten
         #if fixedWord != originalWord:
         #    print originalWord, erroredWord, fixedWord
 
-    return float(totalErrors) / n, float(fixedErrors) / origErrors, float(broken) / n
+    return float(totalErrors) / n,\
+           float(fixedErrors) / origErrors,\
+           float(broken) / n,\
+           float(topNtotalErrors) / n
 
 def testMode(corrector):
     while True:
@@ -240,19 +256,20 @@ def main():
     results = {}
 
     for correctorName, corrector in correctors.iteritems():
-        errorsRate, fixRate, broken = \
+        errorsRate, fixRate, broken, topNerr = \
             evaluateCorrector(correctorName, corrector, originalSentences, erroredSentences, maxWords)
-        results[correctorName] = errorsRate, fixRate, broken
+        results[correctorName] = errorsRate, fixRate, broken, topNerr
 
     print
 
-    print '[info] %12s %8s  %8s  %8s' % ('', 'errRate', 'fixRate', 'broken')
+    print '[info] %12s %8s  %8s  %8s  %8s' % ('', 'errRate', 'fixRate', 'broken', 'topNerr')
     for k, _ in sorted(results.items(), key=lambda x: x[1]):
-        print '[info] %10s  %8.2f%% %8.2f%% %8.2f%%' % \
+        print '[info] %10s  %8.2f%% %8.2f%% %8.2f%% %8.2f%%' % \
               (k,
                100.0 * results[k][0],
                100.0 * results[k][1],
-               100.0 * results[k][2])
+               100.0 * results[k][2],
+               100.0 * results[k][3])
 
 
 if __name__ == '__main__':
