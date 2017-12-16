@@ -159,11 +159,11 @@ def evaluateCorrector(correctorName, corrector, originalSentences, erroredSenten
             if maxWords is not None and n >= maxWords:
                 break
 
+            # if originalWord != fixedWord:
+            #    print '%s (%s=>%s):\n%s\n\n' % (originalWord, erroredWord, fixedWord, ' '.join(erroredText))
+
         if maxWords is not None and n >= maxWords:
             break
-
-            #if originalWord != fixedWord:
-            #    print '%s (%s=>%s):\n%s\n\n' % (originalWord, erroredWord, fixedWord, ' '.join(erroredText))
 
         #if fixedWord != originalWord:
         #    print originalWord, erroredWord, fixedWord
