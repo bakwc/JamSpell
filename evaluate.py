@@ -6,6 +6,7 @@ import random
 import argparse
 import typo_model
 import time
+import copy
 
 try:
     import readline
@@ -120,6 +121,9 @@ def evaluateCorrector(correctorName, corrector, originalSentences, erroredSenten
     totalErrors = 0
     origErrors = 0
     fixedErrors = 0
+    broken = 0
+
+    erroredSentences = copy.deepcopy(erroredSentences)
 
     lastTime = time.time()
     n = 0
@@ -130,13 +134,16 @@ def evaluateCorrector(correctorName, corrector, originalSentences, erroredSenten
             erroredWord = erroredText[pos]
             originalWord = originalText[pos]
             fixedWord = corrector.correct(erroredText, pos)
-            #erroredText[pos] = fixedWord
+            erroredText[pos] = fixedWord
             n += 1
 
             if erroredWord != originalWord:
                 origErrors += 1
                 if fixedWord == originalWord:
                     fixedErrors += 1
+            else:
+                if fixedWord != originalWord:
+                    broken += 1
 
             if fixedWord != originalWord:
                 totalErrors += 1
@@ -161,7 +168,7 @@ def evaluateCorrector(correctorName, corrector, originalSentences, erroredSenten
         #if fixedWord != originalWord:
         #    print originalWord, erroredWord, fixedWord
 
-    return float(totalErrors) / n, float(fixedErrors) / origErrors
+    return float(totalErrors) / n, float(fixedErrors) / origErrors, float(broken) / n
 
 def testMode(corrector):
     while True:
@@ -233,15 +240,19 @@ def main():
     results = {}
 
     for correctorName, corrector in correctors.iteritems():
-        errorsRate, fixRate = evaluateCorrector(correctorName, corrector, originalSentences, erroredSentences, maxWords)
-        results[correctorName] = errorsRate, fixRate
+        errorsRate, fixRate, broken = \
+            evaluateCorrector(correctorName, corrector, originalSentences, erroredSentences, maxWords)
+        results[correctorName] = errorsRate, fixRate, broken
 
     print
 
-    print '[info] %10s  %5s  %5s' % ('', 'errRate', 'fixRate')
+    print '[info] %12s %8s  %8s  %8s' % ('', 'errRate', 'fixRate', 'broken')
     for k, _ in sorted(results.items(), key=lambda x: x[1]):
-        print '[info] %10s  %5.2f%% %5.2f%%' % \
-              (k, 100.0 * results[k][0], 100.0 * results[k][1])
+        print '[info] %10s  %8.2f%% %8.2f%% %8.2f%%' % \
+              (k,
+               100.0 * results[k][0],
+               100.0 * results[k][1],
+               100.0 * results[k][2])
 
 
 if __name__ == '__main__':
