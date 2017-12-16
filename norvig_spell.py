@@ -23,6 +23,9 @@ def correction(word):
     cands = known(edits1(word)) or known(edits2(word))
     if not cands:
         return word
+    cands = sorted(cands, key=P, reverse=True)
+    if cands[0] == word:
+        return word
     return sorted(cands, key=P, reverse=True)
 
 def known(words):

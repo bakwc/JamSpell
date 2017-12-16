@@ -30,9 +30,10 @@ def correction(sentence, pos):
     "Most probable spelling correction for word."
     word = sentence[pos]
     cands = candidates(word)
-    if len(cands) == 1 and word in cands:
+    cands = sorted(cands, key=lambda w: P(w, sentence, pos), reverse=True)
+    if cands[0] == word:
         return word
-    return sorted(cands, key=lambda w: P(w, sentence, pos), reverse=True)
+    return cands
 
 def candidates(word):
     "Generate possible spelling corrections for word."
