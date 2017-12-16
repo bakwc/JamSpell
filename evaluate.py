@@ -106,8 +106,21 @@ class ContextCorrector(Corrector):
         import context_spell
         return context_spell.correction(sentence, position)
 
-def evaluateCorrector(corrector, originalSentences, erroredSentences):
+class ContextPrototypeCorrector(Corrector):
+    def __init__(self, modelPath):
+        super(ContextPrototypeCorrector, self).__init__()
+        import context_spell_prototype
+        context_spell_prototype.init(modelPath + '.txt', modelPath + '.binary')
+
+    def correct(self, sentence, position):
+        import context_spell_prototype
+        return context_spell_prototype.correction(sentence, position)
+
+def evaluateCorrector(correctorName, corrector, originalSentences, erroredSentences, maxWords=None):
     totalErrors = 0
+    origErrors = 0
+    fixedErrors = 0
+
     lastTime = time.time()
     n = 0
     for sentID in xrange(len(originalSentences)):
@@ -117,13 +130,30 @@ def evaluateCorrector(corrector, originalSentences, erroredSentences):
             erroredWord = erroredText[pos]
             originalWord = originalText[pos]
             fixedWord = corrector.correct(erroredText, pos)
-            erroredText[pos] = fixedWord
+            #erroredText[pos] = fixedWord
             n += 1
+
+            if erroredWord != originalWord:
+                origErrors += 1
+                if fixedWord == originalWord:
+                    fixedErrors += 1
+
             if fixedWord != originalWord:
                 totalErrors += 1
             if sentID % 1 == 0 and pos and time.time() - lastTime > 4.0:
-                print '[debug] processed %.2f%%, error rate: %.2f%%' % (100.0 * sentID / len(originalSentences), 100.0 * totalErrors / n)
+                progress = float(sentID) / len(originalSentences)
+                err_rate = float(totalErrors) / n
+                if maxWords is not None:
+                    progress = float(n) / maxWords
+                print '[debug] %s: processed %.2f%%, error rate: %.2f%%' % \
+                      (correctorName, 100.0 * progress, 100.0 * err_rate)
                 lastTime = time.time()
+
+            if maxWords is not None and n >= maxWords:
+                break
+
+        if maxWords is not None and n >= maxWords:
+            break
 
             #if originalWord != fixedWord:
             #    print '%s (%s=>%s):\n%s\n\n' % (originalWord, erroredWord, fixedWord, ' '.join(erroredText))
@@ -131,7 +161,7 @@ def evaluateCorrector(corrector, originalSentences, erroredSentences):
         #if fixedWord != originalWord:
         #    print originalWord, erroredWord, fixedWord
 
-    return float(totalErrors) / n
+    return float(totalErrors) / n, float(fixedErrors) / origErrors
 
 def testMode(corrector):
     while True:
@@ -151,13 +181,19 @@ def main():
     parser.add_argument('-hs', '--hunspell' , type=str, help='path to hunspell model')
     parser.add_argument('-ns', '--norvig', type=str, help='path to train file for Norvig spell corrector')
     parser.add_argument('-cs', '--context', type=str, help='path to context spell model')
+    parser.add_argument('-csp', '--context_prototype', type=str, help='path to context spell prototype model')
     parser.add_argument('-t', '--test', action="store_true")
+    parser.add_argument('-mx', '--max_words', type=int, help='max words to evaluate')
     args = parser.parse_args()
 
     correctors = {
         'dummy': DummyCorrector(),
     }
     #corrector = correctors['dummy']
+
+    maxWords = args.max_words
+
+    print '[info] loading models'
 
     if args.hunspell:
         corrector = correctors['hunspell'] = HunspellCorrector(args.hunspell)
@@ -167,6 +203,9 @@ def main():
 
     if args.context:
         corrector = correctors['context'] = ContextCorrector(args.context)
+
+    if args.context_prototype:
+        corrector = correctors['prototype'] = ContextPrototypeCorrector(args.context_prototype)
 
     if args.test:
         return testMode(corrector)
@@ -191,9 +230,18 @@ def main():
     print '[info] total words: %d' % len(originalText)
     print '[info] evaluating'
 
+    results = {}
+
     for correctorName, corrector in correctors.iteritems():
-        errorsRate = evaluateCorrector(corrector, originalSentences, erroredSentences)
-        print '[info] "%s": %.2f%%' % (correctorName, 100.0 * errorsRate)
+        errorsRate, fixRate = evaluateCorrector(correctorName, corrector, originalSentences, erroredSentences, maxWords)
+        results[correctorName] = errorsRate, fixRate
+
+    print
+
+    print '[info] %10s  %5s  %5s' % ('', 'errRate', 'fixRate')
+    for k, _ in sorted(results.items(), key=lambda x: x[1]):
+        print '[info] %10s  %5.2f%% %5.2f%%' % \
+              (k, 100.0 * results[k][0], 100.0 * results[k][1])
 
 
 if __name__ == '__main__':
