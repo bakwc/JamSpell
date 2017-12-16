@@ -100,7 +100,7 @@ class ContextCorrector(Corrector):
     def __init__(self, modelPath):
         super(ContextCorrector, self).__init__()
         import context_spell
-        context_spell.init(modelPath + '.txt', modelPath + '.arpa')
+        context_spell.init(modelPath + '.txt', modelPath + '.binary')
 
     def correct(self, sentence, position):
         import context_spell
@@ -117,12 +117,16 @@ def evaluateCorrector(corrector, originalSentences, erroredSentences):
             erroredWord = erroredText[pos]
             originalWord = originalText[pos]
             fixedWord = corrector.correct(erroredText, pos)
+            erroredText[pos] = fixedWord
             n += 1
             if fixedWord != originalWord:
                 totalErrors += 1
-            if sentID % 50 == 0 and pos and time.time() - lastTime > 4.0:
+            if sentID % 1 == 0 and pos and time.time() - lastTime > 4.0:
                 print '[debug] processed %.2f%%, error rate: %.2f%%' % (100.0 * sentID / len(originalSentences), 100.0 * totalErrors / n)
                 lastTime = time.time()
+
+            #if originalWord != fixedWord:
+            #    print '%s (%s=>%s):\n%s\n\n' % (originalWord, erroredWord, fixedWord, ' '.join(erroredText))
 
         #if fixedWord != originalWord:
         #    print originalWord, erroredWord, fixedWord

@@ -8,7 +8,6 @@ from scipy.stats import binom
 #todo: calculate correct typo probabilities
 
 TYPO_PROB = 0.03 # chance of making typo for a single letter
-TYPO_COUNT_PROB = [0.8, 0.15, 0.04, 0.01] # chance of making multiple typos
 REPLACE_PROB = 0.7
 INSERT_PROB = 0.1
 REMOVE_PROB = 0.1
@@ -19,7 +18,6 @@ EPSILON = 0.001
 ALPHABET = 'abcdefghijklmnopqrstuvwxyz'
 
 assert 1.0 >= TYPO_PROB > 0
-assert abs(sum(TYPO_COUNT_PROB) - 1.0) < EPSILON
 assert abs(REPLACE_PROB + INSERT_PROB + REMOVE_PROB + TRANSPOSE_PROB - 1.0) < EPSILON
 
 # Randomly selects a value from list [(value, weight), ... ]
@@ -85,11 +83,6 @@ def generateTypo(word):
     if random.random() > getWordTypoChance(word):
         return word
 
-    typos = weightedChoice(enumerate(TYPO_COUNT_PROB)) + 1
-
-    for i in xrange(typos):
-        typoType = weightedChoice(enumerate(TYPO_TYPES))
-        word = TYPO_GENERATORS[typoType](word)
-
-    return word
+    typoType = weightedChoice(enumerate(TYPO_TYPES))
+    return TYPO_GENERATORS[typoType](word)
 
