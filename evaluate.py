@@ -123,6 +123,7 @@ def evaluateCorrector(correctorName, corrector, originalSentences, erroredSenten
     fixedErrors = 0
     broken = 0
     topNtotalErrors = 0
+    topNfixed = 0
 
     erroredSentences = copy.deepcopy(erroredSentences)
 
@@ -150,6 +151,8 @@ def evaluateCorrector(correctorName, corrector, originalSentences, erroredSenten
                 origErrors += 1
                 if fixedWord == originalWord:
                     fixedErrors += 1
+                if originalWord in fixedCandidates:
+                    topNfixed += 1
             else:
                 if fixedWord != originalWord:
                     broken += 1
@@ -184,7 +187,8 @@ def evaluateCorrector(correctorName, corrector, originalSentences, erroredSenten
     return float(totalErrors) / n,\
            float(fixedErrors) / origErrors,\
            float(broken) / n,\
-           float(topNtotalErrors) / n
+           float(topNtotalErrors) / n,\
+           float(topNfixed) / origErrors
 
 def testMode(corrector):
     while True:
@@ -256,20 +260,21 @@ def main():
     results = {}
 
     for correctorName, corrector in correctors.iteritems():
-        errorsRate, fixRate, broken, topNerr = \
+        errorsRate, fixRate, broken, topNerr, topNfix = \
             evaluateCorrector(correctorName, corrector, originalSentences, erroredSentences, maxWords)
-        results[correctorName] = errorsRate, fixRate, broken, topNerr
+        results[correctorName] = errorsRate, fixRate, broken, topNerr, topNfix
 
     print
 
-    print '[info] %12s %8s  %8s  %8s  %8s' % ('', 'errRate', 'fixRate', 'broken', 'topNerr')
+    print '[info] %12s %8s  %8s  %8s  %8s  %8s' % ('', 'errRate', 'fixRate', 'broken', 'topNerr', 'topNfix')
     for k, _ in sorted(results.items(), key=lambda x: x[1]):
-        print '[info] %10s  %8.2f%% %8.2f%% %8.2f%% %8.2f%%' % \
+        print '[info] %10s  %8.2f%% %8.2f%% %8.2f%% %8.2f%% %8.2f%%' % \
               (k,
                100.0 * results[k][0],
                100.0 * results[k][1],
                100.0 * results[k][2],
-               100.0 * results[k][3])
+               100.0 * results[k][3],
+               100.0 * results[k][4])
 
 
 if __name__ == '__main__':
