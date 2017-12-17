@@ -84,18 +84,18 @@ class SimpleLangModel(object):
         return float(wordCounts) / (self.totalWords + vocabSize)
 
     def getGram2Prob(self, wordID1, wordID2):
-        countsWord1 = self.gram1.get(wordID1, 0) + 1
-        countsBigram = self.gram2.get((wordID1, wordID2), 0) + 0.0001
+        countsWord1 = self.gram1.get(wordID1, 0) + self.totalWords
+        countsBigram = self.gram2.get((wordID1, wordID2), 0) + 1
         return float(countsBigram) / countsWord1
 
     def getGram3Prob(self, wordID1, wordID2, wordID3):
-        countsGram2 = self.gram2.get((wordID1, wordID2), 0) + 1
-        countsGram3 = self.gram3.get((wordID1, wordID2, wordID3), 0) + 0.0001
+        countsGram2 = self.gram2.get((wordID1, wordID2), 0) + self.totalWords
+        countsGram3 = self.gram3.get((wordID1, wordID2, wordID3), 0) + 1
         return float(countsGram3) / countsGram2
 
     def getGram4Prob(self, wordID1, wordID2, wordID3, wordID4):
-        countsGram3 = self.gram2.get((wordID1, wordID2, wordID3), 0) + 1
-        countsGram4 = self.gram3.get((wordID1, wordID2, wordID3, wordID4), 0) + 0.0001
+        countsGram3 = self.gram2.get((wordID1, wordID2, wordID3), 0) + self.totalWords
+        countsGram4 = self.gram3.get((wordID1, wordID2, wordID3, wordID4), 0) + 1
         return float(countsGram4) / countsGram3
 
     def predict(self, sentence):
