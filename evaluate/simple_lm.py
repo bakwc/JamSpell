@@ -13,6 +13,7 @@ class SimpleLangModel(object):
         self.wordToId = {} # word => int id
         self.idToWord = {} # int id => word
         self.lastID = 0
+        self.totalWords = 0
         self.gram1 = defaultdict(int) # word => count
         self.gram2 = defaultdict(int) # (word1, word2) => count
         self.gram3 = defaultdict(int) # (word1, word2, word3) => count
@@ -31,6 +32,7 @@ class SimpleLangModel(object):
             sentence = sentences[i]
             for w in sentence:
                 self.gram1[w] += 1
+                self.totalWords += 1
             for j in xrange(len(sentence) - 1):
                 self.gram2[(sentence[j], sentence[j+1])] += 1
             for j in xrange(len(sentence) - 2):
@@ -78,8 +80,8 @@ class SimpleLangModel(object):
 
     def getGram1Prob(self, wordID):
         wordCounts = self.gram1.get(wordID, 0) + 1
-        totalWord = len(self.gram1)
-        return float(wordCounts) / totalWord
+        vocabSize = len(self.gram1)
+        return float(wordCounts) / (self.totalWords + vocabSize)
 
     def getGram2Prob(self, wordID1, wordID2):
         countsWord1 = self.gram1.get(wordID1, 0) + 1
