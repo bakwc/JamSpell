@@ -102,13 +102,13 @@ class SimpleLangModel(object):
         sentence = [self.getWordID(w, False) for w in normalize(sentence).split()]
         result = 0
         for i in xrange(0, len(sentence)):
-            result += math.log(self.getGram1Prob(sentence[i]))
+            result += 0.1 * math.log(self.getGram1Prob(sentence[i]))
         for i in xrange(0, len(sentence) - 1):
-            result += math.log(self.getGram2Prob(sentence[i], sentence[i + 1]))
+            result += 0.2 * math.log(self.getGram2Prob(sentence[i], sentence[i + 1]))
         for i in xrange(0, len(sentence) - 2):
-            result += math.log(self.getGram3Prob(sentence[i], sentence[i + 1], sentence[i + 2]))
+            result += 0.3 * math.log(self.getGram3Prob(sentence[i], sentence[i + 1], sentence[i + 2]))
         for i in xrange(0, len(sentence) - 3):
-            result += math.log(self.getGram4Prob(sentence[i], sentence[i + 1], sentence[i + 2], sentence[i + 3]))
+            result += 0.4 * math.log(self.getGram4Prob(sentence[i], sentence[i + 1], sentence[i + 2], sentence[i + 3]))
         return result
 
 if __name__ == '__main__':
