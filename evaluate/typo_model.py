@@ -4,6 +4,7 @@
 import random
 import bisect
 from scipy.stats import binom
+from utils import ALPHABET
 
 #todo: calculate correct typo probabilities
 
@@ -15,7 +16,6 @@ TRANSPOSE_PROB = 0.1
 TRANSPOSE_DISTANCE_PROB = [0.8, 0.15, 0.04, 0.01]
 EPSILON = 0.001
 
-ALPHABET = 'abcdefghijklmnopqrstuvwxyz'
 
 assert 1.0 >= TYPO_PROB > 0
 assert abs(REPLACE_PROB + INSERT_PROB + REMOVE_PROB + TRANSPOSE_PROB - 1.0) < EPSILON
