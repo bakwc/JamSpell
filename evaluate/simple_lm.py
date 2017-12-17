@@ -15,6 +15,8 @@ class SimpleLangModel(object):
         self.lastID = 0
         self.gram1 = defaultdict(int) # word => count
         self.gram2 = defaultdict(int) # (word1, word2) => count
+        self.gram3 = defaultdict(int) # (word1, word2, word3) => count
+        self.gram4 = defaultdict(int) # (word1, word2, word3, word4) => count
 
     def train(self, trainFile):
         print '[info] loading text'
@@ -30,9 +32,11 @@ class SimpleLangModel(object):
             for w in sentence:
                 self.gram1[w] += 1
             for j in xrange(len(sentence) - 1):
-                w1 = sentence[j]
-                w2 = sentence[j+1]
-                self.gram2[(w1, w2)] += 1
+                self.gram2[(sentence[j], sentence[j+1])] += 1
+            for j in xrange(len(sentence) - 2):
+                self.gram3[(sentence[j], sentence[j+1], sentence[j+2])] += 1
+            for j in xrange(len(sentence) - 3):
+                self.gram4[(sentence[j], sentence[j+1], sentence[j+2], sentence[j+3])] += 1
             if time.time() - lastTime >= 4.0:
                 lastTime = time.time()
                 print '[info] processed %.2f%%' % (100.0 * i / total)
@@ -70,6 +74,7 @@ class SimpleLangModel(object):
             data = cPickle.loads(zlib.decompress(f.read()))
             self.__dict__.clear()
             self.__dict__.update(data)
+            assert self.gram1 and self.gram2 and self.gram3 and self.gram4
 
     def getGram1Prob(self, wordID):
         wordCounts = self.gram1.get(wordID, 0) + 1
@@ -78,20 +83,30 @@ class SimpleLangModel(object):
 
     def getGram2Prob(self, wordID1, wordID2):
         countsWord1 = self.gram1.get(wordID1, 0) + 1
-        countsBigram = self.gram2.get((wordID1, wordID2), 0) + 1
+        countsBigram = self.gram2.get((wordID1, wordID2), 0) + 0.0001
         return float(countsBigram) / countsWord1
 
+    def getGram3Prob(self, wordID1, wordID2, wordID3):
+        countsGram2 = self.gram2.get((wordID1, wordID2), 0) + 1
+        countsGram3 = self.gram3.get((wordID1, wordID2, wordID3), 0) + 0.0001
+        return float(countsGram3) / countsGram2
+
+    def getGram4Prob(self, wordID1, wordID2, wordID3, wordID4):
+        countsGram3 = self.gram2.get((wordID1, wordID2, wordID3), 0) + 1
+        countsGram4 = self.gram3.get((wordID1, wordID2, wordID3, wordID4), 0) + 0.0001
+        return float(countsGram4) / countsGram3
+
     def predict(self, sentence):
-        sentence = normalize(sentence).split()
-        if len(sentence) == 0:
-            return 0
-        if len(sentence) == 1:
-            return math.log(self.getGram1Prob(self.getWordID(sentence[0], False)))
+        sentence = [self.getWordID(w, False) for w in normalize(sentence).split()]
         result = 0
+        for i in xrange(0, len(sentence)):
+            result += math.log(self.getGram1Prob(sentence[i]))
         for i in xrange(0, len(sentence) - 1):
-            w1 = self.getWordID(sentence[i], False)
-            w2 = self.getWordID(sentence[i+1], False)
-            result += math.log(self.getGram2Prob(w1, w2))
+            result += math.log(self.getGram2Prob(sentence[i], sentence[i + 1]))
+        for i in xrange(0, len(sentence) - 2):
+            result += math.log(self.getGram3Prob(sentence[i], sentence[i + 1], sentence[i + 2]))
+        for i in xrange(0, len(sentence) - 3):
+            result += math.log(self.getGram4Prob(sentence[i], sentence[i + 1], sentence[i + 2], sentence[i + 3]))
         return result
 
 if __name__ == '__main__':

@@ -76,7 +76,7 @@ class ContextPrototypeCorrector(Corrector):
     def __init__(self, modelPath):
         super(ContextPrototypeCorrector, self).__init__()
         import context_spell_prototype
-        context_spell_prototype.init(modelPath + '.txt', modelPath + '.binary')
+        context_spell_prototype.init(modelPath + '.txt', modelPath + '.bin')
 
     def correct(self, sentence, position):
         import context_spell_prototype
