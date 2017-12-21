@@ -8,6 +8,8 @@ import math
 import sys
 import time
 
+K = 0.05
+
 class SimpleLangModel(object):
     def __init__(self):
         self.wordToId = {} # word => int id
@@ -79,36 +81,34 @@ class SimpleLangModel(object):
             assert self.gram1 and self.gram2 and self.gram3 and self.gram4
 
     def getGram1Prob(self, wordID):
-        wordCounts = self.gram1.get(wordID, 0) + 1
+        wordCounts = self.gram1.get(wordID, 0) + K
         vocabSize = len(self.gram1)
         return float(wordCounts) / (self.totalWords + vocabSize)
 
     def getGram2Prob(self, wordID1, wordID2):
         countsWord1 = self.gram1.get(wordID1, 0) + self.totalWords
-        countsBigram = self.gram2.get((wordID1, wordID2), 0) + 1
+        countsBigram = self.gram2.get((wordID1, wordID2), 0) + K
         return float(countsBigram) / countsWord1
 
     def getGram3Prob(self, wordID1, wordID2, wordID3):
         countsGram2 = self.gram2.get((wordID1, wordID2), 0) + self.totalWords
-        countsGram3 = self.gram3.get((wordID1, wordID2, wordID3), 0) + 1
+        countsGram3 = self.gram3.get((wordID1, wordID2, wordID3), 0) + K
         return float(countsGram3) / countsGram2
 
     def getGram4Prob(self, wordID1, wordID2, wordID3, wordID4):
         countsGram3 = self.gram2.get((wordID1, wordID2, wordID3), 0) + self.totalWords
-        countsGram4 = self.gram3.get((wordID1, wordID2, wordID3, wordID4), 0) + 1
+        countsGram4 = self.gram3.get((wordID1, wordID2, wordID3, wordID4), 0) + K
         return float(countsGram4) / countsGram3
 
     def predict(self, sentence):
-        sentence = [self.getWordID(w, False) for w in normalize(sentence).split()]
+        sentence = [self.getWordID(w, False) for w in normalize(sentence).split()] + [None] * 3
         result = 0
-        for i in xrange(0, len(sentence)):
-            result += 0.1 * math.log(self.getGram1Prob(sentence[i]))
-        for i in xrange(0, len(sentence) - 1):
-            result += 0.2 * math.log(self.getGram2Prob(sentence[i], sentence[i + 1]))
-        for i in xrange(0, len(sentence) - 2):
-            result += 0.3 * math.log(self.getGram3Prob(sentence[i], sentence[i + 1], sentence[i + 2]))
         for i in xrange(0, len(sentence) - 3):
-            result += 0.4 * math.log(self.getGram4Prob(sentence[i], sentence[i + 1], sentence[i + 2], sentence[i + 3]))
+            p1 = self.getGram4Prob(sentence[i], sentence[i + 1], sentence[i + 2], sentence[i + 3])
+            p2 = self.getGram3Prob(sentence[i], sentence[i + 1], sentence[i + 2])
+            p3 = self.getGram2Prob(sentence[i], sentence[i + 1])
+            p4 = self.getGram1Prob(sentence[i])
+            result += math.log(p1*p2*p3*p4)
         return result
 
 if __name__ == '__main__':
