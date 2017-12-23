@@ -163,7 +163,10 @@ def testMode(corrector):
             continue
         newSentence = []
         for i in xrange(len(sentence)):
-            newSentence.append(corrector.correct(sentence, i))
+            fix = corrector.correct(sentence, i)
+            if isinstance(fix, list):
+                fix = fix[0]
+            newSentence.append(fix)
         print ' '.join(newSentence)
 
 
