@@ -17,37 +17,41 @@ def init(filename = 'big.txt', modelName = 'big.bin'):
     LANG_MODEL = simple_lm.SimpleLangModel()
     LANG_MODEL.load(modelName)
 
-    print LANG_MODEL.predict('he is better than me')
-    print LANG_MODEL.predict('he is better then me')
-
-
-# def P(word, sentence, pos):
-#     subsent = sentence[max(0,pos-2):pos] + [word] + sentence[pos+1:pos+3]
-#     subsent = ' '.join(subsent)
-#     return LANG_MODEL.score(subsent, bos = False, eos = False)
+WEIGHTS = {
+    0: 1.0,
+    1: 1.05,
+    2: 50.0,
+}
 
 def P(word, sentence, pos):
+    word, level = word
     subsent = sentence[:pos] + [word] + sentence[pos+1:]
     subsent = ' '.join(subsent) + ' .'
-    return LANG_MODEL.predict(subsent)
-    #return LANG_MODEL.score(subsent, bos = True, eos = True)
+    score = LANG_MODEL.predict(subsent)
+    return score * WEIGHTS[level]
 
 def correction(sentence, pos):
     "Most probable spelling correction for word."
     word = sentence[pos]
     cands = candidates(word)
+    if not cands:
+        cands = candidates(word, False)
+    if not cands:
+        return word
     cands = sorted(cands, key=lambda w: P(w, sentence, pos), reverse=True)
+    cands = [c[0] for c in cands]
     if cands[0] == word:
         return word
     return cands
 
-def candidates(word):
-    "Generate possible spelling corrections for word."
-    return (known([word]) or known(edits1(word)) or known(edits2(word)) or [word])
-
-def known(words):
-    "The subset of `words` that appear in the dictionary of WORDS."
-    return set(w for w in words if w in WORDS)
+def candidates(word, nearest=True):
+    res = {}
+    cands = ((0, [word]), (1, edits1(word))) if nearest else ((2, edits2(word)),)
+    for lvl, wrds in cands:
+        for w in wrds:
+            if w in WORDS:
+                res.setdefault(w, lvl)
+    return res.items()
 
 def edits1(word):
     "All edits that are one edit away from `word`."
