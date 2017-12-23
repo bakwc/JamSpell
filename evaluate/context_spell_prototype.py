@@ -19,7 +19,7 @@ def init(filename = 'big.txt', modelName = 'big.bin'):
 
 WEIGHTS = {
     0: 1.0,
-    1: 1.05,
+    1: 1.045,
     2: 50.0,
 }
 
