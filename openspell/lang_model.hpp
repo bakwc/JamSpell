@@ -38,6 +38,8 @@ public:
 class TLangModel {
 public:
     void Train(const std::string& fileName, const std::string& alphabetFile);
+    double Score(const TWords& words) const;
+
     void Save(const std::string& modelFileName) const;
     void Load(const std::string& modelFileName);
 
@@ -45,7 +47,14 @@ public:
 private:
     TIdSentences ConvertToIds(const TSentences& sentences);
     TWordId GetWordId(const TWord& word);
+    TWordId GetWordId(const TWord& word) const;
+
+    double GetGram1Prob(TWordId word) const;
+    double GetGram2Prob(TWordId word1, TWordId word2) const;
+    double GetGram3Prob(TWordId word1, TWordId word2, TWordId word3) const;
+
 private:
+    const TWordId UnknownWordId = std::numeric_limits<TWordId>::max();
     double K = 0.05;
     std::unordered_map<std::wstring, TWordId> WordToId;
     TWordId LastWordID;
