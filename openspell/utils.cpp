@@ -75,6 +75,10 @@ void TTokenizer::Clear() {
     Alphabet.clear();
 }
 
+const std::unordered_set<wchar_t>& TTokenizer::GetAlphabet() const {
+    return Alphabet;
+}
+
 std::wstring UTF8ToWide(const std::string& text) {
     std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
     return converter.from_bytes(text);;

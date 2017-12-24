@@ -23,7 +23,7 @@ using TIdSentences = std::vector<TWordIds>;
 
 struct TGram2KeyHash {
 public:
-  std::size_t operator()(TGram2Key x) const {
+  std::size_t operator()(const TGram2Key& x) const {
       return (size_t)x.first ^ ((size_t)x.second << 16);
   }
 };
@@ -42,6 +42,8 @@ public:
     void Train(const std::string& fileName, const std::string& alphabetFile);
     double Score(const TWords& words) const;
     double Score(const std::wstring& str) const;
+    TWord GetWord(const std::wstring& word) const;
+    const std::unordered_set<wchar_t>& GetAlphabet() const;
 
     void Save(const std::string& modelFileName) const;
     bool Load(const std::string& modelFileName);

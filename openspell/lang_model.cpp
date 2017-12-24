@@ -156,6 +156,18 @@ TWordId TLangModel::GetWordId(const TWord& word) const {
     return UnknownWordId;
 }
 
+TWord TLangModel::GetWord(const std::wstring& word) const {
+    auto it = WordToId.find(word);
+    if (it != WordToId.end()) {
+        return TWord(&it->first[0], it->first.size());
+    }
+    return TWord();
+}
+
+const std::unordered_set<wchar_t>& TLangModel::GetAlphabet() const {
+    return Tokenizer.GetAlphabet();
+}
+
 double TLangModel::GetGram1Prob(TWordId word) const {
     double countsGram1 = 0;
     auto it = Grams1.find(word);

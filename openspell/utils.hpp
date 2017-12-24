@@ -8,8 +8,29 @@
 namespace NOpenSpell {
 
 struct TWord {
+    TWord() = default;
+    TWord(const wchar_t* ptr, size_t len)
+        : Ptr(ptr)
+        , Len(len)
+    {
+    }
+    TWord(const std::wstring& w)
+        : Ptr(&w[0])
+        , Len(w.size())
+    {
+    }
+    bool operator ==(const TWord& other) const {
+        return (Ptr == other.Ptr && Len == other.Len);
+    }
     const wchar_t* Ptr = nullptr;
     size_t Len = 0;
+};
+
+struct TWordHashPtr {
+public:
+  std::size_t operator()(const TWord& x) const {
+      return (size_t)x.Ptr;
+  }
 };
 
 using TWords = std::vector<TWord>;
@@ -21,6 +42,8 @@ public:
     void LoadAlphabet(const std::string& alphabetFile);
     TSentences Process(const std::wstring& originalText) const;
     void Clear();
+
+    const std::unordered_set<wchar_t>& GetAlphabet() const;
 
     SAVELOAD(Alphabet)
 private:
