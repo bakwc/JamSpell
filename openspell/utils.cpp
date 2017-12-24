@@ -71,10 +71,19 @@ TSentences TTokenizer::Process(const std::wstring& originalText) const {
     return sentences;
 }
 
+void TTokenizer::Clear() {
+    Alphabet.clear();
+}
+
 std::wstring UTF8ToWide(const std::string& text) {
     std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-    std::wstring res = converter.from_bytes(text);
-    return res;
+    return converter.from_bytes(text);;
+}
+
+std::string WideToUTF8(const std::wstring& text) {
+    using convert_type = std::codecvt_utf8<wchar_t>;
+    std::wstring_convert<convert_type, wchar_t> converter;
+    return converter.to_bytes(text);
 }
 
 std::uint64_t GetCurrentTimeMs() {

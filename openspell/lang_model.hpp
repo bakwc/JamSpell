@@ -9,6 +9,9 @@
 
 namespace NOpenSpell {
 
+const uint64_t MAGIC_BYTE = 8559322735408079685L;
+const uint16_t VERSION = 3;
+constexpr double DEFAULT_K = 0.05;
 
 using TWordId = uint32_t;
 using TCount = uint32_t;
@@ -38,9 +41,11 @@ class TLangModel {
 public:
     void Train(const std::string& fileName, const std::string& alphabetFile);
     double Score(const TWords& words) const;
+    double Score(const std::wstring& str) const;
 
     void Save(const std::string& modelFileName) const;
-    void Load(const std::string& modelFileName);
+    bool Load(const std::string& modelFileName);
+    void Clear();
 
     SAVELOAD(K, WordToId, LastWordID, TotalWords, Grams1, Grams2, Grams3, Tokenizer)
 private:
@@ -54,10 +59,10 @@ private:
 
 private:
     const TWordId UnknownWordId = std::numeric_limits<TWordId>::max();
-    double K = 0.05;
+    double K = DEFAULT_K;
     std::unordered_map<std::wstring, TWordId> WordToId;
-    TWordId LastWordID;
-    TWordId TotalWords;
+    TWordId LastWordID = 0;
+    TWordId TotalWords = 0;
     std::unordered_map<TGram1Key, TCount> Grams1;
     std::unordered_map<TGram2Key, TCount, TGram2KeyHash> Grams2;
     std::unordered_map<TGram3Key, TCount, TGram3KeyHash> Grams3;

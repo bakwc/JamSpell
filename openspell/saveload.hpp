@@ -84,17 +84,18 @@ template<class TVec, class TObj>
 class TVectorSerializer {
 public:
     static inline void Save(std::ostream& out, const TVec& object) {
-        unsigned short size = object.size();
-        out.write((const char*)(&size), 2);
+        uint32_t size = object.size();
+        out.write((const char*)(&size), sizeof(size));
         for (const auto& obj: object) {
             NSaveLoad::Save(out, obj);
         }
     }
 
     static inline void Load(std::istream& in, TVec& object) {
-        unsigned short size;
-        in.read((char*)(&size), 2);
+        uint32_t size;
+        in.read((char*)(&size), sizeof(size));
         object.clear();
+        object.reserve(size);
         for (size_t i = 0; i < size; ++i) {
             TObj obj;
             NSaveLoad::Load(in, obj);
@@ -107,17 +108,41 @@ template<class TVec, class TKey, class TValue>
 class TMapSerializer {
 public:
     static inline void Save(std::ostream& out, const TVec& object) {
-        unsigned short size = object.size();
-        out.write((const char*)(&size), 2);
+        uint32_t size = object.size();
+        out.write((const char*)(&size), sizeof(size));
         for (const auto& obj: object) {
             NSaveLoad::Save(out, obj);
         }
     }
 
     static inline void Load(std::istream& in, TVec& object) {
-        unsigned short size;
-        in.read((char*)(&size), 2);
+        uint32_t size;
+        in.read((char*)(&size), sizeof(size));
         object.clear();
+        for (size_t i = 0; i < size; ++i) {
+            std::pair<TKey, TValue> obj;
+            NSaveLoad::Load(in, obj);
+            object.insert(std::move(obj));
+        }
+    }
+};
+
+template<class TVec, class TKey, class TValue>
+class TUnorderedMapSerializer {
+public:
+    static inline void Save(std::ostream& out, const TVec& object) {
+        uint32_t size = object.size();
+        out.write((const char*)(&size), sizeof(size));
+        for (const auto& obj: object) {
+            NSaveLoad::Save(out, obj);
+        }
+    }
+
+    static inline void Load(std::istream& in, TVec& object) {
+        uint32_t size;
+        in.read((char*)(&size), sizeof(size));
+        object.clear();
+        object.reserve(size);
         for (size_t i = 0; i < size; ++i) {
             std::pair<TKey, TValue> obj;
             NSaveLoad::Load(in, obj);
@@ -130,16 +155,16 @@ template<class TVec, class TObj>
 class TSetSerializer {
 public:
     static inline void Save(std::ostream& out, const TVec& object) {
-        unsigned short size = object.size();
-        out.write((const char*)(&size), 2);
+        uint32_t size = object.size();
+        out.write((const char*)(&size), sizeof(size));
         for (const auto& obj: object) {
             NSaveLoad::Save(out, obj);
         }
     }
 
     static inline void Load(std::istream& in, TVec& object) {
-        unsigned short size;
-        in.read((char*)(&size), 2);
+        uint32_t size;
+        in.read((char*)(&size), sizeof(size));
         object.clear();
         for (size_t i = 0; i < size; ++i) {
             TObj obj;
@@ -154,7 +179,7 @@ template <class T> class TSerializer<std::list<T> >: public TVectorSerializer<st
 template <> class TSerializer<std::string>: public TVectorSerializer<std::string, char> {};
 template <> class TSerializer<std::wstring>: public TVectorSerializer<std::wstring, wchar_t> {};
 template <class K, class V> class TSerializer<std::map<K, V> >: public TMapSerializer<std::map<K, V>, K, V > {};
-template <class K, class V, class H> class TSerializer<std::unordered_map<K, V, H> >: public TMapSerializer<std::unordered_map<K, V, H>, K, V > {};
+template <class K, class V, class H> class TSerializer<std::unordered_map<K, V, H> >: public TUnorderedMapSerializer<std::unordered_map<K, V, H>, K, V > {};
 template <class T> class TSerializer<std::set<T> >: public TSetSerializer<std::set<T>, T > {};
 template <class T> class TSerializer<std::unordered_set<T> >: public TSetSerializer<std::unordered_set<T>, T > {};
 

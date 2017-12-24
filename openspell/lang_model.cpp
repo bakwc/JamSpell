@@ -51,6 +51,10 @@ double TLangModel::Score(const TWords& words) const {
     for (auto&& w: words) {
         sentence.push_back(GetWordId(w));
     }
+    if (sentence.empty()) {
+        return std::numeric_limits<double>::min();
+    }
+
     sentence.push_back(UnknownWordId);
     sentence.push_back(UnknownWordId);
 
@@ -63,14 +67,56 @@ double TLangModel::Score(const TWords& words) const {
     return result;
 }
 
-void TLangModel::Save(const std::string& modelFileName) const {
-    std::ofstream out(modelFileName, std::ios::binary);
-    Save(out);
+double TLangModel::Score(const std::wstring& str) const {
+    TSentences sentences = Tokenizer.Process(str);
+    TWords words;
+    for (auto&& s: sentences) {
+        for (auto&& w: s) {
+            words.push_back(w);
+        }
+    }
+    return Score(words);
 }
 
-void TLangModel::Load(const std::string& modelFileName) {
+void TLangModel::Save(const std::string& modelFileName) const {
+    std::ofstream out(modelFileName, std::ios::binary);
+    NSaveLoad::Save(out, MAGIC_BYTE);
+    NSaveLoad::Save(out, VERSION);
+    Save(out);
+    NSaveLoad::Save(out, MAGIC_BYTE);
+}
+
+bool TLangModel::Load(const std::string& modelFileName) {
     std::ifstream in(modelFileName, std::ios::binary);
+    uint16_t version = 0;
+    uint64_t magicByte = 0;
+    NSaveLoad::Load(in, magicByte);
+    if (magicByte != MAGIC_BYTE) {
+        return false;
+    }
+    NSaveLoad::Load(in, version);
+    if (version != VERSION) {
+        return false;
+    }
     Load(in);
+    magicByte = 0;
+    NSaveLoad::Load(in, magicByte);
+    if (magicByte != MAGIC_BYTE) {
+        Clear();
+        return false;
+    }
+    return true;
+}
+
+void TLangModel::Clear() {
+    K = DEFAULT_K;
+    WordToId.clear();
+    LastWordID = 0;
+    TotalWords = 0;
+    Grams1.clear();
+    Grams2.clear();
+    Grams3.clear();
+    Tokenizer.Clear();
 }
 
 TIdSentences TLangModel::ConvertToIds(const TSentences& sentences) {

@@ -22,11 +22,14 @@ int Train(const std::string& alphabetFile,
 
 int Interactive(const std::string& modelFile) {
     TLangModel model;
+    std::cerr << "[info] loading model" << std::endl;
     model.Load(modelFile);
-    while (true) {
-        std::string text;
-        std::cin >> text;
+    std::cerr << "[info] loaded" << std::endl;
+    for (std::string line; std::getline(std::cin, line);) {
+        std::wstring wtext = UTF8ToWide(line);
+        std::cerr << model.Score(wtext) << "\n";
     }
+    return 0;
 }
 
 int main(int argc, const char** argv) {

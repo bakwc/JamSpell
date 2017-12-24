@@ -20,6 +20,7 @@ public:
     TTokenizer();
     void LoadAlphabet(const std::string& alphabetFile);
     TSentences Process(const std::wstring& originalText) const;
+    void Clear();
 
     SAVELOAD(Alphabet)
 private:
@@ -29,6 +30,7 @@ private:
 
 std::string LoadFile(const std::string& fileName);
 std::wstring UTF8ToWide(const std::string& text);
+std::string WideToUTF8(const std::wstring& text);
 std::uint64_t GetCurrentTimeMs();
 
 } // NOpenSpell
