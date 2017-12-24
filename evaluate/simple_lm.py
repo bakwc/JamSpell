@@ -28,7 +28,7 @@ class SimpleLangModel(object):
         sentences = generateSentences(text)
         sentences = self.convertToIDs(sentences)
 
-        print '[info] generating N-grams'
+        print '[info] generating N-grams', len(sentences)
         total = len(sentences)
         lastTime = time.time()
         for i in xrange(0, total):

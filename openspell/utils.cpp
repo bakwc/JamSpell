@@ -2,6 +2,8 @@
 #include <sstream>
 #include <codecvt>
 #include <chrono>
+#include <cassert>
+#include <iostream>
 
 #include "utils.hpp"
 
@@ -16,7 +18,7 @@ std::string LoadFile(const std::string& fileName) {
 }
 
 TTokenizer::TTokenizer()
-    : Locale("en_US.utf8")
+    : Locale("en_US.utf-8")
 {
 }
 
@@ -58,6 +60,12 @@ TSentences TTokenizer::Process(const std::wstring& originalText) const {
                 currSentence.clear();
             }
         }
+    }
+    if (currWord.Ptr != nullptr) {
+        currSentence.push_back(currWord);
+    }
+    if (!currSentence.empty()) {
+        sentences.push_back(currSentence);
     }
 
     return sentences;

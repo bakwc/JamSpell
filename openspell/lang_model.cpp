@@ -17,26 +17,28 @@ void TLangModel::Train(const std::string& fileName, const std::string& alphabetF
 
     assert(sentences.size() == sentenceIds.size());
 
-    std::cerr << "[info] generating N-grams" << std::endl;
+    std::cerr << "[info] generating N-grams " << sentences.size() << std::endl;
     uint64_t lastTime = GetCurrentTimeMs();
     size_t total = sentenceIds.size();
     for (size_t i = 0; i < total; ++i) {
         const TWordIds& words = sentenceIds[i];
-        for (auto&& w: words) {
+
+        for (auto w: words) {
             Grams1[w] += 1;
             TotalWords += 1;
         }
-        for (size_t j = 0; j < words.size() - 1; ++j) {
+
+        for (ssize_t j = 0; j < (ssize_t)words.size() - 1; ++j) {
             TGram2Key key(words[j], words[j+1]);
             Grams2[key] += 1;
         }
-        for (size_t j = 0; j < words.size() - 2; ++j) {
+        for (ssize_t j = 0; j < (ssize_t)words.size() - 2; ++j) {
             TGram3Key key(words[j], words[j+1], words[j+2]);
             Grams3[key] += 1;
         }
         uint64_t currTime = GetCurrentTimeMs();
         if (currTime - lastTime > 4000) {
-            std::cerr << "[info] processed " << (100.0 * float(i) / float(total));
+            std::cerr << "[info] processed " << (100.0 * float(i) / float(total)) << "%" << std::endl;
             lastTime = currTime;
         }
     }
@@ -77,7 +79,7 @@ TIdSentences TLangModel::ConvertToIds(const TSentences& sentences) {
         const TWords& words = sentences[i];
         TWordIds wordIds;
         for (size_t j = 0; j < words.size(); ++j) {
-            const TWord& word = words[i];
+            const TWord& word = words[j];
             wordIds.push_back(GetWordId(word));
         }
         newSentences.push_back(wordIds);
@@ -86,6 +88,8 @@ TIdSentences TLangModel::ConvertToIds(const TSentences& sentences) {
 }
 
 TWordId TLangModel::GetWordId(const TWord& word) {
+    assert(word.Ptr && word.Len);
+    assert(word.Len < 10000);
     std::wstring w(word.Ptr, word.Len);
     auto it = WordToId.find(w);
     if (it != WordToId.end()) {

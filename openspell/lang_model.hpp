@@ -20,18 +20,17 @@ using TIdSentences = std::vector<TWordIds>;
 
 struct TGram2KeyHash {
 public:
-  std::size_t operator()(const TGram2Key& x) const {
-    return std::hash<TWordId>()(x.first) ^
-           std::hash<TWordId>()(x.second);
+  std::size_t operator()(TGram2Key x) const {
+      return (size_t)x.first ^ ((size_t)x.second << 16);
   }
 };
 
 struct TGram3KeyHash {
 public:
   std::size_t operator()(const TGram3Key& x) const {
-    return std::hash<TWordId>()(std::get<0>(x)) ^
-           std::hash<TWordId>()(std::get<1>(x)) ^
-           std::hash<TWordId>()(std::get<2>(x));
+    return (size_t)std::get<0>(x) ^
+            ((size_t)std::get<1>(x) << 16) ^
+            ((size_t)std::get<2>(x) << 32);
   }
 };
 
