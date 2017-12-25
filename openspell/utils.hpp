@@ -57,5 +57,6 @@ std::string LoadFile(const std::string& fileName);
 std::wstring UTF8ToWide(const std::string& text);
 std::string WideToUTF8(const std::wstring& text);
 std::uint64_t GetCurrentTimeMs();
+void ToLower(std::wstring& text);
 
 } // NOpenSpell

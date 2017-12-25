@@ -12,6 +12,7 @@ void TLangModel::Train(const std::string& fileName, const std::string& alphabetF
     std::cerr << "[info] loading text" << std::endl;
     Tokenizer.LoadAlphabet(alphabetFile);
     std::wstring trainText = UTF8ToWide(LoadFile(fileName));
+    ToLower(trainText);
     TSentences sentences = Tokenizer.Process(trainText);
     TIdSentences sentenceIds = ConvertToIds(sentences);
 

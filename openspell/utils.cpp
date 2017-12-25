@@ -25,6 +25,7 @@ TTokenizer::TTokenizer()
 void TTokenizer::LoadAlphabet(const std::string& alphabetFile) {
     std::string data = LoadFile(alphabetFile);
     std::wstring wdata = UTF8ToWide(data);
+    ToLower(wdata);
     Alphabet.clear();
     for (auto chr: wdata) {
         Alphabet.insert(chr);
@@ -94,6 +95,14 @@ std::uint64_t GetCurrentTimeMs() {
     using namespace std::chrono;
     milliseconds ms = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
     return ms.count();
+}
+
+void ToLower(std::wstring& text) {
+    static const std::locale locale("en_US.UTF-8");
+    const std::ctype<wchar_t>& wctype = std::use_facet<std::ctype<wchar_t>>(locale);
+    std::transform(text.begin(), text.end(), text.begin(), [&wctype](wchar_t wch) {
+        return wctype.tolower(wch);
+    });
 }
 
 

@@ -38,6 +38,7 @@ TWords TSpellCorrector::Correct(const TWords& sentence, size_t position) const {
     }
 
     std::unordered_set<TWord, TWordHashPtr> uniqueCandidates(candidates.begin(), candidates.end());
+
     std::vector<TScoredWord> scoredCandidates;
     scoredCandidates.reserve(candidates.size());
     for (TWord cand: uniqueCandidates) {
@@ -102,10 +103,9 @@ TWords TSpellCorrector::Edits(const TWord& word, bool lastLevel) const {
     std::wstring w(word.Ptr, word.Len);
     TWords result;
 
-    for (size_t i = 0; i < w.size() - 1; ++i) {
-
+    for (size_t i = 0; i < w.size() + 1; ++i) {
         // delete
-        {
+        if (i < w.size()) {
             std::wstring s = w.substr(0, i) + w.substr(i+1);
             TWord c = LangModel.GetWord(s);
             if (c.Ptr && c.Len) {
@@ -117,11 +117,11 @@ TWords TSpellCorrector::Edits(const TWord& word, bool lastLevel) const {
         }
 
         // transpose
-        if (i < w.size() - 2) {
+        if (i + 2 < w.size()) {
             std::wstring s = w.substr(0, i);
             s += w.substr(i + 1, 1);
             s += w.substr(i, 1);
-            if (i < w.size() - 3) {
+            if (i + 3 < w.size()) {
                 s += w.substr(i+2);
             }
             TWord c = LangModel.GetWord(s);
@@ -134,7 +134,7 @@ TWords TSpellCorrector::Edits(const TWord& word, bool lastLevel) const {
         }
 
         // replace
-        {
+        if (i < w.size()) {
             for (auto&& ch: LangModel.GetAlphabet()) {
                 std::wstring s = w.substr(0, i) + ch + w.substr(i+1);
                 TWord c = LangModel.GetWord(s);

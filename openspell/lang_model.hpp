@@ -12,7 +12,7 @@
 namespace NOpenSpell {
 
 const uint64_t MAGIC_BYTE = 8559322735408079685L;
-const uint16_t VERSION = 3;
+const uint16_t VERSION = 4;
 constexpr double DEFAULT_K = 0.05;
 
 using TWordId = uint32_t;

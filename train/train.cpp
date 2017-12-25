@@ -27,10 +27,11 @@ int Score(const std::string& modelFile) {
     std::cerr << "[info] loading model" << std::endl;
     model.Load(modelFile);
     std::cerr << "[info] loaded" << std::endl;
+    std::cerr << ">> ";
     for (std::string line; std::getline(std::cin, line);) {
-        std::cerr << ">> ";
         std::wstring wtext = UTF8ToWide(line);
         std::cerr << model.Score(wtext) << "\n";
+        std::cerr << ">> ";
     }
     return 0;
 }
@@ -43,7 +44,8 @@ int Correct(const std::string& modelFile) {
     std::cerr << ">> ";
     for (std::string line; std::getline(std::cin, line);) {
         std::wstring wtext = UTF8ToWide(line);
-        std::cerr << WideToUTF8(corrector.Correct(wtext)) << "\n";
+        std::wstring result = corrector.Correct(wtext);
+        std::cerr << WideToUTF8(result) << "\n";
         std::cerr << ">> ";
     }
     return 0;
