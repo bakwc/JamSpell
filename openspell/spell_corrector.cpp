@@ -12,7 +12,7 @@ struct TScoredWord {
     double Score = 0;
 };
 
-TWords TSpellCorrector::Correct(const TWords& sentence, size_t position) const {
+TWords TSpellCorrector::GetCandidatesRaw(const TWords& sentence, size_t position) const {
     if (position >= sentence.size()) {
         return TWords();
     }
@@ -75,7 +75,20 @@ TWords TSpellCorrector::Correct(const TWords& sentence, size_t position) const {
     return candidates;
 }
 
-std::wstring TSpellCorrector::Correct(const std::wstring& text) const {
+std::vector<std::wstring> TSpellCorrector::GetCandidates(const std::vector<std::wstring>& sentence, size_t position) const {
+    TWords words;
+    for (auto&& w: sentence) {
+        words.push_back(TWord(w));
+    }
+    TWords candidates = GetCandidatesRaw(words, position);
+    std::vector<std::wstring> results;
+    for (auto&& c: candidates) {
+        results.push_back(std::wstring(c.Ptr, c.Len));
+    }
+    return results;
+}
+
+std::wstring TSpellCorrector::FixFragment(const std::wstring& text) const {
     TSentences origSentences = LangModel.Tokenize(text);
     std::wstring lowered = text;
     ToLower(lowered);
@@ -88,7 +101,7 @@ std::wstring TSpellCorrector::Correct(const std::wstring& text) const {
         for (size_t j = 0; j < words.size(); ++j) {
             TWord orig = origWords[j];
             TWord lowered = words[j];
-            TWords candidates = Correct(words, j);
+            TWords candidates = GetCandidatesRaw(words, j);
             if (candidates.size() > 0) {
                 words[j] = candidates[0];
             }
@@ -120,7 +133,7 @@ std::wstring TSpellCorrector::Correct(const std::wstring& text) const {
     return result;
 }
 
-std::wstring TSpellCorrector::CorrectNormalize(const std::wstring& text) const {
+std::wstring TSpellCorrector::FixFragmentNormalized(const std::wstring& text) const {
     std::wstring lowered = text;
     ToLower(lowered);
     TSentences sentences = LangModel.Tokenize(lowered);
@@ -128,7 +141,7 @@ std::wstring TSpellCorrector::CorrectNormalize(const std::wstring& text) const {
     for (size_t i = 0; i < sentences.size(); ++i) {
         TWords words = sentences[i];
         for (size_t i = 0; i < words.size(); ++i) {
-            TWords candidates = Correct(words, i);
+            TWords candidates = GetCandidatesRaw(words, i);
             if (candidates.size() > 0) {
                 words[i] = candidates[0];
             }
