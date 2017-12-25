@@ -1,3 +1,5 @@
+#pragma once
+
 #include <unordered_map>
 #include <vector>
 #include <utility>
@@ -44,6 +46,7 @@ public:
     double Score(const std::wstring& str) const;
     TWord GetWord(const std::wstring& word) const;
     const std::unordered_set<wchar_t>& GetAlphabet() const;
+    TSentences Tokenize(const std::wstring& text) const;
 
     void Save(const std::string& modelFileName) const;
     bool Load(const std::string& modelFileName);

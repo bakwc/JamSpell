@@ -12,7 +12,7 @@ struct TScoredWord {
     double Score = 0;
 };
 
-TWords TSpellCorrector::Correct(const TWords& sentence, size_t position) {
+TWords TSpellCorrector::Correct(const TWords& sentence, size_t position) const {
     if (position >= sentence.size()) {
         return TWords();
     }
@@ -74,12 +74,31 @@ TWords TSpellCorrector::Correct(const TWords& sentence, size_t position) {
     return candidates;
 }
 
+std::wstring TSpellCorrector::Correct(const std::wstring& text) const {
+    TSentences sentences = LangModel.Tokenize(text);
+    std::wstring result;
+    for (size_t i = 0; i < sentences.size(); ++i) {
+        TWords words = sentences[i];
+        for (size_t i = 0; i < words.size(); ++i) {
+            TWords candidates = Correct(words, i);
+            if (candidates.size() > 0) {
+                words[i] = candidates[0];
+            }
+            result += std::wstring(words[i].Ptr, words[i].Len) + L" ";
+        }
+    }
+    if (!result.empty()) {
+        result.resize(result.size() - 1);
+    }
+    return result;
+}
+
 template<typename T>
 inline void AddVec(T& target, const T& source) {
     target.insert(target.end(), source.begin(), source.end());
 }
 
-TWords TSpellCorrector::Edits(const TWord& word, bool lastLevel) {
+TWords TSpellCorrector::Edits(const TWord& word, bool lastLevel) const {
     std::wstring w(word.Ptr, word.Len);
     TWords result;
 

@@ -1,13 +1,15 @@
 #include <iostream>
 
 #include <openspell/lang_model.hpp>
+#include <openspell/spell_corrector.hpp>
 
 using namespace NOpenSpell;
 
 void PrintUsage(const char** argv) {
     std::cerr << "Usage: " << argv[0] << " mode args" << std::endl;
     std::cerr << "    train alphabet.txt dataset.txt resultModel.bin  - train model" << std::endl;
-    std::cerr << "    interactive model.bin - input sentences and get score" << std::endl;
+    std::cerr << "    score model.bin - input sentences and get score" << std::endl;
+    std::cerr << "    correct model.bin - input sentences and get corrected one" << std::endl;
 }
 
 int Train(const std::string& alphabetFile,
@@ -20,14 +22,29 @@ int Train(const std::string& alphabetFile,
     return 0;
 }
 
-int Interactive(const std::string& modelFile) {
+int Score(const std::string& modelFile) {
     TLangModel model;
     std::cerr << "[info] loading model" << std::endl;
     model.Load(modelFile);
     std::cerr << "[info] loaded" << std::endl;
     for (std::string line; std::getline(std::cin, line);) {
+        std::cerr << ">> ";
         std::wstring wtext = UTF8ToWide(line);
         std::cerr << model.Score(wtext) << "\n";
+    }
+    return 0;
+}
+
+int Correct(const std::string& modelFile) {
+    TSpellCorrector corrector;
+    std::cerr << "[info] loading model" << std::endl;
+    corrector.LoadLangModel(modelFile);
+    std::cerr << "[info] loaded" << std::endl;
+    std::cerr << ">> ";
+    for (std::string line; std::getline(std::cin, line);) {
+        std::wstring wtext = UTF8ToWide(line);
+        std::cerr << WideToUTF8(corrector.Correct(wtext)) << "\n";
+        std::cerr << ">> ";
     }
     return 0;
 }
@@ -47,13 +64,20 @@ int main(int argc, const char** argv) {
         std::string datasetFile = argv[3];
         std::string resultModelFile = argv[4];
         return Train(alphabetFile, datasetFile, resultModelFile);
-    } else if (mode == "interactive") {
+    } else if (mode == "score") {
         if (argc < 3) {
             PrintUsage(argv);
             return 42;
         }
         std::string modelFile = argv[2];
-        return Interactive(modelFile);
+        return Score(modelFile);
+    } else if (mode == "correct") {
+        if (argc < 3) {
+            PrintUsage(argv);
+            return 42;
+        }
+        std::string modelFile = argv[2];
+        return Correct(modelFile);
     }
 
     PrintUsage(argv);

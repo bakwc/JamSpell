@@ -168,6 +168,10 @@ const std::unordered_set<wchar_t>& TLangModel::GetAlphabet() const {
     return Tokenizer.GetAlphabet();
 }
 
+TSentences TLangModel::Tokenize(const std::wstring& text) const {
+    return Tokenizer.Process(text);
+}
+
 double TLangModel::GetGram1Prob(TWordId word) const {
     double countsGram1 = 0;
     auto it = Grams1.find(word);
