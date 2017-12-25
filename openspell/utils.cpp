@@ -97,12 +97,20 @@ std::uint64_t GetCurrentTimeMs() {
     return ms.count();
 }
 
+static const std::locale GLocale("en_US.UTF-8");
+static const std::ctype<wchar_t>& GWctype = std::use_facet<std::ctype<wchar_t>>(GLocale);
+
 void ToLower(std::wstring& text) {
-    static const std::locale locale("en_US.UTF-8");
-    const std::ctype<wchar_t>& wctype = std::use_facet<std::ctype<wchar_t>>(locale);
-    std::transform(text.begin(), text.end(), text.begin(), [&wctype](wchar_t wch) {
-        return wctype.tolower(wch);
+    std::transform(text.begin(), text.end(), text.begin(), [](wchar_t wch) {
+        return GWctype.tolower(wch);
     });
+}
+
+wchar_t MakeUpperIfRequired(wchar_t orig, wchar_t sample) {
+    if (GWctype.toupper(sample) == sample) {
+        return GWctype.toupper(orig);
+    }
+    return orig;
 }
 
 

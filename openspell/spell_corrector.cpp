@@ -76,7 +76,54 @@ TWords TSpellCorrector::Correct(const TWords& sentence, size_t position) const {
 }
 
 std::wstring TSpellCorrector::Correct(const std::wstring& text) const {
-    TSentences sentences = LangModel.Tokenize(text);
+    TSentences origSentences = LangModel.Tokenize(text);
+    std::wstring lowered = text;
+    ToLower(lowered);
+    TSentences sentences = LangModel.Tokenize(lowered);
+    std::wstring result;
+    size_t origPos = 0;
+    for (size_t i = 0; i < sentences.size(); ++i) {
+        TWords words = sentences[i];
+        const TWords& origWords = origSentences[i];
+        for (size_t j = 0; j < words.size(); ++j) {
+            TWord orig = origWords[j];
+            TWord lowered = words[j];
+            TWords candidates = Correct(words, j);
+            if (candidates.size() > 0) {
+                words[j] = candidates[0];
+            }
+            size_t currOrigPos = orig.Ptr - &text[0];
+            while (origPos < currOrigPos) {
+                result.push_back(text[origPos]);
+                origPos += 1;
+            }
+            std::wstring newWord = std::wstring(words[j].Ptr, words[j].Len);
+            std::wstring origWord = std::wstring(orig.Ptr, orig.Len);
+            std::wstring origLowered = std::wstring(lowered.Ptr, lowered.Len);
+            if (newWord != origLowered) {
+                for (size_t k = 0; k < newWord.size(); ++k) {
+                    size_t n = k < origWord.size() ? k : origWord.size() - 1;
+                    wchar_t newChar = newWord[k];
+                    wchar_t origChar = origWord[n];
+                    result.push_back(MakeUpperIfRequired(newChar, origChar));
+                }
+            } else {
+                result += origWord;
+            }
+            origPos += orig.Len;
+        }
+    }
+    while (origPos < text.size()) {
+        result.push_back(text[origPos]);
+        origPos += 1;
+    }
+    return result;
+}
+
+std::wstring TSpellCorrector::CorrectNormalize(const std::wstring& text) const {
+    std::wstring lowered = text;
+    ToLower(lowered);
+    TSentences sentences = LangModel.Tokenize(lowered);
     std::wstring result;
     for (size_t i = 0; i < sentences.size(); ++i) {
         TWords words = sentences[i];
@@ -86,6 +133,10 @@ std::wstring TSpellCorrector::Correct(const std::wstring& text) const {
                 words[i] = candidates[0];
             }
             result += std::wstring(words[i].Ptr, words[i].Len) + L" ";
+        }
+        if (words.size() > 0) {
+            result.resize(result.size() - 1);
+            result += L". ";
         }
     }
     if (!result.empty()) {
