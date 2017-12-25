@@ -52,6 +52,8 @@ public:
     bool Load(const std::string& modelFileName);
     void Clear();
 
+    const std::unordered_map<std::wstring, TWordId>& GetWordToId();
+
     SAVELOAD(K, WordToId, LastWordID, TotalWords, Grams1, Grams2, Grams3, Tokenizer)
 private:
     TIdSentences ConvertToIds(const TSentences& sentences);

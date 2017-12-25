@@ -3,8 +3,52 @@
 namespace NOpenSpell {
 
 
+static std::vector<std::wstring> GetDeletes1(const std::wstring& w) {
+    std::vector<std::wstring> results;
+    for (size_t i = 0; i < w.size(); ++i) {
+        auto nw = w.substr(0, i) + w.substr(i+1);
+        if (!nw.empty()) {
+            results.push_back(nw);
+        }
+    }
+    return results;
+}
+
+static std::vector<std::wstring> GetDeletes2(const std::wstring& w) {
+    std::vector<std::wstring> results;
+    for (size_t i = 0; i < w.size(); ++i) {
+        auto nw = w.substr(0, i) + w.substr(i+1);
+        if (!nw.empty()) {
+            std::vector<std::wstring> currResults = GetDeletes1(nw);
+            results.insert(results.end(), currResults.begin(), currResults.end());
+        }
+    }
+    return results;
+}
+
 bool TSpellCorrector::LoadLangModel(const std::string& modelFile) {
-    return LangModel.Load(modelFile);
+    if (!LangModel.Load(modelFile)) {
+        return false;
+    }
+
+    std::cerr << "preparing model\n";
+
+    auto&& wordToId = LangModel.GetWordToId();
+    for (auto&& it: wordToId) {
+        TWord wid(it.first);
+        auto deletes1 = GetDeletes1(it.first);
+        auto deletes2 = GetDeletes2(it.first);
+        for (auto&& w: deletes1) {
+            Deletes1[w].insert(wid);
+        }
+        for (auto&& w: deletes2) {
+            Deletes2[w].insert(wid);
+        }
+    }
+
+    std::cerr << "done\n";
+
+    return true;
 }
 
 struct TScoredWord {
@@ -164,6 +208,41 @@ inline void AddVec(T& target, const T& source) {
 }
 
 TWords TSpellCorrector::Edits(const TWord& word, bool lastLevel) const {
+    std::wstring w(word.Ptr, word.Len);
+    TWords result;
+
+    std::vector<std::wstring> cands = GetDeletes1(w);
+    cands.push_back(w);
+    if (!lastLevel) {
+        std::vector<std::wstring> deletes2 = GetDeletes2(w);
+        cands.insert(cands.end(), deletes2.begin(), deletes2.end());
+    }
+
+    for (auto&& w: cands) {
+        TWord c = LangModel.GetWord(w);
+        if (c.Ptr && c.Len) {
+            result.push_back(c);
+        }
+        auto it = Deletes1.find(w);
+        if (it != Deletes1.end()) {
+            for (auto c1:it->second) {
+                result.push_back(c1);
+            }
+        }
+        if (!lastLevel) {
+            it = Deletes2.find(w);
+            if (it != Deletes2.end()) {
+                for (auto c1:it->second) {
+                    result.push_back(c1);
+                }
+            }
+        }
+    }
+
+    return result;
+}
+
+TWords TSpellCorrector::Edits2(const TWord& word, bool lastLevel) const {
     std::wstring w(word.Ptr, word.Len);
     TWords result;
 

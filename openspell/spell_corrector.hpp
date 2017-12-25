@@ -14,8 +14,11 @@ public:
     std::wstring FixFragmentNormalized(const std::wstring& text) const;
 private:
     TWords Edits(const TWord& word, bool lastLevel = true) const;
+    TWords Edits2(const TWord& word, bool lastLevel = true) const;
 private:
     TLangModel LangModel;
+    std::unordered_map<std::wstring, std::unordered_set<TWord, TWordHashPtr>> Deletes1;
+    std::unordered_map<std::wstring, std::unordered_set<TWord, TWordHashPtr>> Deletes2;
 };
 
 

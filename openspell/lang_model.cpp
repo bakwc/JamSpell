@@ -120,6 +120,10 @@ void TLangModel::Clear() {
     Tokenizer.Clear();
 }
 
+const std::unordered_map<std::wstring, TWordId>& TLangModel::GetWordToId() {
+    return WordToId;
+}
+
 TIdSentences TLangModel::ConvertToIds(const TSentences& sentences) {
     TIdSentences newSentences;
     for (size_t i = 0; i < sentences.size(); ++i) {
