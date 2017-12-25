@@ -31,8 +31,6 @@ bool TSpellCorrector::LoadLangModel(const std::string& modelFile) {
         return false;
     }
 
-    std::cerr << "preparing model\n";
-
     auto&& wordToId = LangModel.GetWordToId();
     for (auto&& it: wordToId) {
         TWord wid(it.first);
@@ -45,8 +43,6 @@ bool TSpellCorrector::LoadLangModel(const std::string& modelFile) {
             Deletes2[w].insert(wid);
         }
     }
-
-    std::cerr << "done\n";
 
     return true;
 }
