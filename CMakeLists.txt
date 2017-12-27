@@ -8,4 +8,3 @@ include_directories(${CMAKE_SOURCE_DIR})
 
 add_subdirectory(openspell)
 add_subdirectory(train)
-add_subdirectory(swig)
