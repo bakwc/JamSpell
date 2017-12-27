@@ -34,7 +34,7 @@ VERSION = '0.0.2'
 
 setup(
     name='openspell',
-    version='0.0.1',
+    version=VERSION,
     author='Filipp Ozinov',
     author_email='fippo@mail.ru',
     url='https://github.com/bakwc/OpenSpell',
