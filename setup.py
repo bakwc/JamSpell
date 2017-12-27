@@ -17,14 +17,21 @@ openspell = Extension(
     swig_opts=['-c++'],
 )
 
+VERSION = '0.0.1'
+
 setup(
     name='openspell',
     version='0.0.1',
     author='Filipp Ozinov',
+    author_email='fippo@mail.ru',
+    url='https://github.com/bakwc/OpenSpell',
+    download_url='https://github.com/bakwc/OpenSpell/tarball/' + VERSION,
     description='spell checker',
-    url='http://example.com',
+    long_description='context-based spell checker',
+    keywords=['nlp', 'spell', 'spell-checker'],
     classifiers=[
-        # The list of PyPI classifiers
+        'Programming Language :: Python :: 2.7',
+        'License :: OSI Approved :: MIT License',
     ],
     ext_modules=[openspell],
     py_modules=['openspell'],
