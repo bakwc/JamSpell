@@ -8,7 +8,7 @@ this_dir = os.path.dirname(os.path.abspath(__file__))
 
 openspell = Extension(
     name='_openspell',
-    include_dirs=['.'],
+    include_dirs=['.', 'openspell'],
     sources=[
         os.path.join('openspell', 'lang_model.cpp'),
         os.path.join('openspell', 'spell_corrector.cpp'),
@@ -30,7 +30,7 @@ class CustomInstall(install):
         self.run_command('build_ext')
         self.do_egg_install()
 
-VERSION = '0.0.3'
+VERSION = '0.0.4'
 
 setup(
     name='openspell',
@@ -50,5 +50,5 @@ setup(
     ext_modules=[openspell],
     zip_safe=False,
     cmdclass={'build': CustomBuild, 'install': CustomInstall},
-    #include_package_data=True,
+    include_package_data=True,
 )
