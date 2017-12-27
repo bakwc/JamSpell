@@ -1,4 +1,6 @@
 import os
+from distutils.command.build import build
+from setuptools.command.install import install
 from setuptools import setup
 from setuptools.extension import Extension
 
@@ -17,7 +19,18 @@ openspell = Extension(
     swig_opts=['-c++'],
 )
 
-VERSION = '0.0.1'
+class CustomBuild(build):
+    def run(self):
+        self.run_command('build_ext')
+        build.run(self)
+
+
+class CustomInstall(install):
+    def run(self):
+        self.run_command('build_ext')
+        self.do_egg_install()
+
+VERSION = '0.0.2'
 
 setup(
     name='openspell',
@@ -33,7 +46,8 @@ setup(
         'Programming Language :: Python :: 2.7',
         'License :: OSI Approved :: MIT License',
     ],
-    ext_modules=[openspell],
     py_modules=['openspell'],
+    ext_modules=[openspell],
     zip_safe=False,
+    cmdclass={'build': CustomBuild, 'install': CustomInstall},
 )
