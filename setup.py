@@ -60,7 +60,7 @@ def get_swig_executable():
     print("Found SWIG: %s (version %s)" % (swig_executable, swig_version))
     return swig_executable
 
-VERSION = '0.0.4'
+VERSION = '0.0.5'
 
 setup(
     name='openspell',
