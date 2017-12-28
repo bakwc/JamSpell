@@ -30,6 +30,7 @@ bool TSpellCorrector::LoadLangModel(const std::string& modelFile) {
     if (!LangModel.Load(modelFile)) {
         return false;
     }
+    return true;
 
     auto&& wordToId = LangModel.GetWordToId();
     for (auto&& it: wordToId) {
@@ -58,10 +59,10 @@ TWords TSpellCorrector::GetCandidatesRaw(const TWords& sentence, size_t position
     }
 
     TWord w = sentence[position];
-    TWords candidates = Edits(w);
+    TWords candidates = Edits2(w);
     bool firstLevel = true;
     if (candidates.empty()) {
-        candidates = Edits(w, false);
+        candidates = Edits2(w, false);
         firstLevel = false;
     }
 
@@ -86,7 +87,9 @@ TWords TSpellCorrector::GetCandidatesRaw(const TWords& sentence, size_t position
         for (size_t i = 0; i < sentence.size(); ++i) {
             if (i == position) {
                 candSentence.push_back(cand);
-            } else {
+            } else if ((i < position && i + 3 >= position) ||
+                       (i > position && i <= position + 3))
+            {
                 candSentence.push_back(sentence[i]);
             }
         }
@@ -96,7 +99,7 @@ TWords TSpellCorrector::GetCandidatesRaw(const TWords& sentence, size_t position
         scored.Score = LangModel.Score(candSentence);
         if (!(scored.Word == w)) {
             if (firstLevel) {
-                scored.Score *= 1.045;
+                scored.Score *= 1.08;
             } else {
                 scored.Score *= 50.0;
             }
@@ -251,16 +254,16 @@ TWords TSpellCorrector::Edits2(const TWord& word, bool lastLevel) const {
                 result.push_back(c);
             }
             if (!lastLevel) {
-                AddVec(result, Edits(TWord(s)));
+                AddVec(result, Edits2(TWord(s)));
             }
         }
 
         // transpose
-        if (i + 2 < w.size()) {
+        if (i + 1 < w.size()) {
             std::wstring s = w.substr(0, i);
             s += w.substr(i + 1, 1);
             s += w.substr(i, 1);
-            if (i + 3 < w.size()) {
+            if (i + 2 < w.size()) {
                 s += w.substr(i+2);
             }
             TWord c = LangModel.GetWord(s);
@@ -268,7 +271,7 @@ TWords TSpellCorrector::Edits2(const TWord& word, bool lastLevel) const {
                 result.push_back(c);
             }
             if (!lastLevel) {
-                AddVec(result, Edits(TWord(s)));
+                AddVec(result, Edits2(TWord(s)));
             }
         }
 
@@ -281,7 +284,7 @@ TWords TSpellCorrector::Edits2(const TWord& word, bool lastLevel) const {
                     result.push_back(c);
                 }
                 if (!lastLevel) {
-                    AddVec(result, Edits(TWord(s)));
+                    AddVec(result, Edits2(TWord(s)));
                 }
             }
         }
@@ -295,7 +298,7 @@ TWords TSpellCorrector::Edits2(const TWord& word, bool lastLevel) const {
                     result.push_back(c);
                 }
                 if (!lastLevel) {
-                    AddVec(result, Edits(TWord(s)));
+                    AddVec(result, Edits2(TWord(s)));
                 }
             }
         }

@@ -4,6 +4,7 @@
 #include <chrono>
 #include <cassert>
 #include <iostream>
+#include <cassert>
 
 #include "utils.hpp"
 
@@ -28,6 +29,9 @@ void TTokenizer::LoadAlphabet(const std::string& alphabetFile) {
     ToLower(wdata);
     Alphabet.clear();
     for (auto chr: wdata) {
+        if (chr == 10 || chr == 13) {
+            continue;
+        }
         Alphabet.insert(chr);
     }
 }

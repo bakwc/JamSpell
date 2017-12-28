@@ -20,7 +20,7 @@ openspell = Extension(
         os.path.join('openspell', 'utils.cpp'),
         os.path.join('openspell.i'),
     ],
-    extra_compile_args=['-std=c++11'],
+    extra_compile_args=['-std=c++11', '-O2'],
     swig_opts=['-c++'],
 )
 

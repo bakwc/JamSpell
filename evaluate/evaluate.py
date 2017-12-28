@@ -82,6 +82,20 @@ class ContextPrototypeCorrector(Corrector):
         import context_spell_prototype
         return context_spell_prototype.correction(sentence, position)
 
+class OpenspellCorrector(Corrector):
+    def __init__(self, modelFile):
+        super(OpenspellCorrector, self).__init__()
+        import openspell
+        self.model = openspell.TSpellCorrector()
+        if not (self.model.LoadLangModel(modelFile)):
+            raise Exception('wrong model file: %s' % modelFile)
+
+    def correct(self, sentence, position):
+        cands = list(self.model.GetCandidates(sentence, position))
+        if len(cands) == 0:
+            return sentence[position]
+        return cands
+
 def evaluateCorrector(correctorName, corrector, originalSentences, erroredSentences, maxWords=None):
     totalErrors = 0
     origErrors = 0
@@ -177,6 +191,7 @@ def main():
     parser.add_argument('-ns', '--norvig', type=str, help='path to train file for Norvig spell corrector')
     parser.add_argument('-cs', '--context', type=str, help='path to context spell model')
     parser.add_argument('-csp', '--context_prototype', type=str, help='path to context spell prototype model')
+    parser.add_argument('-osp', '--openspell', type=str, help='path to openspell model file')
     parser.add_argument('-t', '--test', action="store_true")
     parser.add_argument('-mx', '--max_words', type=int, help='max words to evaluate')
     args = parser.parse_args()
@@ -201,6 +216,9 @@ def main():
 
     if args.context_prototype:
         corrector = correctors['prototype'] = ContextPrototypeCorrector(args.context_prototype)
+
+    if args.openspell:
+        corrector = correctors['openspell'] = OpenspellCorrector(args.openspell)
 
     if args.test:
         return testMode(corrector)

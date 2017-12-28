@@ -19,14 +19,14 @@ def init(filename = 'big.txt', modelName = 'big.bin'):
 
 WEIGHTS = {
     0: 1.0,
-    1: 1.045,
+    1: 1.08,
     2: 50.0,
 }
 
 def P(word, sentence, pos):
     word, level = word
-    subsent = sentence[:pos] + [word] + sentence[pos+1:]
-    subsent = ' '.join(subsent) + ' .'
+    subsent = sentence[pos-3:pos] + [word] + sentence[pos+1:pos+4]
+    subsent = ' '.join(subsent)
     score = LANG_MODEL.predict(subsent)
     return score * WEIGHTS[level]
 
