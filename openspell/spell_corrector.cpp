@@ -30,7 +30,6 @@ bool TSpellCorrector::LoadLangModel(const std::string& modelFile) {
     if (!LangModel.Load(modelFile)) {
         return false;
     }
-    return true;
 
     auto&& wordToId = LangModel.GetWordToId();
     for (auto&& it: wordToId) {
@@ -60,9 +59,10 @@ TWords TSpellCorrector::GetCandidatesRaw(const TWords& sentence, size_t position
 
     TWord w = sentence[position];
     TWords candidates = Edits2(w);
+
     bool firstLevel = true;
     if (candidates.empty()) {
-        candidates = Edits2(w, false);
+        candidates = Edits(w, false);
         firstLevel = false;
     }
 
@@ -99,7 +99,7 @@ TWords TSpellCorrector::GetCandidatesRaw(const TWords& sentence, size_t position
         scored.Score = LangModel.Score(candSentence);
         if (!(scored.Word == w)) {
             if (firstLevel) {
-                scored.Score *= 1.08;
+                scored.Score -= 20;
             } else {
                 scored.Score *= 50.0;
             }
