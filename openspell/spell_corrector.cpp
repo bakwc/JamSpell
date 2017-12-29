@@ -37,10 +37,10 @@ bool TSpellCorrector::LoadLangModel(const std::string& modelFile) {
         auto deletes1 = GetDeletes1(it.first);
         auto deletes2 = GetDeletes2(it.first);
         for (auto&& w: deletes1) {
-            Deletes1[w].insert(wid);
+            Deletes1[w].push_back(wid);
         }
         for (auto&& w: deletes2) {
-            Deletes2[w].insert(wid);
+            Deletes2[w].push_back(wid);
         }
     }
 
@@ -229,9 +229,9 @@ TWords TSpellCorrector::Edits(const TWord& word, bool lastLevel) const {
             }
         }
         if (!lastLevel) {
-            it = Deletes2.find(w);
-            if (it != Deletes2.end()) {
-                for (auto c1:it->second) {
+            auto jt = Deletes2.find(w);
+            if (jt != Deletes2.end()) {
+                for (auto c1:jt->second) {
                     result.push_back(c1);
                 }
             }

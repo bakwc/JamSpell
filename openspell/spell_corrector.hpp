@@ -17,8 +17,8 @@ private:
     NOpenSpell::TWords Edits2(const NOpenSpell::TWord& word, bool lastLevel = true) const;
 private:
     TLangModel LangModel;
-    std::unordered_map<std::wstring, std::unordered_set<NOpenSpell::TWord, TWordHashPtr>> Deletes1;
-    std::unordered_map<std::wstring, std::unordered_set<NOpenSpell::TWord, TWordHashPtr>> Deletes2;
+    std::unordered_map<std::wstring, std::vector<NOpenSpell::TWord>> Deletes1;
+    std::unordered_map<std::wstring, std::vector<NOpenSpell::TWord>> Deletes2;
 };
 
 
