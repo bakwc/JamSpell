@@ -50,7 +50,7 @@ void TLangModel::Train(const std::string& fileName, const std::string& alphabetF
 double TLangModel::Score(const TWords& words) const {
     TWordIds sentence;
     for (auto&& w: words) {
-        sentence.push_back(GetWordId(w));
+        sentence.push_back(GetWordIdNoCreate(w));
     }
     if (sentence.empty()) {
         return std::numeric_limits<double>::min();
@@ -152,7 +152,7 @@ TWordId TLangModel::GetWordId(const TWord& word) {
     return wordId;
 }
 
-TWordId TLangModel::GetWordId(const TWord& word) const {
+TWordId TLangModel::GetWordIdNoCreate(const TWord& word) const {
     std::wstring w(word.Ptr, word.Len);
     auto it = WordToId.find(w);
     if (it != WordToId.end()) {

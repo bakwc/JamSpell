@@ -57,12 +57,13 @@ public:
     SAVELOAD(K, WordToId, LastWordID, TotalWords, Grams1, Grams2, Grams3, Tokenizer)
 private:
     TIdSentences ConvertToIds(const TSentences& sentences);
-    TWordId GetWordId(const TWord& word);
-    TWordId GetWordId(const TWord& word) const;
 
     double GetGram1Prob(TWordId word) const;
     double GetGram2Prob(TWordId word1, TWordId word2) const;
     double GetGram3Prob(TWordId word1, TWordId word2, TWordId word3) const;
+
+    TWordId GetWordId(const TWord& word);
+    TWordId GetWordIdNoCreate(const TWord& word) const;
 
 private:
     const TWordId UnknownWordId = std::numeric_limits<TWordId>::max();
