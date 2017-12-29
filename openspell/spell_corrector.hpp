@@ -8,6 +8,7 @@ namespace NOpenSpell {
 class TSpellCorrector {
 public:
     bool LoadLangModel(const std::string& modelFile);
+    bool TrainLangModel(const std::string& textFile, const std::string& alphabetFile);
     NOpenSpell::TWords GetCandidatesRaw(const NOpenSpell::TWords& sentence, size_t position) const;
     std::vector<std::wstring> GetCandidates(const std::vector<std::wstring>& sentence, size_t position) const;
     std::wstring FixFragment(const std::wstring& text) const;
@@ -15,6 +16,7 @@ public:
 private:
     NOpenSpell::TWords Edits(const NOpenSpell::TWord& word, bool lastLevel = true) const;
     NOpenSpell::TWords Edits2(const NOpenSpell::TWord& word, bool lastLevel = true) const;
+    void PrepareCache();
 private:
     TLangModel LangModel;
     std::unordered_map<std::string, std::vector<NOpenSpell::TWordId>> Deletes1;

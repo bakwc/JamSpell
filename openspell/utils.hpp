@@ -41,7 +41,7 @@ using TSentences = std::vector<TWords>;
 class TTokenizer {
 public:
     TTokenizer();
-    void LoadAlphabet(const std::string& alphabetFile);
+    bool LoadAlphabet(const std::string& alphabetFile);
     TSentences Process(const std::wstring& originalText) const;
     void Clear();
 

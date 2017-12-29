@@ -8,12 +8,20 @@
 namespace NOpenSpell {
 
 
-void TLangModel::Train(const std::string& fileName, const std::string& alphabetFile) {
+bool TLangModel::Train(const std::string& fileName, const std::string& alphabetFile) {
     std::cerr << "[info] loading text" << std::endl;
-    Tokenizer.LoadAlphabet(alphabetFile);
+    if (!Tokenizer.LoadAlphabet(alphabetFile)) {
+        std::cerr << "[error] failed to load alphabet" << std::endl;
+        return false;
+    }
     std::wstring trainText = UTF8ToWide(LoadFile(fileName));
     ToLower(trainText);
     TSentences sentences = Tokenizer.Process(trainText);
+    if (sentences.empty()) {
+        std::cerr << "[error] no sentences" << std::endl;
+        return false;
+    }
+
     TIdSentences sentenceIds = ConvertToIds(sentences);
 
     assert(sentences.size() == sentenceIds.size());
@@ -45,6 +53,7 @@ void TLangModel::Train(const std::string& fileName, const std::string& alphabetF
     }
 
     std::cerr << "[info] finished training" << std::endl;
+    return true;
 }
 
 double TLangModel::Score(const TWords& words) const {
@@ -153,7 +162,8 @@ TWordId TLangModel::GetWordId(const TWord& word) {
     }
     TWordId wordId = LastWordID;
     ++LastWordID;
-    WordToId[w] = wordId;
+    it = WordToId.insert(std::make_pair(w, wordId)).first;
+    IdToWord.push_back(&(it->first));
     return wordId;
 }
 

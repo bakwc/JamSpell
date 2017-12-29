@@ -12,7 +12,7 @@
 namespace NOpenSpell {
 
 const uint64_t MAGIC_BYTE = 8559322735408079685L;
-const uint16_t VERSION = 4;
+const uint16_t VERSION = 5;
 constexpr double DEFAULT_K = 0.05;
 
 using TWordId = uint32_t;
@@ -41,7 +41,7 @@ public:
 
 class TLangModel {
 public:
-    void Train(const std::string& fileName, const std::string& alphabetFile);
+    bool Train(const std::string& fileName, const std::string& alphabetFile);
     double Score(const TWords& words) const;
     double Score(const std::wstring& str) const;
     TWord GetWord(const std::wstring& word) const;
@@ -58,7 +58,7 @@ public:
     TWordId GetWordIdNoCreate(const TWord& word) const;
     TWord GetWordById(TWordId wid) const;
 
-    SAVELOAD(K, WordToId, LastWordID, TotalWords, Grams1, Grams2, Grams3, Tokenizer)
+    SAVELOAD(WordToId, LastWordID, TotalWords, Grams1, Grams2, Grams3, Tokenizer)
 private:
     TIdSentences ConvertToIds(const TSentences& sentences);
 

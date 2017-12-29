@@ -23,17 +23,28 @@ TTokenizer::TTokenizer()
 {
 }
 
-void TTokenizer::LoadAlphabet(const std::string& alphabetFile) {
+bool TTokenizer::LoadAlphabet(const std::string& alphabetFile) {
     std::string data = LoadFile(alphabetFile);
+    if (data.empty()) {
+        return false;
+    }
     std::wstring wdata = UTF8ToWide(data);
+    if (wdata.empty()) {
+        return false;
+    }
     ToLower(wdata);
-    Alphabet.clear();
+    std::unordered_set<wchar_t> alphabet;
     for (auto chr: wdata) {
         if (chr == 10 || chr == 13) {
             continue;
         }
-        Alphabet.insert(chr);
+        alphabet.insert(chr);
     }
+    if (alphabet.empty()) {
+        return false;
+    }
+    Alphabet = alphabet;
+    return true;
 }
 
 TSentences TTokenizer::Process(const std::wstring& originalText) const {

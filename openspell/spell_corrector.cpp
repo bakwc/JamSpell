@@ -30,20 +30,15 @@ bool TSpellCorrector::LoadLangModel(const std::string& modelFile) {
     if (!LangModel.Load(modelFile)) {
         return false;
     }
+    PrepareCache();
+    return true;
+}
 
-    auto&& wordToId = LangModel.GetWordToId();
-    for (auto&& it: wordToId) {
-        TWordId wid = LangModel.GetWordIdNoCreate(it.first);
-        auto deletes1 = GetDeletes1(it.first);
-        auto deletes2 = GetDeletes2(it.first);
-        for (auto&& w: deletes1) {
-            Deletes1[WideToUTF8(w)].push_back(wid);
-        }
-        for (auto&& w: deletes2) {
-            Deletes2[WideToUTF8(w)].push_back(wid);
-        }
+bool TSpellCorrector::TrainLangModel(const std::string& textFile, const std::string& alphabetFile) {
+    if (!LangModel.Train(textFile, alphabetFile)) {
+        return false;
     }
-
+    PrepareCache();
     return true;
 }
 
@@ -306,6 +301,23 @@ TWords TSpellCorrector::Edits2(const TWord& word, bool lastLevel) const {
     }
 
     return result;
+}
+
+void TSpellCorrector::PrepareCache() {
+    Deletes1.clear();
+    Deletes2.clear();
+    auto&& wordToId = LangModel.GetWordToId();
+    for (auto&& it: wordToId) {
+        TWordId wid = LangModel.GetWordIdNoCreate(it.first);
+        auto deletes1 = GetDeletes1(it.first);
+        auto deletes2 = GetDeletes2(it.first);
+        for (auto&& w: deletes1) {
+            Deletes1[WideToUTF8(w)].push_back(wid);
+        }
+        for (auto&& w: deletes2) {
+            Deletes2[WideToUTF8(w)].push_back(wid);
+        }
+    }
 }
 
 
