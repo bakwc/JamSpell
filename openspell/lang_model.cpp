@@ -106,6 +106,11 @@ bool TLangModel::Load(const std::string& modelFileName) {
         Clear();
         return false;
     }
+    IdToWord.clear();
+    IdToWord.resize(WordToId.size() + 1, nullptr);
+    for (auto&& it: WordToId) {
+        IdToWord[it.second] = &it.first;
+    }
     return true;
 }
 
@@ -159,6 +164,13 @@ TWordId TLangModel::GetWordIdNoCreate(const TWord& word) const {
         return it->second;
     }
     return UnknownWordId;
+}
+
+TWord TLangModel::GetWordById(TWordId wid) const {
+    if (wid >= IdToWord.size()) {
+        return TWord();
+    }
+    return TWord(*IdToWord[wid]);
 }
 
 TWord TLangModel::GetWord(const std::wstring& word) const {

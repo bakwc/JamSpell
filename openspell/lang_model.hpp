@@ -54,6 +54,10 @@ public:
 
     const std::unordered_map<std::wstring, TWordId>& GetWordToId();
 
+    TWordId GetWordId(const TWord& word);
+    TWordId GetWordIdNoCreate(const TWord& word) const;
+    TWord GetWordById(TWordId wid) const;
+
     SAVELOAD(K, WordToId, LastWordID, TotalWords, Grams1, Grams2, Grams3, Tokenizer)
 private:
     TIdSentences ConvertToIds(const TSentences& sentences);
@@ -62,13 +66,11 @@ private:
     double GetGram2Prob(TWordId word1, TWordId word2) const;
     double GetGram3Prob(TWordId word1, TWordId word2, TWordId word3) const;
 
-    TWordId GetWordId(const TWord& word);
-    TWordId GetWordIdNoCreate(const TWord& word) const;
-
 private:
     const TWordId UnknownWordId = std::numeric_limits<TWordId>::max();
     double K = DEFAULT_K;
     std::unordered_map<std::wstring, TWordId> WordToId;
+    std::vector<const std::wstring*> IdToWord;
     TWordId LastWordID = 0;
     TWordId TotalWords = 0;
     std::unordered_map<TGram1Key, TCount> Grams1;

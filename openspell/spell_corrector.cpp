@@ -33,7 +33,7 @@ bool TSpellCorrector::LoadLangModel(const std::string& modelFile) {
 
     auto&& wordToId = LangModel.GetWordToId();
     for (auto&& it: wordToId) {
-        TWord wid(it.first);
+        TWordId wid = LangModel.GetWordIdNoCreate(it.first);
         auto deletes1 = GetDeletes1(it.first);
         auto deletes2 = GetDeletes2(it.first);
         for (auto&& w: deletes1) {
@@ -226,14 +226,14 @@ TWords TSpellCorrector::Edits(const TWord& word, bool lastLevel) const {
         auto it = Deletes1.find(s);
         if (it != Deletes1.end()) {
             for (auto c1:it->second) {
-                result.push_back(c1);
+                result.push_back(LangModel.GetWordById(c1));
             }
         }
         if (!lastLevel) {
             auto jt = Deletes2.find(s);
             if (jt != Deletes2.end()) {
                 for (auto c1:jt->second) {
-                    result.push_back(c1);
+                    result.push_back(LangModel.GetWordById(c1));
                 }
             }
         }
