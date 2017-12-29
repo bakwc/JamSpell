@@ -40,8 +40,6 @@ def correction(sentence, pos):
         return word
     cands = sorted(cands, key=lambda w: P(w, sentence, pos), reverse=True)
     cands = [c[0] for c in cands]
-    if cands[0] == word:
-        return word
     return cands
 
 def candidates(word, nearest=True):
