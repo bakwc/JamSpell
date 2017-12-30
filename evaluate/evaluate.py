@@ -14,8 +14,6 @@ try:
 except:
     pass
 
-FNAME = 'sherlockholmes.txt'
-
 class STATE:
     NONE = 0
     LETTER = 1
