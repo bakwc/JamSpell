@@ -5,6 +5,7 @@
 #include <cassert>
 #include <iostream>
 #include <cassert>
+#include <algorithm>
 
 #include "utils.hpp"
 

@@ -1,3 +1,5 @@
+#include <algorithm>
+
 #include "spell_corrector.hpp"
 
 namespace NOpenSpell {

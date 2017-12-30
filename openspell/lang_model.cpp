@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cassert>
+#include <cmath>
 #include <fstream>
 
 #include "lang_model.hpp"

@@ -4,6 +4,7 @@
 #include <vector>
 #include <utility>
 #include <string>
+#include <limits>
 
 #include "saveload.hpp"
 #include "utils.hpp"
