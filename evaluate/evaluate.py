@@ -100,6 +100,7 @@ def evaluateCorrector(correctorName, corrector, originalSentences, erroredSenten
     origErrors = 0
     fixedErrors = 0
     broken = 0
+    totalNotTouched = 0
     topNtotalErrors = 0
     topNfixed = 0
 
@@ -132,8 +133,10 @@ def evaluateCorrector(correctorName, corrector, originalSentences, erroredSenten
                 if originalWord in fixedCandidates:
                     topNfixed += 1
             else:
+                totalNotTouched += 1
                 if fixedWord != originalWord:
                     broken += 1
+                    print originalWord, fixedWord
 
             if fixedWord != originalWord:
                 totalErrors += 1
@@ -164,7 +167,7 @@ def evaluateCorrector(correctorName, corrector, originalSentences, erroredSenten
 
     return float(totalErrors) / n,\
            float(fixedErrors) / origErrors,\
-           float(broken) / n,\
+           float(broken) / totalNotTouched,\
            float(topNtotalErrors) / n,\
            float(topNfixed) / origErrors
 
