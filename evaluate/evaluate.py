@@ -8,6 +8,7 @@ import typo_model
 import time
 import copy
 from utils import normalize, loadText, generateSentences
+import utils
 
 try:
     import readline
@@ -192,7 +193,11 @@ def main():
     parser.add_argument('-osp', '--openspell', type=str, help='path to openspell model file')
     parser.add_argument('-t', '--test', action="store_true")
     parser.add_argument('-mx', '--max_words', type=int, help='max words to evaluate')
+    parser.add_argument('-a', '--alphabet', type=str, help='alphabet file')
     args = parser.parse_args()
+
+    if args.alphabet:
+        utils.loadAlphabet(args.alphabet)
 
     correctors = {
         'dummy': DummyCorrector(),

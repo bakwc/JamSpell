@@ -27,6 +27,13 @@ def loadText(fname):
         data = f.read()
         return normalize(data).split()
 
+def loadAlphabet(fname):
+    global ALPHABET
+    with codecs.open(fname, 'r', 'utf-8') as f:
+        data = f.read()
+        data = data.strip().lower()
+        ALPHABET = data
+
 def generateSentences(words):
     sentences = []
     currSent = []
