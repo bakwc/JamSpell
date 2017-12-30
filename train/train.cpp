@@ -16,9 +16,11 @@ int Train(const std::string& alphabetFile,
           const std::string& datasetFile,
           const std::string& resultModelFile)
 {
-    TLangModel model;
-    model.Train(datasetFile, alphabetFile);
-    model.Save(resultModelFile);
+    //TLangModel model;
+    //model.Train(datasetFile, alphabetFile);
+    //model.Save(resultModelFile);
+    TSpellCorrector corrector;
+    corrector.TrainLangModel(datasetFile, alphabetFile);
     return 0;
 }
 

@@ -17,10 +17,13 @@ private:
     NOpenSpell::TWords Edits(const NOpenSpell::TWord& word, bool lastLevel = true) const;
     NOpenSpell::TWords Edits2(const NOpenSpell::TWord& word, bool lastLevel = true) const;
     void PrepareCache();
+    double FindPenalty(const TSentences& sentences);
+    double GetBrokenPercent(const TSentences& sentences, double penalty);
 private:
     TLangModel LangModel;
     std::unordered_map<std::string, std::vector<NOpenSpell::TWordId>> Deletes1;
     std::unordered_map<std::string, std::vector<NOpenSpell::TWordId>> Deletes2;
+    double Penalty = 0;
 };
 
 

@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <cassert>
 
 #include "spell_corrector.hpp"
 
@@ -37,10 +38,36 @@ bool TSpellCorrector::LoadLangModel(const std::string& modelFile) {
 }
 
 bool TSpellCorrector::TrainLangModel(const std::string& textFile, const std::string& alphabetFile) {
-    if (!LangModel.Train(textFile, alphabetFile)) {
+    if (!LangModel.LoadAlphabet(alphabetFile)) {
         return false;
     }
+    std::cerr << "[info] loading text\n";
+    std::wstring trainText = UTF8ToWide(LoadFile(textFile));
+    ToLower(trainText);
+    std::cerr << "[info] tokenizing\n";
+    TSentences trainSentences = LangModel.Tokenize(trainText);
+    TSentences testSentences;
+    std::cerr << "[info] prepare test sentences\n";
+    size_t testPart = std::min(size_t(0.2 * trainSentences.size()), size_t(5000));
+    size_t trainPart = trainSentences.size() - testPart;
+    for (size_t i = trainPart; i < trainSentences.size(); ++i) {
+        testSentences.push_back(trainSentences[i]);
+    }
+    trainSentences.resize(trainPart);
+    std::cerr << "[info] training model\n";
+    LangModel.TrainRaw(trainSentences);
+    std::cerr << "[info] prepare cache\n";
     PrepareCache();
+
+    std::cerr << "[info] calc broken percent\n";
+    double broken = FindPenalty(testSentences);
+
+    std::cerr << "penalty: " << broken << "\n";
+
+//    if (!LangModel.Train(textFile, alphabetFile)) {
+//        return false;
+//    }
+//    PrepareCache();
     return true;
 }
 
@@ -96,7 +123,7 @@ TWords TSpellCorrector::GetCandidatesRaw(const TWords& sentence, size_t position
         scored.Score = LangModel.Score(candSentence);
         if (!(scored.Word == w)) {
             if (firstLevel) {
-                scored.Score -= 20;
+                scored.Score -= Penalty;
             } else {
                 scored.Score *= 50.0;
             }
@@ -320,6 +347,50 @@ void TSpellCorrector::PrepareCache() {
             Deletes2[WideToUTF8(w)].push_back(wid);
         }
     }
+}
+
+double TSpellCorrector::FindPenalty(const TSentences& sentences) {
+    double a = 0.0;
+    double b = 500.0;
+    double target = 0.007;
+
+    while (b - a >= 0.2) {
+        double c = a + (b - a) * 0.5;
+        double pc = GetBrokenPercent(sentences, c);
+        std::cerr << "[info] penalty: " << c << ", broken: " << pc << "\n";
+        if (pc <= target) {
+            b = c;
+        } else {
+            a = c;
+        }
+    }
+
+    return b;
+}
+
+double TSpellCorrector::GetBrokenPercent(const TSentences& sentences, double penalty) {
+    assert(!sentences.empty());
+    Penalty = penalty;
+    size_t totalWords = 0;
+    size_t broken = 0;
+    TWords candidates;
+    for (size_t i = 0; i < sentences.size(); ++i) {
+        const TWords& sentence = sentences[i];
+        for (size_t j = 0; j < sentence.size(); ++j) {
+            const TWord& w = sentence[j];
+            candidates = GetCandidatesRaw(sentence, j);
+            totalWords += 1;
+            if (!candidates.empty()) {
+                const TWord& c = candidates[0];
+                std::wstring origWord(w.Ptr, w.Len);
+                std::wstring candWord(c.Ptr, c.Len);
+                if (origWord != candWord) {
+                    broken += 1;
+                }
+            }
+        }
+    }
+    return double(broken) / double(totalWords);
 }
 
 

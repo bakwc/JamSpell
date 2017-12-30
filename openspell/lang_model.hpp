@@ -43,10 +43,12 @@ public:
 class TLangModel {
 public:
     bool Train(const std::string& fileName, const std::string& alphabetFile);
+    bool TrainRaw(const TSentences& sentences);
     double Score(const TWords& words) const;
     double Score(const std::wstring& str) const;
     TWord GetWord(const std::wstring& word) const;
     const std::unordered_set<wchar_t>& GetAlphabet() const;
+    bool LoadAlphabet(const std::string& fileName);
     TSentences Tokenize(const std::wstring& text) const;
 
     void Save(const std::string& modelFileName) const;

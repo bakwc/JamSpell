@@ -18,6 +18,17 @@ bool TLangModel::Train(const std::string& fileName, const std::string& alphabetF
     std::wstring trainText = UTF8ToWide(LoadFile(fileName));
     ToLower(trainText);
     TSentences sentences = Tokenizer.Process(trainText);
+    std::cerr << "[info] generating N-grams " << sentences.size() << std::endl;
+
+    if (!TrainRaw(sentences)) {
+        return false;
+    }
+
+    std::cerr << "[info] finished training" << std::endl;
+    return true;
+}
+
+bool TLangModel::TrainRaw(const TSentences& sentences) {
     if (sentences.empty()) {
         std::cerr << "[error] no sentences" << std::endl;
         return false;
@@ -27,7 +38,6 @@ bool TLangModel::Train(const std::string& fileName, const std::string& alphabetF
 
     assert(sentences.size() == sentenceIds.size());
 
-    std::cerr << "[info] generating N-grams " << sentences.size() << std::endl;
     uint64_t lastTime = GetCurrentTimeMs();
     size_t total = sentenceIds.size();
     for (size_t i = 0; i < total; ++i) {
@@ -52,8 +62,6 @@ bool TLangModel::Train(const std::string& fileName, const std::string& alphabetF
             lastTime = currTime;
         }
     }
-
-    std::cerr << "[info] finished training" << std::endl;
     return true;
 }
 
@@ -194,6 +202,10 @@ TWord TLangModel::GetWord(const std::wstring& word) const {
 
 const std::unordered_set<wchar_t>& TLangModel::GetAlphabet() const {
     return Tokenizer.GetAlphabet();
+}
+
+bool TLangModel::LoadAlphabet(const std::string& fileName) {
+    return Tokenizer.LoadAlphabet(fileName);
 }
 
 TSentences TLangModel::Tokenize(const std::wstring& text) const {
