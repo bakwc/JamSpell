@@ -16,7 +16,9 @@ TEST_FILE = 'test.txt'
 def loadSentences(fname):
     sentences = []
     with codecs.open(fname, 'r', 'utf-8') as f:
-        for line in f:
+        for line in f.read().split('\n'):
+            if not line:
+                continue
             sentences.append(line.split('\t')[1].strip().lower())
     return sentences
 
