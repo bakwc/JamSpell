@@ -222,14 +222,14 @@ TWords TSpellCorrector::Edits(const TWord& word, bool lastLevel) const {
         std::string s = WideToUTF8(w);
         auto it = Deletes1.find(s);
         if (it != Deletes1.end()) {
-            for (auto c1:it->second) {
+            for (auto c1:*it) {
                 result.push_back(LangModel.GetWordById(c1));
             }
         }
         if (!lastLevel) {
             auto jt = Deletes2.find(s);
             if (jt != Deletes2.end()) {
-                for (auto c1:jt->second) {
+                for (auto c1:*jt) {
                     result.push_back(LangModel.GetWordById(c1));
                 }
             }

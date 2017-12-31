@@ -5,7 +5,7 @@
 #include <unordered_set>
 #include <locale>
 
-#include "saveload.hpp"
+#include <contrib/saveload/saveload.hpp>
 
 namespace NOpenSpell {
 

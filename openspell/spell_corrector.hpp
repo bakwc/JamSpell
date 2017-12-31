@@ -2,6 +2,8 @@
 
 #include "lang_model.hpp"
 
+#include <contrib/tsl/htrie_map.h>
+
 namespace NOpenSpell {
 
 
@@ -19,8 +21,8 @@ private:
     void PrepareCache();
 private:
     TLangModel LangModel;
-    std::unordered_map<std::string, std::vector<NOpenSpell::TWordId>> Deletes1;
-    std::unordered_map<std::string, std::vector<NOpenSpell::TWordId>> Deletes2;
+    tsl::htrie_map<char, std::vector<NOpenSpell::TWordId>> Deletes1;
+    tsl::htrie_map<char, std::vector<NOpenSpell::TWordId>> Deletes2;
 };
 
 
