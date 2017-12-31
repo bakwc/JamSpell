@@ -136,7 +136,7 @@ def evaluateCorrector(correctorName, corrector, originalSentences, erroredSenten
                 totalNotTouched += 1
                 if fixedWord != originalWord:
                     broken += 1
-                    print originalWord, fixedWord
+                    #print originalWord, fixedWord
 
             if fixedWord != originalWord:
                 totalErrors += 1
