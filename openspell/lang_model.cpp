@@ -2,12 +2,48 @@
 #include <cassert>
 #include <cmath>
 #include <fstream>
+#include <sstream>
+#include <ostream>
 
 #include "lang_model.hpp"
+#include "phf_utils.hpp"
+
+#include <contrib/phf/phf.h>
+#include <contrib/cityhash/city.h>
 
 
 namespace NOpenSpell {
 
+template<typename T>
+std::string DumpKey(const T& key) {
+    std::stringbuf buf;
+    std::ostream out(&buf);
+    NSaveLoad::Save(out, key);
+    return buf.str();
+}
+
+template<typename T>
+void PrepareNgramKeys(const T& grams, std::vector<std::string>& keys) {
+    for (auto&& it: grams) {
+        keys.push_back(DumpKey(it.first));
+    }
+}
+
+template<typename T>
+void InitializeBuckets(const T& grams, TPerfectHash& ph, std::vector<std::pair<uint32_t, TCount>>& buckets) {
+    for (auto&& it: grams) {
+        std::string key = DumpKey(it.first);
+        uint32_t bucket = ph.Hash(key);
+        if (bucket >= buckets.size()) {
+            std::cerr << bucket << " " << buckets.size() << "\n";
+        }
+        assert(bucket < buckets.size());
+        std::pair<uint32_t, TCount> data;
+        data.first = CityHash32(&key[0], key.size());
+        data.second = it.second;
+        buckets[bucket] = data;
+    }
+}
 
 bool TLangModel::Train(const std::string& fileName, const std::string& alphabetFile) {
     std::cerr << "[info] loading text" << std::endl;
@@ -53,7 +89,33 @@ bool TLangModel::Train(const std::string& fileName, const std::string& alphabetF
         }
     }
 
-    std::cerr << "[info] finished training" << std::endl;
+    std::cerr << "[info] generating keys" << std::endl;
+
+    std::vector<std::string> keys;
+    keys.reserve(Grams1.size() + Grams2.size() + Grams3.size());
+
+    std::cerr << "ngrams1: " << Grams1.size() << "\n";
+    std::cerr << "ngrams2: " << Grams2.size() << "\n";
+    std::cerr << "ngrams3: " << Grams3.size() << "\n";
+    std::cerr << "total: " << Grams3.size() + Grams2.size() + Grams1.size() << "\n";
+
+    PrepareNgramKeys(Grams1, keys);
+    PrepareNgramKeys(Grams2, keys);
+    PrepareNgramKeys(Grams3, keys);
+
+    std::cerr << "[info] generating perf hash" << std::endl;
+
+    PerfectHash.Init(keys);
+
+    std::cerr << "[info] finished, buckets: " << PerfectHash.BucketsNumber() << "\n";
+
+    Buckets.resize(PerfectHash.BucketsNumber());
+    InitializeBuckets(Grams1, PerfectHash, Buckets);
+    InitializeBuckets(Grams2, PerfectHash, Buckets);
+    InitializeBuckets(Grams3, PerfectHash, Buckets);
+
+    std::cerr << "[info] buckets filled" << std::endl;
+
     return true;
 }
 
@@ -201,46 +263,96 @@ TSentences TLangModel::Tokenize(const std::wstring& text) const {
 }
 
 double TLangModel::GetGram1Prob(TWordId word) const {
-    double countsGram1 = 0;
-    auto it = Grams1.find(word);
-    if (it != Grams1.end()) {
-        countsGram1 = it->second;
-    }
+//    double countsGram1 = 0;
+//    auto it = Grams1.find(word);
+//    if (it != Grams1.end()) {
+//        countsGram1 = it->second;
+//    }
+    double countsGram1 = GetGram1HashCount(word);
     countsGram1 += K;
     double vocabSize = Grams1.size();
     return countsGram1 / (TotalWords + vocabSize);
 }
 
 double TLangModel::GetGram2Prob(TWordId word1, TWordId word2) const {
-    double countsGram1 = 0;
-    auto it = Grams1.find(word1);
-    if (it != Grams1.end()) {
-        countsGram1 = it->second;
+//    double countsGram1 = 0;
+//    auto it = Grams1.find(word1);
+//    if (it != Grams1.end()) {
+//        countsGram1 = it->second;
+//    }
+    double countsGram1 = GetGram1HashCount(word1);
+    double countsGram2 = GetGram2HashCount(word1, word2);
+    if (countsGram2 > countsGram1) { // (hash collision)
+        countsGram2 = 0;
     }
     countsGram1 += TotalWords;
-    double countsGram2 = 0;
-    auto jt = Grams2.find(TGram2Key(word1, word2));
-    if (jt != Grams2.end()) {
-        countsGram2 = jt->second;
-    }
+//    double countsGram2 = 0;
+//    auto jt = Grams2.find(TGram2Key(word1, word2));
+//    if (jt != Grams2.end()) {
+//        countsGram2 = jt->second;
+//    }
     countsGram2 += K;
     return countsGram2 / countsGram1;
 }
 
 double TLangModel::GetGram3Prob(TWordId word1, TWordId word2, TWordId word3) const {
-    double countsGram2 = 0;
-    auto it = Grams2.find(TGram2Key(word1, word2));
-    if (it != Grams2.end()) {
-        countsGram2 = it->second;
+//    double countsGram2 = 0;
+//    auto it = Grams2.find(TGram2Key(word1, word2));
+//    if (it != Grams2.end()) {
+//        countsGram2 = it->second;
+//    }
+    double countsGram2 = GetGram2HashCount(word1, word2);
+    double countsGram3 = GetGram3HashCount(word1, word2, word3);
+    if (countsGram3 > countsGram2) { // hash collision
+        countsGram3 = 0;
     }
     countsGram2 += TotalWords;
-    double countsGram3 = 0;
-    auto jt = Grams3.find(TGram3Key(word1, word2, word3));
-    if (jt != Grams3.end()) {
-        countsGram3 = jt->second;
-    }
+//    double countsGram3 = 0;
+//    auto jt = Grams3.find(TGram3Key(word1, word2, word3));
+//    if (jt != Grams3.end()) {
+//        countsGram3 = jt->second;
+//    }
     countsGram3 += K;
     return countsGram3 / countsGram2;
+}
+
+template<typename T>
+TCount GetGramHashCount(T key,
+                        const TPerfectHash& ph,
+                        const std::vector<std::pair<uint32_t, TCount>>& buckets)
+{
+    std::string s = DumpKey(key);
+    uint32_t bucket = ph.Hash(s);
+    assert(bucket < ph.BucketsNumber());
+    const std::pair<uint32_t, TCount>& data = buckets[bucket];
+    if (data.first == CityHash32(&s[0], s.size())) {
+        return data.second;
+    }
+    return TCount();
+}
+
+TCount TLangModel::GetGram1HashCount(TWordId word) const {
+    if (word == UnknownWordId) {
+        return TCount();
+    }
+    TGram1Key key = word;
+    return GetGramHashCount(key, PerfectHash, Buckets);
+}
+
+TCount TLangModel::GetGram2HashCount(TWordId word1, TWordId word2) const {
+    if (word1 == UnknownWordId || word2 == UnknownWordId) {
+        return TCount();
+    }
+    TGram2Key key({word1, word2});
+    return GetGramHashCount(key, PerfectHash, Buckets);
+}
+
+TCount TLangModel::GetGram3HashCount(TWordId word1, TWordId word2, TWordId word3) const {
+    if (word1 == UnknownWordId || word2 == UnknownWordId || word3 == UnknownWordId) {
+        return TCount();
+    }
+    TGram3Key key({word1, word2, word3});
+    return GetGramHashCount(key, PerfectHash, Buckets);
 }
 
 } // NOpenSpell
