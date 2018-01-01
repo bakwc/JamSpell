@@ -60,6 +60,7 @@ public:
     TWordId GetWordId(const TWord& word);
     TWordId GetWordIdNoCreate(const TWord& word) const;
     TWord GetWordById(TWordId wid) const;
+    TCount GetWordCount(TWordId wid) const;
 
     //SAVELOAD(WordToId, LastWordID, TotalWords, Grams1, Grams2, Grams3, Tokenizer)
     SAVELOAD(WordToId, LastWordID, TotalWords, PerfectHash, Buckets, Tokenizer)

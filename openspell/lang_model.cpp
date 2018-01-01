@@ -62,6 +62,14 @@ bool TLangModel::Train(const std::string& fileName, const std::string& alphabetF
     TIdSentences sentenceIds = ConvertToIds(sentences);
 
     assert(sentences.size() == sentenceIds.size());
+    {
+        std::wstring tmp;
+        trainText.swap(tmp);
+    }
+    {
+        TSentences tmp;
+        sentences.swap(tmp);
+    }
 
     std::cerr << "[info] generating N-grams " << sentences.size() << std::endl;
     uint64_t lastTime = GetCurrentTimeMs();
@@ -244,6 +252,10 @@ TWord TLangModel::GetWordById(TWordId wid) const {
         return TWord();
     }
     return TWord(*IdToWord[wid]);
+}
+
+TCount TLangModel::GetWordCount(TWordId wid) const {
+    return GetGram1HashCount(wid);
 }
 
 TWord TLangModel::GetWord(const std::wstring& word) const {

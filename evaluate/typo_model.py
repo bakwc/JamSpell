@@ -9,6 +9,7 @@ from utils import ALPHABET
 #todo: calculate correct typo probabilities
 
 TYPO_PROB = 0.03 # chance of making typo for a single letter
+SECOND_TYPO_CF = 0.2 # chance of making two typos, relative to TYPO_PROB
 REPLACE_PROB = 0.7
 INSERT_PROB = 0.1
 REMOVE_PROB = 0.1
@@ -80,9 +81,16 @@ def generateTypo(word):
     if word == '.':
         return word
 
-    if random.random() > getWordTypoChance(word):
-        return word
+    chance = random.random()
+    required = getWordTypoChance(word)
+    numTypo = 0
 
-    typoType = weightedChoice(enumerate(TYPO_TYPES))
-    return TYPO_GENERATORS[typoType](word)
+    if chance < required:
+        numTypo = 1
+    if chance < required * SECOND_TYPO_CF:
+        numTypo = 2
 
+    for _ in xrange(numTypo):
+        typoType = weightedChoice(enumerate(TYPO_TYPES))
+        word = TYPO_GENERATORS[typoType](word)
+    return word

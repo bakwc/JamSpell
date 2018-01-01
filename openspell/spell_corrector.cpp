@@ -32,7 +32,7 @@ bool TSpellCorrector::LoadLangModel(const std::string& modelFile) {
     if (!LangModel.Load(modelFile)) {
         return false;
     }
-    PrepareCache();
+    //PrepareCache();
     return true;
 }
 
@@ -55,12 +55,17 @@ TWords TSpellCorrector::GetCandidatesRaw(const TWords& sentence, size_t position
     }
 
     TWord w = sentence[position];
+
     TWords candidates = Edits2(w);
 
     bool firstLevel = true;
     if (candidates.empty()) {
-        candidates = Edits(w, false);
+        candidates = Edits2(w, false);
         firstLevel = false;
+    }
+
+    if (candidates.empty()) {
+        return candidates;
     }
 
     {
@@ -69,10 +74,6 @@ TWords TSpellCorrector::GetCandidatesRaw(const TWords& sentence, size_t position
             w = c;
             candidates.push_back(c);
         }
-    }
-
-    if (candidates.empty()) {
-        return candidates;
     }
 
     std::unordered_set<TWord, TWordHashPtr> uniqueCandidates(candidates.begin(), candidates.end());
