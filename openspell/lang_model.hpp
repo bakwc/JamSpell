@@ -13,9 +13,10 @@
 
 namespace NOpenSpell {
 
-const uint64_t MAGIC_BYTE = 8559322735408079685L;
-const uint16_t VERSION = 6;
-constexpr double DEFAULT_K = 0.05;
+
+constexpr uint64_t LANG_MODEL_MAGIC_BYTE = 8559322735408079685L;
+constexpr uint16_t LANG_MODEL_VERSION = 7;
+constexpr double LANG_MODEL_DEFAULT_K = 0.05;
 
 using TWordId = uint32_t;
 using TCount = uint32_t;
@@ -51,7 +52,7 @@ public:
     const std::unordered_set<wchar_t>& GetAlphabet() const;
     TSentences Tokenize(const std::wstring& text) const;
 
-    void Save(const std::string& modelFileName) const;
+    bool Save(const std::string& modelFileName) const;
     bool Load(const std::string& modelFileName);
     void Clear();
 
@@ -62,7 +63,10 @@ public:
     TWord GetWordById(TWordId wid) const;
     TCount GetWordCount(TWordId wid) const;
 
-    SAVELOAD(WordToId, LastWordID, TotalWords, PerfectHash, Buckets, Tokenizer)
+    uint64_t GetCheckSum() const;
+
+    SAVELOAD(WordToId, LastWordID, TotalWords, VocabSize,
+             PerfectHash, Buckets, Tokenizer, CheckSum)
 private:
     TIdSentences ConvertToIds(const TSentences& sentences);
 
@@ -76,17 +80,16 @@ private:
 
 private:
     const TWordId UnknownWordId = std::numeric_limits<TWordId>::max();
-    double K = DEFAULT_K;
+    double K = LANG_MODEL_DEFAULT_K;
     std::unordered_map<std::wstring, TWordId> WordToId;
     std::vector<const std::wstring*> IdToWord;
     TWordId LastWordID = 0;
     TWordId TotalWords = 0;
-    std::unordered_map<TGram1Key, TCount> Grams1;
-    std::unordered_map<TGram2Key, TCount, TGram2KeyHash> Grams2;
-    std::unordered_map<TGram3Key, TCount, TGram3KeyHash> Grams3;
+    TWordId VocabSize = 0;
     TTokenizer Tokenizer;
     std::vector<std::pair<uint32_t, TCount>> Buckets;
     TPerfectHash PerfectHash;
+    uint64_t CheckSum;
 };
 
 

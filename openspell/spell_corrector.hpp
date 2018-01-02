@@ -3,9 +3,7 @@
 #include <memory>
 
 #include "lang_model.hpp"
-
-#include <contrib/tsl/htrie_set.h>
-#include <contrib/bloom/bloom_filter.hpp>
+#include "bloom_filter.hpp"
 
 namespace NOpenSpell {
 
@@ -24,10 +22,12 @@ private:
     void Inserts(const std::wstring& w, NOpenSpell::TWords& result) const;
     void Inserts2(const std::wstring& w, NOpenSpell::TWords& result) const;
     void PrepareCache();
+    bool LoadCache(const std::string& cacheFile);
+    bool SaveCache(const std::string& cacheFile);
 private:
     TLangModel LangModel;
-    std::unique_ptr<bloom_filter> Deletes1f;
-    std::unique_ptr<bloom_filter> Deletes2f;
+    std::unique_ptr<TBloomFilter> Deletes1;
+    std::unique_ptr<TBloomFilter> Deletes2;
 };
 
 

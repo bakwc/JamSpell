@@ -45,6 +45,7 @@ void InitializeBuckets(const T& grams, TPerfectHash& ph, std::vector<std::pair<u
 
 bool TLangModel::Train(const std::string& fileName, const std::string& alphabetFile) {
     std::cerr << "[info] loading text" << std::endl;
+    uint64_t trainStarTime = GetCurrentTimeMs();
     if (!Tokenizer.LoadAlphabet(alphabetFile)) {
         std::cerr << "[error] failed to load alphabet" << std::endl;
         return false;
@@ -69,6 +70,10 @@ bool TLangModel::Train(const std::string& fileName, const std::string& alphabetF
         sentences.swap(tmp);
     }
 
+    std::unordered_map<TGram1Key, TCount> grams1;
+    std::unordered_map<TGram2Key, TCount, TGram2KeyHash> grams2;
+    std::unordered_map<TGram3Key, TCount, TGram3KeyHash> grams3;
+
     std::cerr << "[info] generating N-grams " << sentences.size() << std::endl;
     uint64_t lastTime = GetCurrentTimeMs();
     size_t total = sentenceIds.size();
@@ -76,17 +81,17 @@ bool TLangModel::Train(const std::string& fileName, const std::string& alphabetF
         const TWordIds& words = sentenceIds[i];
 
         for (auto w: words) {
-            Grams1[w] += 1;
+            grams1[w] += 1;
             TotalWords += 1;
         }
 
         for (ssize_t j = 0; j < (ssize_t)words.size() - 1; ++j) {
             TGram2Key key(words[j], words[j+1]);
-            Grams2[key] += 1;
+            grams2[key] += 1;
         }
         for (ssize_t j = 0; j < (ssize_t)words.size() - 2; ++j) {
             TGram3Key key(words[j], words[j+1], words[j+2]);
-            Grams3[key] += 1;
+            grams3[key] += 1;
         }
         uint64_t currTime = GetCurrentTimeMs();
         if (currTime - lastTime > 4000) {
@@ -95,33 +100,43 @@ bool TLangModel::Train(const std::string& fileName, const std::string& alphabetF
         }
     }
 
+    VocabSize = grams1.size();
+
     std::cerr << "[info] generating keys" << std::endl;
 
-    std::vector<std::string> keys;
-    keys.reserve(Grams1.size() + Grams2.size() + Grams3.size());
+    {
+        std::vector<std::string> keys;
+        keys.reserve(grams1.size() + grams2.size() + grams3.size());
 
-    std::cerr << "[info] ngrams1: " << Grams1.size() << "\n";
-    std::cerr << "[info] ngrams2: " << Grams2.size() << "\n";
-    std::cerr << "[info] ngrams3: " << Grams3.size() << "\n";
-    std::cerr << "[info] total: " << Grams3.size() + Grams2.size() + Grams1.size() << "\n";
+        std::cerr << "[info] ngrams1: " << grams1.size() << "\n";
+        std::cerr << "[info] ngrams2: " << grams2.size() << "\n";
+        std::cerr << "[info] ngrams3: " << grams3.size() << "\n";
+        std::cerr << "[info] total: " << grams3.size() + grams2.size() + grams1.size() << "\n";
 
-    PrepareNgramKeys(Grams1, keys);
-    PrepareNgramKeys(Grams2, keys);
-    PrepareNgramKeys(Grams3, keys);
+        PrepareNgramKeys(grams1, keys);
+        PrepareNgramKeys(grams2, keys);
+        PrepareNgramKeys(grams3, keys);
 
-    std::cerr << "[info] generating perf hash" << std::endl;
+        std::cerr << "[info] generating perf hash" << std::endl;
 
-    PerfectHash.Init(keys);
+        PerfectHash.Init(keys);
+    }
 
     std::cerr << "[info] finished, buckets: " << PerfectHash.BucketsNumber() << "\n";
 
     Buckets.resize(PerfectHash.BucketsNumber());
-    InitializeBuckets(Grams1, PerfectHash, Buckets);
-    InitializeBuckets(Grams2, PerfectHash, Buckets);
-    InitializeBuckets(Grams3, PerfectHash, Buckets);
+    InitializeBuckets(grams1, PerfectHash, Buckets);
+    InitializeBuckets(grams2, PerfectHash, Buckets);
+    InitializeBuckets(grams3, PerfectHash, Buckets);
 
     std::cerr << "[info] buckets filled" << std::endl;
 
+    std::stringbuf checkSumBuf;
+    std::ostream checkSumOut(&checkSumBuf);
+    NSaveLoad::Save(checkSumOut, trainStarTime, grams1.size(), grams2.size(),
+                    grams3.size(), Buckets.size(), trainText.size(), sentences.size());
+    std::string checkSumStr = checkSumBuf.str();
+    CheckSum = CityHash64(&checkSumStr[0], checkSumStr.size());
     return true;
 }
 
@@ -157,30 +172,37 @@ double TLangModel::Score(const std::wstring& str) const {
     return Score(words);
 }
 
-void TLangModel::Save(const std::string& modelFileName) const {
+bool TLangModel::Save(const std::string& modelFileName) const {
     std::ofstream out(modelFileName, std::ios::binary);
-    NSaveLoad::Save(out, MAGIC_BYTE);
-    NSaveLoad::Save(out, VERSION);
+    if (!out.is_open()) {
+        return false;
+    }
+    NSaveLoad::Save(out, LANG_MODEL_MAGIC_BYTE);
+    NSaveLoad::Save(out, LANG_MODEL_VERSION);
     Save(out);
-    NSaveLoad::Save(out, MAGIC_BYTE);
+    NSaveLoad::Save(out, LANG_MODEL_MAGIC_BYTE);
+    return true;
 }
 
 bool TLangModel::Load(const std::string& modelFileName) {
     std::ifstream in(modelFileName, std::ios::binary);
+    if (!in.is_open()) {
+        return false;
+    }
     uint16_t version = 0;
     uint64_t magicByte = 0;
     NSaveLoad::Load(in, magicByte);
-    if (magicByte != MAGIC_BYTE) {
+    if (magicByte != LANG_MODEL_MAGIC_BYTE) {
         return false;
     }
     NSaveLoad::Load(in, version);
-    if (version != VERSION) {
+    if (version != LANG_MODEL_VERSION) {
         return false;
     }
     Load(in);
     magicByte = 0;
     NSaveLoad::Load(in, magicByte);
-    if (magicByte != MAGIC_BYTE) {
+    if (magicByte != LANG_MODEL_MAGIC_BYTE) {
         Clear();
         return false;
     }
@@ -193,13 +215,10 @@ bool TLangModel::Load(const std::string& modelFileName) {
 }
 
 void TLangModel::Clear() {
-    K = DEFAULT_K;
+    K = LANG_MODEL_DEFAULT_K;
     WordToId.clear();
     LastWordID = 0;
     TotalWords = 0;
-    Grams1.clear();
-    Grams2.clear();
-    Grams3.clear();
     Tokenizer.Clear();
 }
 
@@ -256,6 +275,10 @@ TCount TLangModel::GetWordCount(TWordId wid) const {
     return GetGram1HashCount(wid);
 }
 
+uint64_t TLangModel::GetCheckSum() const {
+    return CheckSum;
+}
+
 TWord TLangModel::GetWord(const std::wstring& word) const {
     auto it = WordToId.find(word);
     if (it != WordToId.end()) {
@@ -275,8 +298,7 @@ TSentences TLangModel::Tokenize(const std::wstring& text) const {
 double TLangModel::GetGram1Prob(TWordId word) const {
     double countsGram1 = GetGram1HashCount(word);
     countsGram1 += K;
-    double vocabSize = Grams1.size();
-    return countsGram1 / (TotalWords + vocabSize);
+    return countsGram1 / (TotalWords + VocabSize);
 }
 
 double TLangModel::GetGram2Prob(TWordId word1, TWordId word2) const {

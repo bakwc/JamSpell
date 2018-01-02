@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <fstream>
 
 #include "spell_corrector.hpp"
 
@@ -33,7 +34,11 @@ bool TSpellCorrector::LoadLangModel(const std::string& modelFile) {
     if (!LangModel.Load(modelFile)) {
         return false;
     }
-    PrepareCache();
+    std::string cacheFile = modelFile + ".spell";
+    if (!LoadCache(cacheFile)) {
+        PrepareCache();
+        SaveCache(cacheFile);
+    }
     return true;
 }
 
@@ -219,10 +224,10 @@ TWords TSpellCorrector::Edits(const TWord& word) const {
                 result.push_back(c);
             }
             std::string s = WideToUTF8(w);
-            if (Deletes1f->contains(s)) {
+            if (Deletes1->Contains(s)) {
                 Inserts(w, result);
             }
-            if (Deletes2f->contains(s)) {
+            if (Deletes2->Contains(s)) {
                 Inserts2(w, result);
             }
         }
@@ -313,7 +318,7 @@ void TSpellCorrector::Inserts2(const std::wstring& w, TWords& result) const {
     for (size_t i = 0; i < w.size() + 1; ++i) {
         for (auto&& ch: LangModel.GetAlphabet()) {
             std::wstring s = w.substr(0, i) + ch + w.substr(i);
-            if (Deletes1f->contains(WideToUTF8(s))) {
+            if (Deletes1->Contains(WideToUTF8(s))) {
                 Inserts(s, result);
             }
         }
@@ -321,29 +326,96 @@ void TSpellCorrector::Inserts2(const std::wstring& w, TWords& result) const {
 }
 
 void TSpellCorrector::PrepareCache() {
-    bloom_parameters parameters;
-    parameters.projected_element_count = 7000000;
-    parameters.false_positive_probability = 0.001;
-    parameters.random_seed = 42;
-    parameters.compute_optimal_parameters();
-
-    Deletes1f.reset(new bloom_filter(parameters));
-
-    parameters.projected_element_count = 30000000;
-    parameters.compute_optimal_parameters();
-
-    Deletes2f.reset(new bloom_filter(parameters));
-
     auto&& wordToId = LangModel.GetWordToId();
+    size_t n = 0;
+    size_t s = 0;
+    for (auto&& it: wordToId) {
+        n += 1;
+        s += it.first.size();
+        if (n > 3000) {
+            break;
+        }
+    }
+    size_t avgWordLen = std::max(int(double(s) / n) + 1, 1);
+    size_t avgWordLenMinusOne = std::max(size_t(1), avgWordLen - 1);
+
+    uint64_t deletes1size = wordToId.size() * avgWordLen;
+    uint64_t deletes2size = wordToId.size() * avgWordLen * avgWordLenMinusOne;
+    deletes1size = std::max(uint64_t(1000), deletes1size);
+    deletes1size = std::max(uint64_t(1000), deletes1size);
+
+    double falsePositiveProb = 0.001;
+    Deletes1.reset(new TBloomFilter(deletes1size, falsePositiveProb));
+    Deletes2.reset(new TBloomFilter(deletes2size, falsePositiveProb));
+
+    uint64_t deletes1real = 0;
+    uint64_t deletes2real = 0;
+
     for (auto&& it: wordToId) {
         auto deletes = GetDeletes2(it.first);
         for (auto&& w1: deletes) {
-            Deletes1f->insert(WideToUTF8(w1.back()));
+            Deletes1->Insert(WideToUTF8(w1.back()));
+            deletes1real += 1;
             for (size_t i = 0; i < w1.size() - 1; ++i) {
-                Deletes2f->insert(WideToUTF8(w1[i]));
+                Deletes2->Insert(WideToUTF8(w1[i]));
+                deletes2real += 1;
             }
         }
     }
+}
+
+constexpr uint64_t SPELL_CHECKER_CACHE_MAGIC_BYTE = 3811558393781437494L;
+constexpr uint16_t SPELL_CHECKER_CACHE_VERSION = 1;
+
+bool TSpellCorrector::LoadCache(const std::string& cacheFile) {
+    std::ifstream in(cacheFile, std::ios::binary);
+    if (!in.is_open()) {
+        return false;
+    }
+    uint16_t version = 0;
+    uint64_t magicByte = 0;
+    NSaveLoad::Load(in, magicByte);
+    if (magicByte != SPELL_CHECKER_CACHE_MAGIC_BYTE) {
+        return false;
+    }
+    NSaveLoad::Load(in, version);
+    if (version != SPELL_CHECKER_CACHE_VERSION) {
+        return false;
+    }
+    uint64_t checkSum = 0;
+    NSaveLoad::Load(in, checkSum);
+    if (checkSum != LangModel.GetCheckSum()) {
+        return false;
+    }
+    std::unique_ptr<TBloomFilter> deletes1(new TBloomFilter());
+    std::unique_ptr<TBloomFilter> deletes2(new TBloomFilter());
+    deletes1->Load(in);
+    deletes2->Load(in);
+    magicByte = 0;
+    NSaveLoad::Load(in, magicByte);
+    if (magicByte != SPELL_CHECKER_CACHE_MAGIC_BYTE) {
+        return false;
+    }
+    Deletes1 = std::move(deletes1);
+    Deletes2 = std::move(deletes2);
+    return true;
+}
+
+bool TSpellCorrector::SaveCache(const std::string& cacheFile) {
+    std::ofstream out(cacheFile, std::ios::binary);
+    if (!out.is_open()) {
+        return false;
+    }
+    if (!Deletes1 || !Deletes2) {
+        return false;
+    }
+    NSaveLoad::Save(out, SPELL_CHECKER_CACHE_MAGIC_BYTE);
+    NSaveLoad::Save(out, SPELL_CHECKER_CACHE_VERSION);
+    NSaveLoad::Save(out, LangModel.GetCheckSum());
+    Deletes1->Save(out);
+    Deletes2->Save(out);
+    NSaveLoad::Save(out, SPELL_CHECKER_CACHE_MAGIC_BYTE);
+    return true;
 }
 
 
