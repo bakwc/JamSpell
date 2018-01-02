@@ -219,17 +219,11 @@ TWords TSpellCorrector::Edits(const TWord& word) const {
                 result.push_back(c);
             }
             std::string s = WideToUTF8(w);
-            {
-                auto it = Deletes1.find(s);
-                if (it != Deletes1.end()) {
-                    Inserts(w, result);
-                }
+            if (Deletes1f->contains(s)) {
+                Inserts(w, result);
             }
-            {
-                auto it = Deletes2.find(s);
-                if (it != Deletes2.end()) {
-                    Inserts2(w, result);
-                }
+            if (Deletes2f->contains(s)) {
+                Inserts2(w, result);
             }
         }
     }
@@ -319,8 +313,7 @@ void TSpellCorrector::Inserts2(const std::wstring& w, TWords& result) const {
     for (size_t i = 0; i < w.size() + 1; ++i) {
         for (auto&& ch: LangModel.GetAlphabet()) {
             std::wstring s = w.substr(0, i) + ch + w.substr(i);
-            auto it = Deletes1.find(WideToUTF8(s));
-            if (it != Deletes1.end()) {
+            if (Deletes1f->contains(WideToUTF8(s))) {
                 Inserts(s, result);
             }
         }
@@ -328,15 +321,26 @@ void TSpellCorrector::Inserts2(const std::wstring& w, TWords& result) const {
 }
 
 void TSpellCorrector::PrepareCache() {
-    Deletes1.clear();
-    Deletes2.clear();
+    bloom_parameters parameters;
+    parameters.projected_element_count = 7000000;
+    parameters.false_positive_probability = 0.0001;
+    parameters.random_seed = 42;
+    parameters.compute_optimal_parameters();
+
+    Deletes1f.reset(new bloom_filter(parameters));
+
+    parameters.projected_element_count = 30000000;
+    parameters.compute_optimal_parameters();
+
+    Deletes2f.reset(new bloom_filter(parameters));
+
     auto&& wordToId = LangModel.GetWordToId();
     for (auto&& it: wordToId) {
         auto deletes = GetDeletes2(it.first);
         for (auto&& w1: deletes) {
-            Deletes1.insert(WideToUTF8(w1.back()));
+            Deletes1f->insert(WideToUTF8(w1.back()));
             for (size_t i = 0; i < w1.size() - 1; ++i) {
-                Deletes2.insert(WideToUTF8(w1[i]));
+                Deletes2f->insert(WideToUTF8(w1[i]));
             }
         }
     }

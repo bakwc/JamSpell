@@ -1,8 +1,11 @@
 #pragma once
 
+#include <memory>
+
 #include "lang_model.hpp"
 
 #include <contrib/tsl/htrie_set.h>
+#include <contrib/bloom/bloom_filter.hpp>
 
 namespace NOpenSpell {
 
@@ -23,8 +26,8 @@ private:
     void PrepareCache();
 private:
     TLangModel LangModel;
-    tsl::htrie_set<char> Deletes1;
-    tsl::htrie_set<char> Deletes2;
+    std::unique_ptr<bloom_filter> Deletes1f;
+    std::unique_ptr<bloom_filter> Deletes2f;
 };
 
 
