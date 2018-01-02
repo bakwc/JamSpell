@@ -32,7 +32,7 @@ bool TSpellCorrector::LoadLangModel(const std::string& modelFile) {
     if (!LangModel.Load(modelFile)) {
         return false;
     }
-    //PrepareCache();
+    PrepareCache();
     return true;
 }
 
@@ -60,7 +60,7 @@ TWords TSpellCorrector::GetCandidatesRaw(const TWords& sentence, size_t position
 
     bool firstLevel = true;
     if (candidates.empty()) {
-        candidates = Edits2(w, false);
+        candidates = Edits(w, false);
         firstLevel = false;
     }
 
