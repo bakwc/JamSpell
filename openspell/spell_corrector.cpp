@@ -323,7 +323,7 @@ void TSpellCorrector::Inserts2(const std::wstring& w, TWords& result) const {
 void TSpellCorrector::PrepareCache() {
     bloom_parameters parameters;
     parameters.projected_element_count = 7000000;
-    parameters.false_positive_probability = 0.0001;
+    parameters.false_positive_probability = 0.001;
     parameters.random_seed = 42;
     parameters.compute_optimal_parameters();
 
