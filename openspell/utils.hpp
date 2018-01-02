@@ -56,8 +56,9 @@ private:
 std::string LoadFile(const std::string& fileName);
 std::wstring UTF8ToWide(const std::string& text);
 std::string WideToUTF8(const std::wstring& text);
-std::uint64_t GetCurrentTimeMs();
+uint64_t GetCurrentTimeMs();
 void ToLower(std::wstring& text);
 wchar_t MakeUpperIfRequired(wchar_t orig, wchar_t sample);
+uint16_t CityHash16(const std::string& str);
 
 } // NOpenSpell

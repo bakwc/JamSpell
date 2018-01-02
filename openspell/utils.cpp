@@ -9,6 +9,8 @@
 
 #include "utils.hpp"
 
+#include <contrib/cityhash/city.h>
+
 
 namespace NOpenSpell {
 
@@ -107,7 +109,7 @@ std::string WideToUTF8(const std::wstring& text) {
     return converter.to_bytes(text);
 }
 
-std::uint64_t GetCurrentTimeMs() {
+uint64_t GetCurrentTimeMs() {
     using namespace std::chrono;
     milliseconds ms = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
     return ms.count();
@@ -127,6 +129,11 @@ wchar_t MakeUpperIfRequired(wchar_t orig, wchar_t sample) {
         return GWctype.toupper(orig);
     }
     return orig;
+}
+
+uint16_t CityHash16(const std::string& str) {
+    uint32_t hash = CityHash32(&str[0], str.size());
+    return hash % std::numeric_limits<uint16_t>::max();
 }
 
 

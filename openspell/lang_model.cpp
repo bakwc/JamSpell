@@ -28,7 +28,7 @@ void PrepareNgramKeys(const T& grams, std::vector<std::string>& keys) {
 }
 
 template<typename T>
-void InitializeBuckets(const T& grams, TPerfectHash& ph, std::vector<std::pair<uint32_t, TCount>>& buckets) {
+void InitializeBuckets(const T& grams, TPerfectHash& ph, std::vector<std::pair<uint16_t, TCount>>& buckets) {
     for (auto&& it: grams) {
         std::string key = DumpKey(it.first);
         uint32_t bucket = ph.Hash(key);
@@ -37,7 +37,7 @@ void InitializeBuckets(const T& grams, TPerfectHash& ph, std::vector<std::pair<u
         }
         assert(bucket < buckets.size());
         std::pair<uint32_t, TCount> data;
-        data.first = CityHash32(&key[0], key.size());
+        data.first = CityHash16(key);
         data.second = it.second;
         buckets[bucket] = data;
     }
@@ -326,13 +326,13 @@ double TLangModel::GetGram3Prob(TWordId word1, TWordId word2, TWordId word3) con
 template<typename T>
 TCount GetGramHashCount(T key,
                         const TPerfectHash& ph,
-                        const std::vector<std::pair<uint32_t, TCount>>& buckets)
+                        const std::vector<std::pair<uint16_t, TCount>>& buckets)
 {
     std::string s = DumpKey(key);
     uint32_t bucket = ph.Hash(s);
     assert(bucket < ph.BucketsNumber());
     const std::pair<uint32_t, TCount>& data = buckets[bucket];
-    if (data.first == CityHash32(&s[0], s.size())) {
+    if (data.first == CityHash16(s)) {
         return data.second;
     }
     return TCount();

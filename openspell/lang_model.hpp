@@ -15,7 +15,7 @@ namespace NOpenSpell {
 
 
 constexpr uint64_t LANG_MODEL_MAGIC_BYTE = 8559322735408079685L;
-constexpr uint16_t LANG_MODEL_VERSION = 7;
+constexpr uint16_t LANG_MODEL_VERSION = 8;
 constexpr double LANG_MODEL_DEFAULT_K = 0.05;
 
 using TWordId = uint32_t;
@@ -87,7 +87,7 @@ private:
     TWordId TotalWords = 0;
     TWordId VocabSize = 0;
     TTokenizer Tokenizer;
-    std::vector<std::pair<uint32_t, TCount>> Buckets;
+    std::vector<std::pair<uint16_t, TCount>> Buckets;
     TPerfectHash PerfectHash;
     uint64_t CheckSum;
 };
