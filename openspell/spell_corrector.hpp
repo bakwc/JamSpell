@@ -2,7 +2,7 @@
 
 #include "lang_model.hpp"
 
-#include <contrib/tsl/htrie_map.h>
+#include <contrib/tsl/htrie_set.h>
 
 namespace NOpenSpell {
 
@@ -16,13 +16,15 @@ public:
     std::wstring FixFragment(const std::wstring& text) const;
     std::wstring FixFragmentNormalized(const std::wstring& text) const;
 private:
-    NOpenSpell::TWords Edits(const NOpenSpell::TWord& word, bool lastLevel = true) const;
+    NOpenSpell::TWords Edits(const NOpenSpell::TWord& word) const;
     NOpenSpell::TWords Edits2(const NOpenSpell::TWord& word, bool lastLevel = true) const;
+    void Inserts(const std::wstring& w, NOpenSpell::TWords& result) const;
+    void Inserts2(const std::wstring& w, NOpenSpell::TWords& result) const;
     void PrepareCache();
 private:
     TLangModel LangModel;
-    tsl::htrie_map<char, std::vector<NOpenSpell::TWordId>> Deletes1;
-    tsl::htrie_map<char, std::vector<NOpenSpell::TWordId>> Deletes2;
+    tsl::htrie_set<char> Deletes1;
+    tsl::htrie_set<char> Deletes2;
 };
 
 

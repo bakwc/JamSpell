@@ -16,13 +16,14 @@ static std::vector<std::wstring> GetDeletes1(const std::wstring& w) {
     return results;
 }
 
-static std::vector<std::wstring> GetDeletes2(const std::wstring& w) {
-    std::vector<std::wstring> results;
+static std::vector<std::vector<std::wstring>> GetDeletes2(const std::wstring& w) {
+    std::vector<std::vector<std::wstring>> results;
     for (size_t i = 0; i < w.size(); ++i) {
         auto nw = w.substr(0, i) + w.substr(i+1);
         if (!nw.empty()) {
             std::vector<std::wstring> currResults = GetDeletes1(nw);
-            results.insert(results.end(), currResults.begin(), currResults.end());
+            currResults.push_back(nw);
+            results.push_back(currResults);
         }
     }
     return results;
@@ -60,7 +61,7 @@ TWords TSpellCorrector::GetCandidatesRaw(const TWords& sentence, size_t position
 
     bool firstLevel = true;
     if (candidates.empty()) {
-        candidates = Edits(w, false);
+        candidates = Edits(w);
         firstLevel = false;
     }
 
@@ -204,34 +205,30 @@ inline void AddVec(T& target, const T& source) {
     target.insert(target.end(), source.begin(), source.end());
 }
 
-TWords TSpellCorrector::Edits(const TWord& word, bool lastLevel) const {
+TWords TSpellCorrector::Edits(const TWord& word) const {
     std::wstring w(word.Ptr, word.Len);
     TWords result;
 
-    std::vector<std::wstring> cands = GetDeletes1(w);
-    cands.push_back(w);
-    if (!lastLevel) {
-        std::vector<std::wstring> deletes2 = GetDeletes2(w);
-        cands.insert(cands.end(), deletes2.begin(), deletes2.end());
-    }
+    std::vector<std::vector<std::wstring>> cands = GetDeletes2(w);
+    cands.push_back(std::vector<std::wstring>({w}));
 
-    for (auto&& w: cands) {
-        TWord c = LangModel.GetWord(w);
-        if (c.Ptr && c.Len) {
-            result.push_back(c);
-        }
-        std::string s = WideToUTF8(w);
-        auto it = Deletes1.find(s);
-        if (it != Deletes1.end()) {
-            for (auto c1:*it) {
-                result.push_back(LangModel.GetWordById(c1));
+    for (auto&& w1: cands) {
+        for (auto&& w: w1) {
+            TWord c = LangModel.GetWord(w);
+            if (c.Ptr && c.Len) {
+                result.push_back(c);
             }
-        }
-        if (!lastLevel) {
-            auto jt = Deletes2.find(s);
-            if (jt != Deletes2.end()) {
-                for (auto c1:*jt) {
-                    result.push_back(LangModel.GetWordById(c1));
+            std::string s = WideToUTF8(w);
+            {
+                auto it = Deletes1.find(s);
+                if (it != Deletes1.end()) {
+                    Inserts(w, result);
+                }
+            }
+            {
+                auto it = Deletes2.find(s);
+                if (it != Deletes2.end()) {
+                    Inserts2(w, result);
                 }
             }
         }
@@ -306,19 +303,44 @@ TWords TSpellCorrector::Edits2(const TWord& word, bool lastLevel) const {
     return result;
 }
 
+void TSpellCorrector::Inserts(const std::wstring& w, TWords& result) const {
+    for (size_t i = 0; i < w.size() + 1; ++i) {
+        for (auto&& ch: LangModel.GetAlphabet()) {
+            std::wstring s = w.substr(0, i) + ch + w.substr(i);
+            TWord c = LangModel.GetWord(s);
+            if (c.Ptr && c.Len) {
+                result.push_back(c);
+            }
+        }
+    }
+}
+
+void TSpellCorrector::Inserts2(const std::wstring& w, TWords& result) const {
+    for (size_t i = 0; i < w.size() + 1; ++i) {
+        for (auto&& ch: LangModel.GetAlphabet()) {
+            std::wstring s = w.substr(0, i) + ch + w.substr(i);
+            auto it = Deletes1.find(WideToUTF8(s));
+            if (it != Deletes1.end()) {
+                Inserts(s, result);
+            }
+        }
+    }
+}
+
 void TSpellCorrector::PrepareCache() {
     Deletes1.clear();
     Deletes2.clear();
     auto&& wordToId = LangModel.GetWordToId();
     for (auto&& it: wordToId) {
-        TWordId wid = LangModel.GetWordIdNoCreate(it.first);
-        auto deletes1 = GetDeletes1(it.first);
-        auto deletes2 = GetDeletes2(it.first);
-        for (auto&& w: deletes1) {
-            Deletes1[WideToUTF8(w)].push_back(wid);
-        }
-        for (auto&& w: deletes2) {
-            Deletes2[WideToUTF8(w)].push_back(wid);
+        //TWordId wid = LangModel.GetWordIdNoCreate(it.first);
+        auto deletes = GetDeletes2(it.first);
+        for (auto&& w1: deletes) {
+            Deletes1.insert(WideToUTF8(w1.back()));
+            //Deletes1[WideToUTF8(w1.back())].push_back(wid);
+            for (size_t i = 0; i < w1.size() - 1; ++i) {
+                //Deletes2[WideToUTF8(w1[i])].push_back(wid);
+                Deletes2.insert(WideToUTF8(w1[i]));
+            }
         }
     }
 }
