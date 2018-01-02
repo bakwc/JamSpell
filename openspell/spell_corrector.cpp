@@ -412,8 +412,8 @@ bool TSpellCorrector::SaveCache(const std::string& cacheFile) {
     NHandyPack::Dump(out, SPELL_CHECKER_CACHE_MAGIC_BYTE);
     NHandyPack::Dump(out, SPELL_CHECKER_CACHE_VERSION);
     NHandyPack::Dump(out, LangModel.GetCheckSum());
-    Deletes1->Save(out);
-    Deletes2->Save(out);
+    Deletes1->Dump(out);
+    Deletes2->Dump(out);
     NHandyPack::Dump(out, SPELL_CHECKER_CACHE_MAGIC_BYTE);
     return true;
 }

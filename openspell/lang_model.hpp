@@ -52,7 +52,7 @@ public:
     const std::unordered_set<wchar_t>& GetAlphabet() const;
     TSentences Tokenize(const std::wstring& text) const;
 
-    bool Save(const std::string& modelFileName) const;
+    bool Dump(const std::string& modelFileName) const;
     bool Load(const std::string& modelFileName);
     void Clear();
 

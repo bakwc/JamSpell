@@ -18,7 +18,7 @@ int Train(const std::string& alphabetFile,
 {
     TLangModel model;
     model.Train(datasetFile, alphabetFile);
-    model.Save(resultModelFile);
+    model.Dump(resultModelFile);
     return 0;
 }
 

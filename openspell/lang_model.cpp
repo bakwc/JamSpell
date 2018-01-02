@@ -172,7 +172,7 @@ double TLangModel::Score(const std::wstring& str) const {
     return Score(words);
 }
 
-bool TLangModel::Save(const std::string& modelFileName) const {
+bool TLangModel::Dump(const std::string& modelFileName) const {
     std::ofstream out(modelFileName, std::ios::binary);
     if (!out.is_open()) {
         return false;

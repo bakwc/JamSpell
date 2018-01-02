@@ -10,7 +10,7 @@ public:
     ~TBloomFilter();
     void Insert(const std::string& element);
     bool Contains(const std::string& element) const;
-    void Save(std::ostream& out) const;
+    void Dump(std::ostream& out) const;
     void Load(std::istream& in);
 private:
     struct Impl;

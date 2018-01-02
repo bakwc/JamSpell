@@ -12,7 +12,7 @@ struct TBloomFilter::Impl: public bloom_filter {
     Impl(const bloom_parameters& params): bloom_filter(params) {}
     Impl(const TBloomFilter::Impl& bloomFilter): bloom_filter(bloomFilter) {}
     ~Impl() {}
-    void Save(std::ostream& out) const {
+    void Dump(std::ostream& out) const {
         NHandyPack::Dump(out, salt_, bit_table_, salt_count_, table_size_,
                         projected_element_count_, inserted_element_count_,
                         random_seed_, desired_false_positive_probability_);
@@ -49,8 +49,8 @@ bool TBloomFilter::Contains(const std::string& element) const {
     return BloomFilter->contains(element);
 }
 
-void TBloomFilter::Save(std::ostream& out) const {
-    BloomFilter->Save(out);
+void TBloomFilter::Dump(std::ostream& out) const {
+    BloomFilter->Dump(out);
 }
 
 void TBloomFilter::Load(std::istream& in) {
