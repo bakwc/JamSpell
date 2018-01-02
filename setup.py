@@ -39,30 +39,12 @@ class CustomInstall(install):
         self.run_command('build_ext')
         self.do_egg_install()
 
-class Build_Ext_find_swig3(build_ext):
+class Swig3Ext(build_ext):
     def find_swig(self):
-        return get_swig_executable()
-
-def get_swig_executable():
-    # stolen from https://github.com/FEniCS/ffc/blob/master/setup.py
-    "Get SWIG executable"
-
-    # Find SWIG executable
-    swig_executable = None
-    swig_minimum_version = "3.0.2"
-    for executable in ["swig", "swig3.0"]:
-        swig_executable = find_executable(executable)
-        if swig_executable is not None:
-            # Check that SWIG version is ok
-            output = subprocess.check_output([swig_executable, "-version"]).decode('utf-8')
-            swig_version = re.findall(r"SWIG Version ([0-9.]+)", output)[0]
-            if LooseVersion(swig_version) >= LooseVersion(swig_minimum_version):
-                break
-            swig_executable = None
-    if swig_executable is None:
-        raise OSError("Unable to find SWIG version %s or higher." % swig_minimum_version)
-    print("Found SWIG: %s (version %s)" % (swig_executable, swig_version))
-    return swig_executable
+        swigBinary = find_executable('swig3.0') or find_executable('swig')
+        assert swigBinary is not None
+        assert subprocess.check_output([swigBinary, "-version"]).find('SWIG Version 3') != -1
+        return swigBinary
 
 VERSION = '0.0.5'
 
@@ -86,7 +68,7 @@ setup(
     cmdclass={
         'build': CustomBuild,
         'install': CustomInstall,
-        'build_ext': Build_Ext_find_swig3,
+        'build_ext': Swig3Ext,
     },
     include_package_data=True,
 )
