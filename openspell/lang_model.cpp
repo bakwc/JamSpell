@@ -102,10 +102,10 @@ bool TLangModel::Train(const std::string& fileName, const std::string& alphabetF
     std::vector<std::string> keys;
     keys.reserve(Grams1.size() + Grams2.size() + Grams3.size());
 
-    std::cerr << "ngrams1: " << Grams1.size() << "\n";
-    std::cerr << "ngrams2: " << Grams2.size() << "\n";
-    std::cerr << "ngrams3: " << Grams3.size() << "\n";
-    std::cerr << "total: " << Grams3.size() + Grams2.size() + Grams1.size() << "\n";
+    std::cerr << "[info] ngrams1: " << Grams1.size() << "\n";
+    std::cerr << "[info] ngrams2: " << Grams2.size() << "\n";
+    std::cerr << "[info] ngrams3: " << Grams3.size() << "\n";
+    std::cerr << "[info] total: " << Grams3.size() + Grams2.size() + Grams1.size() << "\n";
 
     PrepareNgramKeys(Grams1, keys);
     PrepareNgramKeys(Grams2, keys);
@@ -275,11 +275,6 @@ TSentences TLangModel::Tokenize(const std::wstring& text) const {
 }
 
 double TLangModel::GetGram1Prob(TWordId word) const {
-//    double countsGram1 = 0;
-//    auto it = Grams1.find(word);
-//    if (it != Grams1.end()) {
-//        countsGram1 = it->second;
-//    }
     double countsGram1 = GetGram1HashCount(word);
     countsGram1 += K;
     double vocabSize = Grams1.size();
@@ -287,43 +282,23 @@ double TLangModel::GetGram1Prob(TWordId word) const {
 }
 
 double TLangModel::GetGram2Prob(TWordId word1, TWordId word2) const {
-//    double countsGram1 = 0;
-//    auto it = Grams1.find(word1);
-//    if (it != Grams1.end()) {
-//        countsGram1 = it->second;
-//    }
     double countsGram1 = GetGram1HashCount(word1);
     double countsGram2 = GetGram2HashCount(word1, word2);
     if (countsGram2 > countsGram1) { // (hash collision)
         countsGram2 = 0;
     }
     countsGram1 += TotalWords;
-//    double countsGram2 = 0;
-//    auto jt = Grams2.find(TGram2Key(word1, word2));
-//    if (jt != Grams2.end()) {
-//        countsGram2 = jt->second;
-//    }
     countsGram2 += K;
     return countsGram2 / countsGram1;
 }
 
 double TLangModel::GetGram3Prob(TWordId word1, TWordId word2, TWordId word3) const {
-//    double countsGram2 = 0;
-//    auto it = Grams2.find(TGram2Key(word1, word2));
-//    if (it != Grams2.end()) {
-//        countsGram2 = it->second;
-//    }
     double countsGram2 = GetGram2HashCount(word1, word2);
     double countsGram3 = GetGram3HashCount(word1, word2, word3);
     if (countsGram3 > countsGram2) { // hash collision
         countsGram3 = 0;
     }
     countsGram2 += TotalWords;
-//    double countsGram3 = 0;
-//    auto jt = Grams3.find(TGram3Key(word1, word2, word3));
-//    if (jt != Grams3.end()) {
-//        countsGram3 = jt->second;
-//    }
     countsGram3 += K;
     return countsGram3 / countsGram2;
 }

@@ -332,13 +332,10 @@ void TSpellCorrector::PrepareCache() {
     Deletes2.clear();
     auto&& wordToId = LangModel.GetWordToId();
     for (auto&& it: wordToId) {
-        //TWordId wid = LangModel.GetWordIdNoCreate(it.first);
         auto deletes = GetDeletes2(it.first);
         for (auto&& w1: deletes) {
             Deletes1.insert(WideToUTF8(w1.back()));
-            //Deletes1[WideToUTF8(w1.back())].push_back(wid);
             for (size_t i = 0; i < w1.size() - 1; ++i) {
-                //Deletes2[WideToUTF8(w1[i])].push_back(wid);
                 Deletes2.insert(WideToUTF8(w1[i]));
             }
         }
