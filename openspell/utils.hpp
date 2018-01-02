@@ -5,7 +5,7 @@
 #include <unordered_set>
 #include <locale>
 
-#include <contrib/saveload/saveload.hpp>
+#include <contrib/handypack/handypack.hpp>
 
 namespace NOpenSpell {
 
@@ -47,7 +47,7 @@ public:
 
     const std::unordered_set<wchar_t>& GetAlphabet() const;
 
-    SAVELOAD(Alphabet)
+    HANDYPACK(Alphabet)
 private:
     std::unordered_set<wchar_t> Alphabet;
     std::locale Locale;

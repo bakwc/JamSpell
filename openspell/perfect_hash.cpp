@@ -1,13 +1,13 @@
-#include <contrib/saveload/saveload.hpp>
+#include <contrib/handypack/handypack.hpp>
 #include <contrib/phf/phf.h>
 
 #include "perfect_hash.hpp"
 
 namespace NOpenSpell {
 
-void TPerfectHash::Save(std::ostream& out) const {
+void TPerfectHash::Dump(std::ostream& out) const {
     const phf& perfHash = *(const phf*)Phf;
-    NSaveLoad::Save(out, perfHash.d_max,
+    NHandyPack::Dump(out, perfHash.d_max,
                          perfHash.g_op,
                          perfHash.m,
                          perfHash.r,
@@ -19,7 +19,7 @@ void TPerfectHash::Save(std::ostream& out) const {
 void TPerfectHash::Load(std::istream& in) {
     Phf = new phf();
     phf& perfHash = *(phf*)Phf;
-    NSaveLoad::Load(in, perfHash.d_max,
+    NHandyPack::Load(in, perfHash.d_max,
                         perfHash.g_op,
                         perfHash.m,
                         perfHash.r,

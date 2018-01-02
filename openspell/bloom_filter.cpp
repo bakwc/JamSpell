@@ -3,7 +3,7 @@
 #include "bloom_filter.hpp"
 
 #include <contrib/bloom/bloom_filter.hpp>
-#include <contrib/saveload/saveload.hpp>
+#include <contrib/handypack/handypack.hpp>
 
 namespace NOpenSpell {
 
@@ -13,12 +13,12 @@ struct TBloomFilter::Impl: public bloom_filter {
     Impl(const TBloomFilter::Impl& bloomFilter): bloom_filter(bloomFilter) {}
     ~Impl() {}
     void Save(std::ostream& out) const {
-        NSaveLoad::Save(out, salt_, bit_table_, salt_count_, table_size_,
+        NHandyPack::Dump(out, salt_, bit_table_, salt_count_, table_size_,
                         projected_element_count_, inserted_element_count_,
                         random_seed_, desired_false_positive_probability_);
     }
     void Load(std::istream& in) {
-        NSaveLoad::Load(in, salt_, bit_table_, salt_count_, table_size_,
+        NHandyPack::Load(in, salt_, bit_table_, salt_count_, table_size_,
                         projected_element_count_, inserted_element_count_,
                         random_seed_, desired_false_positive_probability_);
     }

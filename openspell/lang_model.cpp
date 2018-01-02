@@ -16,7 +16,7 @@ template<typename T>
 std::string DumpKey(const T& key) {
     std::stringbuf buf;
     std::ostream out(&buf);
-    NSaveLoad::Save(out, key);
+    NHandyPack::Dump(out, key);
     return buf.str();
 }
 
@@ -133,7 +133,7 @@ bool TLangModel::Train(const std::string& fileName, const std::string& alphabetF
 
     std::stringbuf checkSumBuf;
     std::ostream checkSumOut(&checkSumBuf);
-    NSaveLoad::Save(checkSumOut, trainStarTime, grams1.size(), grams2.size(),
+    NHandyPack::Dump(checkSumOut, trainStarTime, grams1.size(), grams2.size(),
                     grams3.size(), Buckets.size(), trainText.size(), sentences.size());
     std::string checkSumStr = checkSumBuf.str();
     CheckSum = CityHash64(&checkSumStr[0], checkSumStr.size());
@@ -177,10 +177,10 @@ bool TLangModel::Save(const std::string& modelFileName) const {
     if (!out.is_open()) {
         return false;
     }
-    NSaveLoad::Save(out, LANG_MODEL_MAGIC_BYTE);
-    NSaveLoad::Save(out, LANG_MODEL_VERSION);
-    Save(out);
-    NSaveLoad::Save(out, LANG_MODEL_MAGIC_BYTE);
+    NHandyPack::Dump(out, LANG_MODEL_MAGIC_BYTE);
+    NHandyPack::Dump(out, LANG_MODEL_VERSION);
+    Dump(out);
+    NHandyPack::Dump(out, LANG_MODEL_MAGIC_BYTE);
     return true;
 }
 
@@ -191,17 +191,17 @@ bool TLangModel::Load(const std::string& modelFileName) {
     }
     uint16_t version = 0;
     uint64_t magicByte = 0;
-    NSaveLoad::Load(in, magicByte);
+    NHandyPack::Load(in, magicByte);
     if (magicByte != LANG_MODEL_MAGIC_BYTE) {
         return false;
     }
-    NSaveLoad::Load(in, version);
+    NHandyPack::Load(in, version);
     if (version != LANG_MODEL_VERSION) {
         return false;
     }
     Load(in);
     magicByte = 0;
-    NSaveLoad::Load(in, magicByte);
+    NHandyPack::Load(in, magicByte);
     if (magicByte != LANG_MODEL_MAGIC_BYTE) {
         Clear();
         return false;

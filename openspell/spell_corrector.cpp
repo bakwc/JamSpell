@@ -374,16 +374,16 @@ bool TSpellCorrector::LoadCache(const std::string& cacheFile) {
     }
     uint16_t version = 0;
     uint64_t magicByte = 0;
-    NSaveLoad::Load(in, magicByte);
+    NHandyPack::Load(in, magicByte);
     if (magicByte != SPELL_CHECKER_CACHE_MAGIC_BYTE) {
         return false;
     }
-    NSaveLoad::Load(in, version);
+    NHandyPack::Load(in, version);
     if (version != SPELL_CHECKER_CACHE_VERSION) {
         return false;
     }
     uint64_t checkSum = 0;
-    NSaveLoad::Load(in, checkSum);
+    NHandyPack::Load(in, checkSum);
     if (checkSum != LangModel.GetCheckSum()) {
         return false;
     }
@@ -392,7 +392,7 @@ bool TSpellCorrector::LoadCache(const std::string& cacheFile) {
     deletes1->Load(in);
     deletes2->Load(in);
     magicByte = 0;
-    NSaveLoad::Load(in, magicByte);
+    NHandyPack::Load(in, magicByte);
     if (magicByte != SPELL_CHECKER_CACHE_MAGIC_BYTE) {
         return false;
     }
@@ -409,12 +409,12 @@ bool TSpellCorrector::SaveCache(const std::string& cacheFile) {
     if (!Deletes1 || !Deletes2) {
         return false;
     }
-    NSaveLoad::Save(out, SPELL_CHECKER_CACHE_MAGIC_BYTE);
-    NSaveLoad::Save(out, SPELL_CHECKER_CACHE_VERSION);
-    NSaveLoad::Save(out, LangModel.GetCheckSum());
+    NHandyPack::Dump(out, SPELL_CHECKER_CACHE_MAGIC_BYTE);
+    NHandyPack::Dump(out, SPELL_CHECKER_CACHE_VERSION);
+    NHandyPack::Dump(out, LangModel.GetCheckSum());
     Deletes1->Save(out);
     Deletes2->Save(out);
-    NSaveLoad::Save(out, SPELL_CHECKER_CACHE_MAGIC_BYTE);
+    NHandyPack::Dump(out, SPELL_CHECKER_CACHE_MAGIC_BYTE);
     return true;
 }
 

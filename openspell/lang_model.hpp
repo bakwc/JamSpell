@@ -6,7 +6,7 @@
 #include <string>
 #include <limits>
 
-#include <contrib/saveload/saveload.hpp>
+#include <contrib/handypack/handypack.hpp>
 #include "utils.hpp"
 #include "perfect_hash.hpp"
 
@@ -65,8 +65,8 @@ public:
 
     uint64_t GetCheckSum() const;
 
-    SAVELOAD(WordToId, LastWordID, TotalWords, VocabSize,
-             PerfectHash, Buckets, Tokenizer, CheckSum)
+    HANDYPACK(WordToId, LastWordID, TotalWords, VocabSize,
+              PerfectHash, Buckets, Tokenizer, CheckSum)
 private:
     TIdSentences ConvertToIds(const TSentences& sentences);
 

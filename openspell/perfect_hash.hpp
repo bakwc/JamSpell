@@ -9,7 +9,7 @@ public:
     TPerfectHash();
     TPerfectHash(const TPerfectHash& other) = delete;
     ~TPerfectHash();
-    void Save(std::ostream& out) const;
+    void Dump(std::ostream& out) const;
     void Load(std::istream& in);
     void Init(const std::vector<std::string>& keys);
     uint32_t Hash(const std::string& value) const;
