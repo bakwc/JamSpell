@@ -1,7 +1,7 @@
 #include <contrib/saveload/saveload.hpp>
 #include <contrib/phf/phf.h>
 
-#include "phf_utils.hpp"
+#include "perfect_hash.hpp"
 
 namespace NOpenSpell {
 

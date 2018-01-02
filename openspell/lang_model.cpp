@@ -6,9 +6,7 @@
 #include <ostream>
 
 #include "lang_model.hpp"
-#include "phf_utils.hpp"
 
-#include <contrib/phf/phf.h>
 #include <contrib/cityhash/city.h>
 
 

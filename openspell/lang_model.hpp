@@ -8,7 +8,7 @@
 
 #include <contrib/saveload/saveload.hpp>
 #include "utils.hpp"
-#include "phf_utils.hpp"
+#include "perfect_hash.hpp"
 
 
 namespace NOpenSpell {
@@ -62,7 +62,6 @@ public:
     TWord GetWordById(TWordId wid) const;
     TCount GetWordCount(TWordId wid) const;
 
-    //SAVELOAD(WordToId, LastWordID, TotalWords, Grams1, Grams2, Grams3, Tokenizer)
     SAVELOAD(WordToId, LastWordID, TotalWords, PerfectHash, Buckets, Tokenizer)
 private:
     TIdSentences ConvertToIds(const TSentences& sentences);
