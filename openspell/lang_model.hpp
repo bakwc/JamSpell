@@ -8,16 +8,18 @@
 
 #include <contrib/saveload/saveload.hpp>
 #include "utils.hpp"
+#include "phf_utils.hpp"
 
 
 namespace NOpenSpell {
 
 const uint64_t MAGIC_BYTE = 8559322735408079685L;
-const uint16_t VERSION = 5;
+const uint16_t VERSION = 6;
 constexpr double DEFAULT_K = 0.05;
 
 using TWordId = uint32_t;
 using TCount = uint32_t;
+
 using TGram1Key = TWordId;
 using TGram2Key = std::pair<TWordId, TWordId>;
 using TGram3Key = std::tuple<TWordId, TWordId, TWordId>;
@@ -58,14 +60,20 @@ public:
     TWordId GetWordId(const TWord& word);
     TWordId GetWordIdNoCreate(const TWord& word) const;
     TWord GetWordById(TWordId wid) const;
+    TCount GetWordCount(TWordId wid) const;
 
-    SAVELOAD(WordToId, LastWordID, TotalWords, Grams1, Grams2, Grams3, Tokenizer)
+    //SAVELOAD(WordToId, LastWordID, TotalWords, Grams1, Grams2, Grams3, Tokenizer)
+    SAVELOAD(WordToId, LastWordID, TotalWords, PerfectHash, Buckets, Tokenizer)
 private:
     TIdSentences ConvertToIds(const TSentences& sentences);
 
     double GetGram1Prob(TWordId word) const;
     double GetGram2Prob(TWordId word1, TWordId word2) const;
     double GetGram3Prob(TWordId word1, TWordId word2, TWordId word3) const;
+
+    TCount GetGram1HashCount(TWordId word) const;
+    TCount GetGram2HashCount(TWordId word1, TWordId word2) const;
+    TCount GetGram3HashCount(TWordId word1, TWordId word2, TWordId word3) const;
 
 private:
     const TWordId UnknownWordId = std::numeric_limits<TWordId>::max();
@@ -78,6 +86,8 @@ private:
     std::unordered_map<TGram2Key, TCount, TGram2KeyHash> Grams2;
     std::unordered_map<TGram3Key, TCount, TGram3KeyHash> Grams3;
     TTokenizer Tokenizer;
+    std::vector<std::pair<uint32_t, TCount>> Buckets;
+    TPerfectHash PerfectHash;
 };
 
 

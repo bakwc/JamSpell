@@ -203,7 +203,7 @@ static inline void Save(std::ostream& out, const T& t) {
 }
 
 template<class T, class... Args>
-static inline void Save(std::ostream& out, T first, Args... args) {
+static inline void Save(std::ostream& out, const T& first, const Args&... args) {
     NSaveLoad::Save(out, first);
     NSaveLoad::Save(out, args...);
 }
