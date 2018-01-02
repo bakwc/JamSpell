@@ -13,7 +13,7 @@ public:
     void Save(std::ostream& out) const;
     void Load(std::istream& in);
 private:
-    class Impl;
+    struct Impl;
     std::unique_ptr<Impl> BloomFilter;
 };
 
