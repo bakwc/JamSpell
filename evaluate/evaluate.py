@@ -104,7 +104,7 @@ def evaluateCorrector(correctorName, corrector, originalSentences, erroredSenten
     topNtotalErrors = 0
     topNfixed = 0
 
-    erroredSentences = copy.deepcopy(erroredSentences)
+    #erroredSentences = copy.deepcopy(erroredSentences)
 
     lastTime = time.time()
     n = 0

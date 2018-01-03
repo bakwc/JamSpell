@@ -100,6 +100,22 @@ bool TLangModel::Train(const std::string& fileName, const std::string& alphabetF
         }
     }
 
+    std::unordered_map<TWordId, std::unordered_set<TWordId>> uniqueContext;
+    for (auto&& it: grams2) {
+        TGram2Key k = it.first;
+        TWordId prevWord = k.first;
+        TWordId word = k.second;
+        uniqueContext[word].insert(prevWord);
+    }
+    grams1.clear();
+    UniqueBigrams = 0;
+    for (auto&& it: uniqueContext) {
+        grams1[it.first] = it.second.size();
+        UniqueBigrams += it.second.size();
+    }
+
+    std::cerr << "[info] unique bigrams: " << " " << UniqueBigrams << " " << grams2.size() << "\n";
+
     VocabSize = grams1.size();
 
     std::cerr << "[info] generating keys" << std::endl;
@@ -142,6 +158,9 @@ bool TLangModel::Train(const std::string& fileName, const std::string& alphabetF
 
 double TLangModel::Score(const TWords& words) const {
     TWordIds sentence;
+    sentence.push_back(UnknownWordId);
+    sentence.push_back(UnknownWordId);
+
     for (auto&& w: words) {
         sentence.push_back(GetWordIdNoCreate(w));
     }
@@ -149,14 +168,12 @@ double TLangModel::Score(const TWords& words) const {
         return std::numeric_limits<double>::min();
     }
 
-    sentence.push_back(UnknownWordId);
-    sentence.push_back(UnknownWordId);
-
     double result = 0;
-    for (size_t i = 0; i < sentence.size() - 2; ++i) {
-        result += log(GetGram1Prob(sentence[i]));
-        result += log(GetGram2Prob(sentence[i], sentence[i + 1]));
-        result += log(GetGram3Prob(sentence[i], sentence[i + 1], sentence[i + 2]));
+    for (size_t i = 2; i < sentence.size(); ++i) {
+        //result += log(GetGram1Prob(sentence[i]));
+        //result += log(GetGram2Prob(sentence[i], sentence[i + 1]));
+        //result += log(GetGram3Prob(sentence[i], sentence[i + 1], sentence[i + 2]));
+        result += log(PAbsDiscount3(sentence[i-2], sentence[i - 1], sentence[i]));
     }
     return result;
 }
@@ -321,6 +338,36 @@ double TLangModel::GetGram3Prob(TWordId word1, TWordId word2, TWordId word3) con
     countsGram2 += TotalWords;
     countsGram3 += K;
     return countsGram3 / countsGram2;
+}
+
+double TLangModel::PAbsDiscount1(TWordId word1) const {
+    double countsGram1 = GetGram1HashCount(word1);
+    //double
+    double res = std::max(countsGram1 - 0.1, 0.01) / UniqueBigrams;
+    //std::cerr << "AbsDiscount1: " << res << "\n";
+    return res;
+}
+
+double TLangModel::PAbsDiscount2(TWordId word1, TWordId word2) const {
+    double countsGram1 = std::max(TCount(1), GetGram1HashCount(word1));
+    double countsGram2 = GetGram2HashCount(word1, word2);
+    if (countsGram2 > countsGram1) { // hash collision
+        countsGram2 = 0;
+    }
+    double res = std::max(countsGram2 - 0.9, 0.0) / countsGram1 + 0.5 * PAbsDiscount1(word2);
+    //std::cerr << "AbsDiscount2: " << res << "\n";
+    return res;
+}
+
+double TLangModel::PAbsDiscount3(TWordId word1, TWordId word2, TWordId word3) const {
+    double countsGram2 = std::max(TCount(1), GetGram2HashCount(word1, word2));
+    double countsGram3 = GetGram3HashCount(word1, word2, word3);
+    if (countsGram3 > countsGram2) { // hash collision
+        countsGram3 = 0;
+    }
+    double res = std::max(countsGram3 - 0.9, 0.0) / countsGram2 + 0.3 * PAbsDiscount2(word2, word3);
+    //std::cerr << "AbsDiscount3: " << res << "\n";
+    return res;
 }
 
 template<typename T>

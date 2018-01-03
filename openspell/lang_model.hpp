@@ -15,7 +15,7 @@ namespace NOpenSpell {
 
 
 constexpr uint64_t LANG_MODEL_MAGIC_BYTE = 8559322735408079685L;
-constexpr uint16_t LANG_MODEL_VERSION = 8;
+constexpr uint16_t LANG_MODEL_VERSION = 9;
 constexpr double LANG_MODEL_DEFAULT_K = 0.05;
 
 using TWordId = uint32_t;
@@ -66,7 +66,7 @@ public:
     uint64_t GetCheckSum() const;
 
     HANDYPACK(WordToId, LastWordID, TotalWords, VocabSize,
-              PerfectHash, Buckets, Tokenizer, CheckSum)
+              PerfectHash, Buckets, Tokenizer, CheckSum, UniqueBigrams)
 private:
     TIdSentences ConvertToIds(const TSentences& sentences);
 
@@ -78,6 +78,10 @@ private:
     TCount GetGram2HashCount(TWordId word1, TWordId word2) const;
     TCount GetGram3HashCount(TWordId word1, TWordId word2, TWordId word3) const;
 
+    double PAbsDiscount1(TWordId word1) const;
+    double PAbsDiscount2(TWordId word1, TWordId word2) const;
+    double PAbsDiscount3(TWordId word1, TWordId word2, TWordId word3) const;
+
 private:
     const TWordId UnknownWordId = std::numeric_limits<TWordId>::max();
     double K = LANG_MODEL_DEFAULT_K;
@@ -85,6 +89,7 @@ private:
     std::vector<const std::wstring*> IdToWord;
     TWordId LastWordID = 0;
     TWordId TotalWords = 0;
+    TWordId UniqueBigrams = 0;
     TWordId VocabSize = 0;
     TTokenizer Tokenizer;
     std::vector<std::pair<uint16_t, TCount>> Buckets;
