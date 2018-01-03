@@ -15,7 +15,7 @@ namespace NOpenSpell {
 
 
 constexpr uint64_t LANG_MODEL_MAGIC_BYTE = 8559322735408079685L;
-constexpr uint16_t LANG_MODEL_VERSION = 8;
+constexpr uint16_t LANG_MODEL_VERSION = 11;
 constexpr double LANG_MODEL_DEFAULT_K = 0.05;
 
 using TWordId = uint32_t;
@@ -66,7 +66,7 @@ public:
     uint64_t GetCheckSum() const;
 
     HANDYPACK(WordToId, LastWordID, TotalWords, VocabSize,
-              PerfectHash, Buckets, Tokenizer, CheckSum)
+              PerfectHash, Buckets, NPlus1, NPlus2, Tokenizer, CheckSum)
 private:
     TIdSentences ConvertToIds(const TSentences& sentences);
 
@@ -78,6 +78,10 @@ private:
     TCount GetGram2HashCount(TWordId word1, TWordId word2) const;
     TCount GetGram3HashCount(TWordId word1, TWordId word2, TWordId word3) const;
 
+    double PAbsDiscount1(TWordId word1) const;
+    double PAbsDiscount2(TWordId word1, TWordId word2) const;
+    double PAbsDiscount3(TWordId word1, TWordId word2, TWordId word3) const;
+
 private:
     const TWordId UnknownWordId = std::numeric_limits<TWordId>::max();
     double K = LANG_MODEL_DEFAULT_K;
@@ -88,6 +92,8 @@ private:
     TWordId VocabSize = 0;
     TTokenizer Tokenizer;
     std::vector<std::pair<uint16_t, TCount>> Buckets;
+    std::unordered_map<TWordId, TCount> NPlus1;
+    std::unordered_map<TGram2Key, TCount, TGram2KeyHash> NPlus2;
     TPerfectHash PerfectHash;
     uint64_t CheckSum;
 };

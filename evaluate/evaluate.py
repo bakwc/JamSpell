@@ -104,7 +104,7 @@ def evaluateCorrector(correctorName, corrector, originalSentences, erroredSenten
     topNtotalErrors = 0
     topNfixed = 0
 
-    erroredSentences = copy.deepcopy(erroredSentences)
+    #erroredSentences = copy.deepcopy(erroredSentences)
 
     lastTime = time.time()
     n = 0
@@ -156,7 +156,7 @@ def evaluateCorrector(correctorName, corrector, originalSentences, erroredSenten
             if maxWords is not None and n >= maxWords:
                 break
 
-            # if originalWord != fixedWord:
+            # if originalWord != fixedWord and originalWord != erroredWord and originalWord in fixedCandidates:
             #    print '%s (%s=>%s):\n%s\n\n' % (originalWord, erroredWord, fixedWord, ' '.join(erroredText))
 
         if maxWords is not None and n >= maxWords:
