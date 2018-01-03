@@ -4,7 +4,7 @@
 import random
 import bisect
 from scipy.stats import binom
-from utils import ALPHABET
+import utils
 
 #todo: calculate correct typo probabilities
 
@@ -36,11 +36,11 @@ def typoReplace(word):
     if not word:
         return word
     l = random.randint(0, len(word) - 1)
-    return word[:l] + random.choice(ALPHABET) + word[l + 1:]
+    return word[:l] + random.choice(utils.ALPHABET) + word[l + 1:]
 
 def typoInsert(word):
     l = random.randint(0, len(word))
-    return word[:l] + random.choice(ALPHABET) + word[l:]
+    return word[:l] + random.choice(utils.ALPHABET) + word[l:]
 
 def typoRemove(word):
     if not word:
