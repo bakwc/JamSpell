@@ -15,7 +15,7 @@ namespace NOpenSpell {
 
 
 constexpr uint64_t LANG_MODEL_MAGIC_BYTE = 8559322735408079685L;
-constexpr uint16_t LANG_MODEL_VERSION = 11;
+constexpr uint16_t LANG_MODEL_VERSION = 12;
 constexpr double LANG_MODEL_DEFAULT_K = 0.05;
 
 using TWordId = uint32_t;
@@ -65,7 +65,7 @@ public:
 
     uint64_t GetCheckSum() const;
 
-    HANDYPACK(WordToId, LastWordID, TotalWords, VocabSize,
+    HANDYPACK(WordToId, LastWordID, TotalWords, VocabSize, NPlusLowOrder,
               PerfectHash, Buckets, NPlus1, NPlus2, Tokenizer, CheckSum)
 private:
     TIdSentences ConvertToIds(const TSentences& sentences);
@@ -92,6 +92,7 @@ private:
     TWordId VocabSize = 0;
     TTokenizer Tokenizer;
     std::vector<std::pair<uint16_t, TCount>> Buckets;
+    std::unordered_map<TWordId, TCount> NPlusLowOrder;
     std::unordered_map<TWordId, TCount> NPlus1;
     std::unordered_map<TGram2Key, TCount, TGram2KeyHash> NPlus2;
     TPerfectHash PerfectHash;

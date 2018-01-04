@@ -125,8 +125,8 @@ bool TLangModel::Train(const std::string& fileName, const std::string& alphabetF
         }
     }
 
+    std::cerr << "[info] generating low order\n";
 
-    /*
     std::unordered_map<TWordId, std::unordered_set<TWordId>> uniqueContext;
     for (auto&& it: grams2) {
         TGram2Key k = it.first;
@@ -134,15 +134,9 @@ bool TLangModel::Train(const std::string& fileName, const std::string& alphabetF
         TWordId word = k.second;
         uniqueContext[word].insert(prevWord);
     }
-    grams1.clear();
-    UniqueBigrams = 0;
     for (auto&& it: uniqueContext) {
-        grams1[it.first] = it.second.size();
-        UniqueBigrams += it.second.size();
+        NPlusLowOrder[it.first] = it.second.size();
     }
-
-    std::cerr << "[info] unique bigrams: " << " " << UniqueBigrams << " " << grams2.size() << "\n";
-    */
 
     VocabSize = grams1.size();
 
@@ -378,10 +372,16 @@ inline double GetD(double counts) {
 }
 
 double TLangModel::PAbsDiscount1(TWordId word1) const {
-    double countsGram1 = GetGram1HashCount(word1);
+    //double countsGram1 = GetGram1HashCount(word1);
     //double
-    double res = std::max(countsGram1 - GetD(countsGram1), 0.01) / TotalWords;
+    //double res = std::max(countsGram1 - GetD(countsGram1), 0.01) / TotalWords;
     //std::cerr << "AbsDiscount1: " << res << "\n";
+    double countsGram1 = 0.0;
+    auto it = NPlusLowOrder.find(word1);
+    if (it != NPlusLowOrder.end()) {
+        countsGram1 = it->second;
+    }
+    double res = std::max(countsGram1 - GetD(countsGram1), 0.01) / NPlus2.size();
     return res;
 }
 

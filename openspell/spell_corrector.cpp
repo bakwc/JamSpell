@@ -103,7 +103,7 @@ TWords TSpellCorrector::GetCandidatesRaw(const TWords& sentence, size_t position
         scored.Score = LangModel.Score(candSentence);
         if (!(scored.Word == w)) {
             if (firstLevel) {
-                scored.Score -= 12;
+                scored.Score *= 11;
             } else {
                 scored.Score *= 50.0;
             }
