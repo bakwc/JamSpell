@@ -108,12 +108,12 @@ TWords TSpellCorrector::GetCandidatesRaw(const TWords& sentence, size_t position
         if (!(scored.Word == w)) {
             if (knownWord) {
                 if (firstLevel) {
-                    scored.Score -= 20;
+                    scored.Score -= KnownWordsPenalty;
                 } else {
                     scored.Score *= 50.0;
                 }
             } else {
-                scored.Score -= 5;
+                scored.Score -= UnknownWordsPenalty;
             }
         }
         scoredCandidates.push_back(scored);
@@ -211,6 +211,11 @@ std::wstring TSpellCorrector::FixFragmentNormalized(const std::wstring& text) co
         result.resize(result.size() - 1);
     }
     return result;
+}
+
+void TSpellCorrector::SetPenalty(double knownWordsPenaly, double unknownWordsPenalty) {
+    KnownWordsPenalty = knownWordsPenaly;
+    UnknownWordsPenalty = unknownWordsPenalty;
 }
 
 template<typename T>

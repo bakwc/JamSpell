@@ -16,6 +16,7 @@ public:
     std::vector<std::wstring> GetCandidates(const std::vector<std::wstring>& sentence, size_t position) const;
     std::wstring FixFragment(const std::wstring& text) const;
     std::wstring FixFragmentNormalized(const std::wstring& text) const;
+    void SetPenalty(double knownWordsPenaly, double unknownWordsPenalty);
 private:
     NOpenSpell::TWords Edits(const NOpenSpell::TWord& word) const;
     NOpenSpell::TWords Edits2(const NOpenSpell::TWord& word, bool lastLevel = true) const;
@@ -28,6 +29,8 @@ private:
     TLangModel LangModel;
     std::unique_ptr<TBloomFilter> Deletes1;
     std::unique_ptr<TBloomFilter> Deletes2;
+    double KnownWordsPenalty = 20.0;
+    double UnknownWordsPenalty = 5.0;
 };
 
 
