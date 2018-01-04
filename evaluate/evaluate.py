@@ -144,7 +144,7 @@ def evaluateCorrector(correctorName, corrector, originalSentences, erroredSenten
             if originalWord not in fixedWords:
                 topNtotalErrors += 1
 
-            if sentID % 1 == 0 and pos and time.time() - lastTime > 4.0:
+            if sentID % 50 == 0 and pos and time.time() - lastTime > 4.0:
                 progress = float(sentID) / len(originalSentences)
                 err_rate = float(totalErrors) / n
                 if maxWords is not None:

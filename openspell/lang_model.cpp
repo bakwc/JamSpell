@@ -192,9 +192,6 @@ double TLangModel::Score(const TWords& words) const {
 
     double result = 0;
     for (size_t i = 2; i < sentence.size(); ++i) {
-        //result += log(GetGram1Prob(sentence[i]));
-        //result += log(GetGram2Prob(sentence[i], sentence[i + 1]));
-        //result += log(GetGram3Prob(sentence[i], sentence[i + 1], sentence[i + 2]));
         result += log(PAbsDiscount3(sentence[i-2], sentence[i - 1], sentence[i]));
     }
     return result;
@@ -364,24 +361,20 @@ double TLangModel::GetGram3Prob(TWordId word1, TWordId word2, TWordId word3) con
 
 inline double GetD(double counts) {
     if (counts < 1.1) {
-        return 0.99;
+        return 0.1;
     } else if (counts < 2.1) {
-        return 0.95;
+        return 0.9;
     }
     return 0.9;
 }
 
 double TLangModel::PAbsDiscount1(TWordId word1) const {
-    //double countsGram1 = GetGram1HashCount(word1);
-    //double
-    //double res = std::max(countsGram1 - GetD(countsGram1), 0.01) / TotalWords;
-    //std::cerr << "AbsDiscount1: " << res << "\n";
     double countsGram1 = 0.0;
     auto it = NPlusLowOrder.find(word1);
     if (it != NPlusLowOrder.end()) {
         countsGram1 = it->second;
     }
-    double res = std::max(countsGram1 - GetD(countsGram1), 0.01) / NPlus2.size();
+    double res = std::max(countsGram1 - 0.9, 0.01) / NPlus2.size();
     return res;
 }
 
@@ -391,7 +384,7 @@ double TLangModel::PAbsDiscount2(TWordId word1, TWordId word2) const {
     if (countsGram2 > countsGram1) { // hash collision
         countsGram2 = 0;
     }
-    double d = 0.6;
+    double d = GetD(countsGram2);
 
     auto it = NPlus1.find(word1);
     double nplus = 1.0;
@@ -412,7 +405,7 @@ double TLangModel::PAbsDiscount3(TWordId word1, TWordId word2, TWordId word3) co
         countsGram3 = 0;
     }
 
-    double d = 0.7;
+    double d = 0.9;
 
     auto it = NPlus2.find(TGram2Key(word1, word2));
     double nplus = 1.0;
@@ -422,10 +415,6 @@ double TLangModel::PAbsDiscount3(TWordId word1, TWordId word2, TWordId word3) co
 
     double lambda = d * nplus / countsGram2;
     double res = std::max(countsGram3 - d, 0.0) / countsGram2 + lambda * PAbsDiscount2(word2, word3);
-
-
-    //double res = std::max(countsGram3 - GetD(countsGram3), 0.0) / countsGram2 + 0.3 * PAbsDiscount2(word2, word3);
-    //std::cerr << "AbsDiscount3: " << res << "\n";
     return res;
 }
 
