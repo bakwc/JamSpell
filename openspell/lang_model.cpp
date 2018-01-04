@@ -27,8 +27,26 @@ void PrepareNgramKeys(const T& grams, std::vector<std::string>& keys) {
     }
 }
 
+static const uint32_t MAX_REAL_NUM = 268435456;
+static const uint32_t MAX_AVAILABLE_NUM = 65536;
+
+uint16_t PackInt32(uint32_t num) {
+    double r = double(num) / double(MAX_REAL_NUM);
+    assert(r >= 0.0 && r <= 1.0);
+    r = pow(r, 0.2);
+    r *= MAX_AVAILABLE_NUM;
+    return uint16_t(r);
+}
+
+uint32_t UnpackInt32(uint16_t num) {
+    double r = double(num) / double(MAX_AVAILABLE_NUM);
+    r = pow(r, 5.0);
+    r *= MAX_REAL_NUM;
+    return uint32_t(ceil(r));
+}
+
 template<typename T>
-void InitializeBuckets(const T& grams, TPerfectHash& ph, std::vector<std::pair<uint16_t, TCount>>& buckets) {
+void InitializeBuckets(const T& grams, TPerfectHash& ph, std::vector<std::pair<uint16_t, uint16_t>>& buckets) {
     for (auto&& it: grams) {
         std::string key = DumpKey(it.first);
         uint32_t bucket = ph.Hash(key);
@@ -36,14 +54,15 @@ void InitializeBuckets(const T& grams, TPerfectHash& ph, std::vector<std::pair<u
             std::cerr << bucket << " " << buckets.size() << "\n";
         }
         assert(bucket < buckets.size());
-        std::pair<uint32_t, TCount> data;
+        std::pair<uint16_t, uint16_t> data;
         data.first = CityHash16(key);
-        data.second = it.second;
+        data.second = PackInt32(it.second);
         buckets[bucket] = data;
     }
 }
 
 bool TLangModel::Train(const std::string& fileName, const std::string& alphabetFile) {
+
     std::cerr << "[info] loading text" << std::endl;
     uint64_t trainStarTime = GetCurrentTimeMs();
     if (!Tokenizer.LoadAlphabet(alphabetFile)) {
@@ -326,14 +345,14 @@ double TLangModel::GetGram3Prob(TWordId word1, TWordId word2, TWordId word3) con
 template<typename T>
 TCount GetGramHashCount(T key,
                         const TPerfectHash& ph,
-                        const std::vector<std::pair<uint16_t, TCount>>& buckets)
+                        const std::vector<std::pair<uint16_t, uint16_t>>& buckets)
 {
     std::string s = DumpKey(key);
     uint32_t bucket = ph.Hash(s);
     assert(bucket < ph.BucketsNumber());
-    const std::pair<uint32_t, TCount>& data = buckets[bucket];
+    const std::pair<uint16_t, uint16_t>& data = buckets[bucket];
     if (data.first == CityHash16(s)) {
-        return data.second;
+        return UnpackInt32(data.second);
     }
     return TCount();
 }
