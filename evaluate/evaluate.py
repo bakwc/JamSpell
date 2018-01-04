@@ -106,7 +106,7 @@ def evaluateCorrector(correctorName, corrector, originalSentences, erroredSenten
 
     erroredSentences = copy.deepcopy(erroredSentences)
 
-    lastTime = time.time()
+    startTime = lastTime = time.time()
     n = 0
     for sentID in xrange(len(originalSentences)):
         originalText = originalSentences[sentID]
@@ -169,7 +169,8 @@ def evaluateCorrector(correctorName, corrector, originalSentences, erroredSenten
            float(fixedErrors) / origErrors,\
            float(broken) / totalNotTouched,\
            float(topNtotalErrors) / n,\
-           float(topNfixed) / origErrors
+           float(topNfixed) / origErrors, \
+            time.time() - startTime
 
 def testMode(corrector):
     while True:
@@ -252,21 +253,22 @@ def main():
     results = {}
 
     for correctorName, corrector in correctors.iteritems():
-        errorsRate, fixRate, broken, topNerr, topNfix = \
+        errorsRate, fixRate, broken, topNerr, topNfix, execTime = \
             evaluateCorrector(correctorName, corrector, originalSentences, erroredSentences, maxWords)
-        results[correctorName] = errorsRate, fixRate, broken, topNerr, topNfix
+        results[correctorName] = errorsRate, fixRate, broken, topNerr, topNfix, execTime
 
     print
 
-    print '[info] %12s %8s  %8s  %8s  %8s  %8s' % ('', 'errRate', 'fixRate', 'broken', 'topNerr', 'topNfix')
+    print '[info] %12s %8s  %8s  %8s  %8s  %8s  %8s' % ('', 'errRate', 'fixRate', 'broken', 'topNerr', 'topNfix', 'time')
     for k, _ in sorted(results.items(), key=lambda x: x[1]):
-        print '[info] %10s  %8.2f%% %8.2f%% %8.2f%% %8.2f%% %8.2f%%' % \
+        print '[info] %10s  %8.2f%% %8.2f%% %8.2f%% %8.2f%% %8.2f%% %8.2fs' % \
               (k,
                100.0 * results[k][0],
                100.0 * results[k][1],
                100.0 * results[k][2],
                100.0 * results[k][3],
-               100.0 * results[k][4])
+               100.0 * results[k][4],
+               results[k][5])
 
 
 if __name__ == '__main__':
