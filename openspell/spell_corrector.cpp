@@ -80,7 +80,7 @@ TWords TSpellCorrector::GetCandidatesRaw(const TWords& sentence, size_t position
             w = c;
             candidates.push_back(c);
         } else {
-            candidates.push_back(w);
+            //candidates.push_back(w);
         }
     }
 
@@ -105,9 +105,7 @@ TWords TSpellCorrector::GetCandidatesRaw(const TWords& sentence, size_t position
         scored.Score = LangModel.Score(candSentence);
         if (!(scored.Word == w)) {
             if (firstLevel) {
-                if (!(scored.Word == c)) {
-                    scored.Score -= 15;
-                }
+                scored.Score -= 15;
             } else {
                 scored.Score *= 50.0;
             }
