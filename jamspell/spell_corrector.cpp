@@ -3,7 +3,7 @@
 
 #include "spell_corrector.hpp"
 
-namespace NOpenSpell {
+namespace NJamSpell {
 
 
 static std::vector<std::wstring> GetDeletes1(const std::wstring& w) {
@@ -433,4 +433,4 @@ bool TSpellCorrector::SaveCache(const std::string& cacheFile) {
 }
 
 
-} // NOpenSpell
+} // NJamSpell

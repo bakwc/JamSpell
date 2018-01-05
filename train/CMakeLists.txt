@@ -1,3 +1,3 @@
 
-add_executable(osp_train train.cpp)
-target_link_libraries(osp_train openspell_lib)
+add_executable(jamspell train.cpp)
+target_link_libraries(jamspell jamspell_lib)

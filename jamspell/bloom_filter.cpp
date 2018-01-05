@@ -5,7 +5,7 @@
 #include <contrib/bloom/bloom_filter.hpp>
 #include <contrib/handypack/handypack.hpp>
 
-namespace NOpenSpell {
+namespace NJamSpell {
 
 struct TBloomFilter::Impl: public bloom_filter {
     Impl(): bloom_filter() {}
@@ -57,4 +57,4 @@ void TBloomFilter::Load(std::istream& in) {
     BloomFilter->Load(in);
 }
 
-} // NOpenSpell
+} // NJamSpell

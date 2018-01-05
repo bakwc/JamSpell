@@ -3,7 +3,7 @@
 
 #include "perfect_hash.hpp"
 
-namespace NOpenSpell {
+namespace NJamSpell {
 
 void TPerfectHash::Dump(std::ostream& out) const {
     const phf& perfHash = *(const phf*)Phf;
@@ -57,4 +57,4 @@ TPerfectHash::~TPerfectHash() {
     delete (phf*)Phf;
 }
 
-} // NOpenSpell
+} // NJamSpell

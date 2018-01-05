@@ -7,7 +7,7 @@
 
 #include <contrib/handypack/handypack.hpp>
 
-namespace NOpenSpell {
+namespace NJamSpell {
 
 struct TWord {
     TWord() = default;
@@ -61,4 +61,4 @@ void ToLower(std::wstring& text);
 wchar_t MakeUpperIfRequired(wchar_t orig, wchar_t sample);
 uint16_t CityHash16(const std::string& str);
 
-} // NOpenSpell
+} // NJamSpell

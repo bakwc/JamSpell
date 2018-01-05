@@ -3,9 +3,9 @@ project(openspell)
 
 set(CMAKE_CXX_FLAGS "-std=c++11 -fPIC -g")
 
-link_directories(${PROJECT_BINARY_DIR}/openspell)
+link_directories(${PROJECT_BINARY_DIR}/jamspell)
 include_directories(${CMAKE_SOURCE_DIR})
 
-add_subdirectory(openspell)
+add_subdirectory(jamspell)
 add_subdirectory(train)
 add_subdirectory(contrib)

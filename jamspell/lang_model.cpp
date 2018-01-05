@@ -10,7 +10,7 @@
 #include <contrib/cityhash/city.h>
 
 
-namespace NOpenSpell {
+namespace NJamSpell {
 
 template<typename T>
 std::string DumpKey(const T& key) {
@@ -381,4 +381,4 @@ TCount TLangModel::GetGram3HashCount(TWordId word1, TWordId word2, TWordId word3
     return GetGramHashCount(key, PerfectHash, Buckets);
 }
 
-} // NOpenSpell
+} // NJamSpell

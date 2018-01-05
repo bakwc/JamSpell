@@ -12,7 +12,7 @@
 #include <contrib/cityhash/city.h>
 
 
-namespace NOpenSpell {
+namespace NJamSpell {
 
 std::string LoadFile(const std::string& fileName) {
     std::ifstream in(fileName, std::ios::binary);
@@ -137,4 +137,4 @@ uint16_t CityHash16(const std::string& str) {
 }
 
 
-} // NOpenSpell
+} // NJamSpell

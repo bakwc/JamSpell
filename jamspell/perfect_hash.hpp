@@ -2,7 +2,7 @@
 
 #include <ostream>
 
-namespace NOpenSpell {
+namespace NJamSpell {
 
 class TPerfectHash {
 public:
@@ -18,4 +18,4 @@ private:
     void* Phf; // sort of forward declaration
 };
 
-} // NOpenSpell
+} // NJamSpell

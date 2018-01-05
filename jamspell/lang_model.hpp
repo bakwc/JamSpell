@@ -11,7 +11,7 @@
 #include "perfect_hash.hpp"
 
 
-namespace NOpenSpell {
+namespace NJamSpell {
 
 
 constexpr uint64_t LANG_MODEL_MAGIC_BYTE = 8559322735408079685L;
@@ -93,4 +93,4 @@ private:
 };
 
 
-} // NOpenSpell
+} // NJamSpell

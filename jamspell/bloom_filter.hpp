@@ -1,7 +1,7 @@
 #pragma once
 #include <memory>
 
-namespace NOpenSpell {
+namespace NJamSpell {
 
 class TBloomFilter {
 public:
@@ -17,4 +17,4 @@ private:
     std::unique_ptr<Impl> BloomFilter;
 };
 
-} // NOpenSpell
+} // NJamSpell

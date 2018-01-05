@@ -1,9 +1,9 @@
 #include <iostream>
 
-#include <openspell/lang_model.hpp>
-#include <openspell/spell_corrector.hpp>
+#include <jamspell/lang_model.hpp>
+#include <jamspell/spell_corrector.hpp>
 
-using namespace NOpenSpell;
+using namespace NJamSpell;
 
 void PrintUsage(const char** argv) {
     std::cerr << "Usage: " << argv[0] << " mode args" << std::endl;
