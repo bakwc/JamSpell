@@ -1,2 +1,2 @@
-# OpenSpell
+# JamSpell
 WIP: Spell correction library

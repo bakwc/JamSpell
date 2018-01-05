@@ -11,18 +11,18 @@ import subprocess
 
 this_dir = os.path.dirname(os.path.abspath(__file__))
 
-openspell = Extension(
-    name='_openspell',
-    include_dirs=['.', 'openspell'],
+jamspell = Extension(
+    name='_jamspell',
+    include_dirs=['.', 'jamspell'],
     sources=[
-        os.path.join('openspell', 'lang_model.cpp'),
-        os.path.join('openspell', 'spell_corrector.cpp'),
-        os.path.join('openspell', 'utils.cpp'),
-        os.path.join('openspell', 'perfect_hash.cpp'),
-        os.path.join('openspell', 'bloom_filter.cpp'),
+        os.path.join('jamspell', 'lang_model.cpp'),
+        os.path.join('jamspell', 'spell_corrector.cpp'),
+        os.path.join('jamspell', 'utils.cpp'),
+        os.path.join('jamspell', 'perfect_hash.cpp'),
+        os.path.join('jamspell', 'bloom_filter.cpp'),
         os.path.join('contrib', 'cityhash', 'city.cc'),
         os.path.join('contrib', 'phf', 'phf.cc'),
-        os.path.join('openspell.i'),
+        os.path.join('jamspell.i'),
     ],
     extra_compile_args=['-std=c++11', '-O2'],
     swig_opts=['-c++'],
@@ -46,24 +46,24 @@ class Swig3Ext(build_ext):
         assert subprocess.check_output([swigBinary, "-version"]).find('SWIG Version 3') != -1
         return swigBinary
 
-VERSION = '0.0.5'
+VERSION = '0.0.6'
 
 setup(
-    name='openspell',
+    name='jamspell',
     version=VERSION,
     author='Filipp Ozinov',
     author_email='fippo@mail.ru',
-    url='https://github.com/bakwc/OpenSpell',
-    download_url='https://github.com/bakwc/OpenSpell/tarball/' + VERSION,
+    url='https://github.com/bakwc/JamSpell',
+    download_url='https://github.com/bakwc/JamSpell/tarball/' + VERSION,
     description='spell checker',
     long_description='context-based spell checker',
-    keywords=['nlp', 'spell', 'spell-checker'],
+    keywords=['nlp', 'spell', 'spell-checker', 'jamspell'],
     classifiers=[
         'Programming Language :: Python :: 2.7',
         'License :: OSI Approved :: MIT License',
     ],
-    py_modules=['openspell'],
-    ext_modules=[openspell],
+    py_modules=['jamspell'],
+    ext_modules=[jamspell],
     zip_safe=False,
     cmdclass={
         'build': CustomBuild,

@@ -81,11 +81,11 @@ class ContextPrototypeCorrector(Corrector):
         import context_spell_prototype
         return context_spell_prototype.correction(sentence, position)
 
-class OpenspellCorrector(Corrector):
+class JamspellCorrector(Corrector):
     def __init__(self, modelFile):
-        super(OpenspellCorrector, self).__init__()
-        import openspell
-        self.model = openspell.TSpellCorrector()
+        super(JamspellCorrector, self).__init__()
+        import jamspell
+        self.model = jamspell.TSpellCorrector()
         if not (self.model.LoadLangModel(modelFile)):
             raise Exception('wrong model file: %s' % modelFile)
 
@@ -194,7 +194,7 @@ def main():
     parser.add_argument('-ns', '--norvig', type=str, help='path to train file for Norvig spell corrector')
     parser.add_argument('-cs', '--context', type=str, help='path to context spell model')
     parser.add_argument('-csp', '--context_prototype', type=str, help='path to context spell prototype model')
-    parser.add_argument('-osp', '--openspell', type=str, help='path to openspell model file')
+    parser.add_argument('-jsp', '--jamspell', type=str, help='path to jamspell model file')
     parser.add_argument('-t', '--test', action="store_true")
     parser.add_argument('-mx', '--max_words', type=int, help='max words to evaluate')
     parser.add_argument('-a', '--alphabet', type=str, help='alphabet file')
@@ -224,8 +224,8 @@ def main():
     if args.context_prototype:
         corrector = correctors['prototype'] = ContextPrototypeCorrector(args.context_prototype)
 
-    if args.openspell:
-        corrector = correctors['openspell'] = OpenspellCorrector(args.openspell)
+    if args.jamspell:
+        corrector = correctors['jamspell'] = JamspellCorrector(args.jamspell)
 
     if args.test:
         return testMode(corrector)

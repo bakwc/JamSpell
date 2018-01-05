@@ -1,4 +1,4 @@
-%module openspell
+%module jamspell
 %include "std_vector.i"
 %include <std_string.i>
 %include <std_wstring.i>
@@ -9,6 +9,6 @@ namespace std {
 }
 
 %{
-#include "openspell/spell_corrector.hpp"
+#include "jamspell/spell_corrector.hpp"
 %}
-%include "openspell/spell_corrector.hpp"
+%include "jamspell/spell_corrector.hpp"
