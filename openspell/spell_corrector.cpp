@@ -90,13 +90,14 @@ TWords TSpellCorrector::GetCandidatesRaw(const TWords& sentence, size_t position
 
     std::vector<TScoredWord> scoredCandidates;
     scoredCandidates.reserve(candidates.size());
+
     for (TWord cand: uniqueCandidates) {
         TWords candSentence;
         for (size_t i = 0; i < sentence.size(); ++i) {
             if (i == position) {
                 candSentence.push_back(cand);
-            } else if ((i < position && i + 3 >= position) ||
-                       (i > position && i <= position + 3))
+            } else if ((i < position && i + 2 >= position) ||
+                       (i > position && i <= position + 2))
             {
                 candSentence.push_back(sentence[i]);
             }

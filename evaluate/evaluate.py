@@ -130,7 +130,7 @@ def evaluateCorrector(correctorName, corrector, originalSentences, erroredSenten
                 origErrors += 1
                 if fixedWord == originalWord:
                     fixedErrors += 1
-                if originalWord in fixedCandidates:
+                if fixedWord != erroredWord and originalWord in fixedCandidates:
                     topNfixed += 1
             else:
                 totalNotTouched += 1
