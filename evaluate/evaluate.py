@@ -86,6 +86,7 @@ class JamspellCorrector(Corrector):
         super(JamspellCorrector, self).__init__()
         import jamspell
         self.model = jamspell.TSpellCorrector()
+        #self.model.SetPenalty(16.0, 0.0)
         if not (self.model.LoadLangModel(modelFile)):
             raise Exception('wrong model file: %s' % modelFile)
 
@@ -123,6 +124,9 @@ def evaluateCorrector(correctorName, corrector, originalSentences, erroredSenten
                 fixedWord = fixedCandidates
                 fixedWords = [fixedCandidates]
 
+            # if originalWord != fixedWord:
+            #    print '%s (%s=>%s):\n%s\n\n' % (originalWord, erroredWord, fixedWord, ' '.join(erroredText))
+
             erroredText[pos] = fixedWord
             n += 1
 
@@ -155,9 +159,6 @@ def evaluateCorrector(correctorName, corrector, originalSentences, erroredSenten
 
             if maxWords is not None and n >= maxWords:
                 break
-
-            # if originalWord != fixedWord:
-            #    print '%s (%s=>%s):\n%s\n\n' % (originalWord, erroredWord, fixedWord, ' '.join(erroredText))
 
         if maxWords is not None and n >= maxWords:
             break
