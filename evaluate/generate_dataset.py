@@ -5,6 +5,8 @@ import codecs
 import random
 import os
 import argparse
+import xml.sax
+from collections import defaultdict
 
 RANDOM_SEED = 42
 TRAIN_TEST_SPLIT = 0.95
@@ -19,6 +21,34 @@ def dirFilesIterator(dirPath):
     for root, directories, filenames in os.walk(dirPath):
         for filename in filenames:
             yield os.path.join(root, filename)
+
+class FB2Handler(xml.sax.handler.ContentHandler):
+    def __init__(self, tagsToExclude):
+        xml.sax.handler.ContentHandler.__init__(self)
+        self.__tagsToExclude = tagsToExclude
+        self.__counters = defaultdict(int)
+        self.__buff = ''
+
+    def getBuff(self):
+        return self.__buff
+
+    def _mayProcess(self):
+        for counter in self.__counters.itervalues():
+            if counter > 0:
+                return False
+        return True
+
+    def startElement(self, name, attrs):
+        if name in self.__tagsToExclude:
+            self.__counters[name] += 1
+
+    def endElement(self, name):
+        if name in self.__tagsToExclude:
+            self.__counters[name] -= 1
+
+    def characters(self, content):
+        if self._mayProcess():
+            self.__buff += content
 
 class DataSource(object):
     def __init__(self, rootDir, name):
@@ -51,15 +81,37 @@ class LeipzigDataSource(DataSource):
                     continue
                 sentences.append(line.split('\t')[1].strip().lower())
 
+class FB2DataSource(DataSource):
+    def __init__(self, rootDir):
+        super(FB2DataSource, self).__init__(rootDir, 'FB2')
+
+    def isMatch(self, pathToFile):
+        return pathToFile.endswith('.fb2')
+
+    def loadSentences(self, pathToFile, sentences):
+        parser = xml.sax.make_parser()
+        handler = FB2Handler(['binary'])
+        parser.setContentHandler(handler)
+        print 'loading file', pathToFile
+        with open(pathToFile, 'rb') as f:
+            parser.parse(f)
+        for line in handler.getBuff().split('\n'):
+            if not line:
+                continue
+            sentences.append(line)
+
 def main():
     parser = argparse.ArgumentParser(description='datset generator')
     parser.add_argument('out_file', type=str, help='will be created out_file_train and out_file_test')
-    parser.add_argument('-lz', '--leipzig', type=str, help='path to directory with Leipzig Corpora files')
+    parser.add_argument('-lz', '--leipzig', type=str, help='path to dir with Leipzig Corpora files')
+    parser.add_argument('-fb2', '--fb2', type=str, help='path to dir with files in FB2 format')
     args = parser.parse_args()
 
     dataSources = []
     if args.leipzig:
         dataSources.append(LeipzigDataSource(args.leipzig))
+    if args.fb2:
+        dataSources.append(FB2DataSource(args.fb2))
 
     if not dataSources:
         raise Exception('specify at least single data source')
