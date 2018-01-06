@@ -10,6 +10,7 @@ from collections import defaultdict
 
 RANDOM_SEED = 42
 TRAIN_TEST_SPLIT = 0.95
+LANG_DETECT_FRAGMENT_SIZE = 2000
 
 def saveSentences(sentences, fname):
     with codecs.open(fname, 'w', 'utf-8') as f:
@@ -51,9 +52,10 @@ class FB2Handler(xml.sax.handler.ContentHandler):
             self.__buff.append(content)
 
 class DataSource(object):
-    def __init__(self, rootDir, name):
+    def __init__(self, rootDir, name, lang = None):
         self.__rootDir = rootDir
         self.__name = name
+        self.__lang = lang
 
     def getRootDir(self):
         return self.__rootDir
@@ -67,23 +69,34 @@ class DataSource(object):
     def loadSentences(self, pathToFile, sentences):
         pass
 
+    def checkLang(self, textFragment):
+        if self.__lang is None:
+            return True
+        from langdetect import detect
+        if detect(textFragment) != self.__lang:
+            return False
+        return True
+
 class LeipzigDataSource(DataSource):
-    def __init__(self, rootDir):
-        super(LeipzigDataSource, self).__init__(rootDir, 'leipzig')
+    def __init__(self, rootDir, lang):
+        super(LeipzigDataSource, self).__init__(rootDir, 'leipzig', lang)
 
     def isMatch(self, pathToFile):
         return pathToFile.endswith('-sentences.txt')
 
     def loadSentences(self, pathToFile, sentences):
         with codecs.open(pathToFile, 'r', 'utf-8') as f:
-            for line in f.read().split('\n'):
+            data = f.read()
+            if not self.checkLang(data[:LANG_DETECT_FRAGMENT_SIZE]):
+                return
+            for line in data.split('\n'):
                 if not line:
                     continue
                 sentences.append(line.split('\t')[1].strip().lower())
 
 class TxtDataSource(DataSource):
-    def __init__(self, rootDir):
-        super(TxtDataSource, self).__init__(rootDir, 'txt')
+    def __init__(self, rootDir, lang):
+        super(TxtDataSource, self).__init__(rootDir, 'txt', lang)
 
     def isMatch(self, pathToFile):
         return pathToFile.endswith('.txt')
@@ -97,8 +110,8 @@ class TxtDataSource(DataSource):
                 sentences.append(line)
 
 class FB2DataSource(DataSource):
-    def __init__(self, rootDir):
-        super(FB2DataSource, self).__init__(rootDir, 'FB2')
+    def __init__(self, rootDir, lang):
+        super(FB2DataSource, self).__init__(rootDir, 'FB2', lang)
 
     def isMatch(self, pathToFile):
         return pathToFile.endswith('.fb2')
@@ -107,10 +120,13 @@ class FB2DataSource(DataSource):
         parser = xml.sax.make_parser()
         handler = FB2Handler(['binary'])
         parser.setContentHandler(handler)
-        print 'loading file', pathToFile
+        print '[info] loading file', pathToFile
         with open(pathToFile, 'rb') as f:
             parser.parse(f)
-        for line in handler.getBuff().split('\n'):
+        data = handler.getBuff()
+        if not self.checkLang(data[:LANG_DETECT_FRAGMENT_SIZE]):
+            print '[info] wrong language'
+        for line in data.split('\n'):
             line = line.strip().lower()
             if not line:
                 continue
@@ -122,15 +138,20 @@ def main():
     parser.add_argument('-lz', '--leipzig', type=str, help='path to dir with Leipzig Corpora files')
     parser.add_argument('-fb2', '--fb2', type=str, help='path to dir with files in FB2 format')
     parser.add_argument('-txt', '--txt', type=str, help='path to dir with utf-8 txt files')
+    parser.add_argument('-lng', '--language', type=str, help='filter by content language')
     args = parser.parse_args()
+
+    lang = None
+    if args.language:
+        lang = args.language
 
     dataSources = []
     if args.leipzig:
-        dataSources.append(LeipzigDataSource(args.leipzig))
+        dataSources.append(LeipzigDataSource(args.leipzig, lang))
     if args.fb2:
-        dataSources.append(FB2DataSource(args.fb2))
+        dataSources.append(FB2DataSource(args.fb2, lang))
     if args.txt:
-        dataSources.append(TxtDataSource(args.txt))
+        dataSources.append(TxtDataSource(args.txt, lang))
 
     if not dataSources:
         raise Exception('specify at least single data source')
