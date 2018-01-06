@@ -27,10 +27,10 @@ class FB2Handler(xml.sax.handler.ContentHandler):
         xml.sax.handler.ContentHandler.__init__(self)
         self.__tagsToExclude = tagsToExclude
         self.__counters = defaultdict(int)
-        self.__buff = ''
+        self.__buff = []
 
     def getBuff(self):
-        return self.__buff
+        return ''.join(self.__buff)
 
     def _mayProcess(self):
         for counter in self.__counters.itervalues():
@@ -48,7 +48,7 @@ class FB2Handler(xml.sax.handler.ContentHandler):
 
     def characters(self, content):
         if self._mayProcess():
-            self.__buff += content
+            self.__buff.append(content)
 
 class DataSource(object):
     def __init__(self, rootDir, name):
@@ -81,6 +81,21 @@ class LeipzigDataSource(DataSource):
                     continue
                 sentences.append(line.split('\t')[1].strip().lower())
 
+class TxtDataSource(DataSource):
+    def __init__(self, rootDir):
+        super(TxtDataSource, self).__init__(rootDir, 'txt')
+
+    def isMatch(self, pathToFile):
+        return pathToFile.endswith('.txt')
+
+    def loadSentences(self, pathToFile, sentences):
+        with codecs.open(pathToFile, 'r', 'utf-8') as f:
+            for line in f.read().split('\n'):
+                line = line.strip().lower()
+                if not line:
+                    continue
+                sentences.append(line)
+
 class FB2DataSource(DataSource):
     def __init__(self, rootDir):
         super(FB2DataSource, self).__init__(rootDir, 'FB2')
@@ -96,6 +111,7 @@ class FB2DataSource(DataSource):
         with open(pathToFile, 'rb') as f:
             parser.parse(f)
         for line in handler.getBuff().split('\n'):
+            line = line.strip().lower()
             if not line:
                 continue
             sentences.append(line)
@@ -105,6 +121,7 @@ def main():
     parser.add_argument('out_file', type=str, help='will be created out_file_train and out_file_test')
     parser.add_argument('-lz', '--leipzig', type=str, help='path to dir with Leipzig Corpora files')
     parser.add_argument('-fb2', '--fb2', type=str, help='path to dir with files in FB2 format')
+    parser.add_argument('-txt', '--txt', type=str, help='path to dir with utf-8 txt files')
     args = parser.parse_args()
 
     dataSources = []
@@ -112,6 +129,8 @@ def main():
         dataSources.append(LeipzigDataSource(args.leipzig))
     if args.fb2:
         dataSources.append(FB2DataSource(args.fb2))
+    if args.txt:
+        dataSources.append(TxtDataSource(args.txt))
 
     if not dataSources:
         raise Exception('specify at least single data source')
