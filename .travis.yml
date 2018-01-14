@@ -22,3 +22,10 @@ before_script:
     - make
     - ls -l
 script: ./tests/jamspell_tests
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - gcc-5
+      - g++-5
