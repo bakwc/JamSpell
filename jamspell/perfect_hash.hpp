@@ -11,7 +11,8 @@ public:
     ~TPerfectHash();
     void Dump(std::ostream& out) const;
     void Load(std::istream& in);
-    void Init(const std::vector<std::string>& keys);
+    bool Init(const std::vector<std::string>& keys);
+    void Clear();
     uint32_t Hash(const std::string& value) const;
     uint32_t BucketsNumber() const;
 private:

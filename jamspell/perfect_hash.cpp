@@ -3,6 +3,8 @@
 
 #include "perfect_hash.hpp"
 
+#include <cassert>
+
 namespace NJamSpell {
 
 void TPerfectHash::Dump(std::ostream& out) const {
@@ -17,6 +19,7 @@ void TPerfectHash::Dump(std::ostream& out) const {
 }
 
 void TPerfectHash::Load(std::istream& in) {
+    Clear();
     Phf = new phf();
     phf& perfHash = *(phf*)Phf;
     NHandyPack::Load(in, perfHash.d_max,
@@ -29,13 +32,29 @@ void TPerfectHash::Load(std::istream& in) {
     in.read((char*)perfHash.g, perfHash.r * sizeof(uint32_t));
 }
 
-void TPerfectHash::Init(const std::vector<std::string>& keys) {
-    Phf = new phf();
-    phf_error_t res = PHF::init<std::string, false>((phf*)Phf, &keys[0], keys.size(), 4, 80, 42);
-    std::cerr << " Train result: " << res << "\n";
+bool TPerfectHash::Init(const std::vector<std::string>& keys) {
+    phf* tempPhf = new phf();
+    phf_error_t res = PHF::init<std::string, false>(tempPhf, &keys[0], keys.size(), 4, 80, 42);
+    if (res != 0) {
+        PHF::destroy(tempPhf);
+        delete tempPhf;
+        return false;
+    }
+    Clear();
+    Phf = tempPhf;
+    return true;
+}
+
+void TPerfectHash::Clear() {
+    if (!Phf) {
+        return;
+    }
+    PHF::destroy((phf*)Phf);
+    delete (phf*)Phf;
 }
 
 uint32_t TPerfectHash::Hash(const std::string& value) const {
+    assert(Phf && "Not initialized");
     return PHF::hash<std::string>((phf*)Phf, value);
 }
 
@@ -50,11 +69,7 @@ TPerfectHash::TPerfectHash()
 }
 
 TPerfectHash::~TPerfectHash() {
-    if (!Phf) {
-        return;
-    }
-    PHF::destroy((phf*)Phf);
-    delete (phf*)Phf;
+    Clear();
 }
 
 } // NJamSpell
