@@ -3,6 +3,10 @@ dist: trusty
 language: cpp
 compiler: gcc
 before_install:
+    - sudo unlink /usr/bin/g++ && sudo ln -s /usr/bin/g++-5 /usr/bin/g++
+    - sudo unlink /usr/bin/gcc && sudo ln -s /usr/bin/gcc-5 /usr/bin/gcc
+    - gcc --version
+    - g++ --version
     - sudo apt-get -qq update
     - sudo apt-get install -y cmake
     - sudo apt-get install -y libgtest-dev
@@ -11,10 +15,6 @@ before_install:
     - sudo make
     - sudo cp *.a /usr/lib
     - cd -
-    - sudo unlink /usr/bin/g++ && sudo ln -s /usr/bin/g++-5 /usr/bin/g++
-    - sudo unlink /usr/bin/gcc && sudo ln -s /usr/bin/gcc-5 /usr/bin/gcc
-    - gcc --version
-    - g++ --version
 before_script:
     - mkdir build
     - cd build
