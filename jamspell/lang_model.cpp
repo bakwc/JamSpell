@@ -377,7 +377,7 @@ TCount TLangModel::GetGram3HashCount(TWordId word1, TWordId word2, TWordId word3
     if (word1 == UnknownWordId || word2 == UnknownWordId || word3 == UnknownWordId) {
         return TCount();
     }
-    TGram3Key key({word1, word2, word3});
+    TGram3Key key(word1, word2, word3);
     return GetGramHashCount(key, PerfectHash, Buckets);
 }
 
