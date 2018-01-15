@@ -52,13 +52,13 @@ class FB2Handler(xml.sax.handler.ContentHandler):
             self.__buff.append(content)
 
 class DataSource(object):
-    def __init__(self, rootDir, name, lang = None):
-        self.__rootDir = rootDir
+    def __init__(self, path, name, lang = None):
+        self.__path = path
         self.__name = name
         self.__lang = lang
 
-    def getRootDir(self):
-        return self.__rootDir
+    def getPath(self):
+        return self.__path
 
     def getName(self):
         return self.__name
@@ -78,8 +78,8 @@ class DataSource(object):
         return True
 
 class LeipzigDataSource(DataSource):
-    def __init__(self, rootDir, lang):
-        super(LeipzigDataSource, self).__init__(rootDir, 'leipzig', lang)
+    def __init__(self, path, lang):
+        super(LeipzigDataSource, self).__init__(path, 'leipzig', lang)
 
     def isMatch(self, pathToFile):
         return pathToFile.endswith('-sentences.txt')
@@ -95,8 +95,8 @@ class LeipzigDataSource(DataSource):
                 sentences.append(line.split('\t')[1].strip().lower())
 
 class TxtDataSource(DataSource):
-    def __init__(self, rootDir, lang):
-        super(TxtDataSource, self).__init__(rootDir, 'txt', lang)
+    def __init__(self, path, lang):
+        super(TxtDataSource, self).__init__(path, 'txt', lang)
 
     def isMatch(self, pathToFile):
         return pathToFile.endswith('.txt')
@@ -110,8 +110,8 @@ class TxtDataSource(DataSource):
                 sentences.append(line)
 
 class FB2DataSource(DataSource):
-    def __init__(self, rootDir, lang):
-        super(FB2DataSource, self).__init__(rootDir, 'FB2', lang)
+    def __init__(self, path, lang):
+        super(FB2DataSource, self).__init__(path, 'FB2', lang)
 
     def isMatch(self, pathToFile):
         return pathToFile.endswith('.fb2')
@@ -135,9 +135,9 @@ class FB2DataSource(DataSource):
 def main():
     parser = argparse.ArgumentParser(description='datset generator')
     parser.add_argument('out_file', type=str, help='will be created out_file_train and out_file_test')
-    parser.add_argument('-lz', '--leipzig', type=str, help='path to dir with Leipzig Corpora files')
-    parser.add_argument('-fb2', '--fb2', type=str, help='path to dir with files in FB2 format')
-    parser.add_argument('-txt', '--txt', type=str, help='path to dir with utf-8 txt files')
+    parser.add_argument('-lz', '--leipzig', type=str, help='path to file or dir with Leipzig Corpora files')
+    parser.add_argument('-fb2', '--fb2', type=str, help='path to file or dir with files in FB2 format')
+    parser.add_argument('-txt', '--txt', type=str, help='path to file or dir with utf-8 txt files')
     parser.add_argument('-lng', '--language', type=str, help='filter by content language')
     args = parser.parse_args()
 
@@ -159,11 +159,17 @@ def main():
     sentences = []
     for dataSource in dataSources:
         print '[info] loading %s collection' % dataSource.getName()
-        for filePath in dirFilesIterator(dataSource.getRootDir()):
+        path = dataSource.getPath()
+        paths = [path] if os.path.isfile(path) else dirFilesIterator(path)
+        for filePath in paths:
             if dataSource.isMatch(filePath):
                 dataSource.loadSentences(filePath, sentences)
 
     print '[info] loaded %d sentences' % len(sentences)
+    if not sentences:
+        print '[error] no sentences loaded'
+        return
+
     print '[info] removing duplicates'
 
     sentences = list(set(sentences))
