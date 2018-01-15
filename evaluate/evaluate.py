@@ -187,6 +187,18 @@ def testMode(corrector):
             newSentence.append(fix)
         print ' '.join(newSentence)
 
+def evaluateJamspell(modelFile, testText, alphabetFile, maxWords = 50000):
+    utils.loadAlphabet(alphabetFile)
+    corrector = JamspellCorrector(modelFile)
+    random.seed(42)
+    originalText = loadText(testText)
+    erroredText = generateTypos(originalText)
+    assert len(originalText) == len(erroredText)
+    originalSentences = generateSentences(originalText)
+    erroredSentences = generateSentences(erroredText)
+    errorsRate, fixRate, broken, topNerr, topNfix, execTime = \
+        evaluateCorrector('jamspell', corrector, originalSentences, erroredSentences, maxWords)
+    return errorsRate, fixRate, broken, topNerr, topNfix
 
 def main():
     parser = argparse.ArgumentParser(description='spelling correctors evaluation')
