@@ -11,7 +11,7 @@ before_install:
     - sudo apt-get install -y cmake
     - sudo apt-get install -y libgtest-dev
     - sudo apt-get install -y python2.7 python-pip
-    - sudo python2.7 -m pip install pytest
+    - sudo python2.7 -m pip install pytest scipy
     - sudo apt-get install swig3.0
     - cd /usr/src/gtest
     - sudo cmake CMakeLists.txt
