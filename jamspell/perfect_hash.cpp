@@ -33,8 +33,14 @@ void TPerfectHash::Load(std::istream& in) {
 }
 
 bool TPerfectHash::Init(const std::vector<std::string>& keys) {
+    std::vector<phf_string_t> keysForPhf;
+    keysForPhf.reserve(keys.size());
+    for (const std::string& s: keys) {
+        keysForPhf.push_back({&s[0], s.size()});
+    }
+
     phf* tempPhf = new phf();
-    phf_error_t res = PHF::init<std::string, false>(tempPhf, &keys[0], keys.size(), 4, 80, 42);
+    phf_error_t res = PHF::init<phf_string_t, false>(tempPhf, &keysForPhf[0], keysForPhf.size(), 4, 80, 42);
     if (res != 0) {
         PHF::destroy(tempPhf);
         delete tempPhf;
