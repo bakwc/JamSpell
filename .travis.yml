@@ -10,6 +10,7 @@ before_install:
     - sudo apt-get -qq update
     - sudo apt-get install -y cmake
     - sudo apt-get install -y libgtest-dev
+    - sudo apt-get install python2
     - cd /usr/src/gtest
     - sudo cmake CMakeLists.txt
     - sudo make
@@ -21,7 +22,10 @@ before_script:
     - cmake ..
     - make
     - ls -l
-script: ./tests/jamspell_tests
+    - cd ..
+    - sudo python2.7 setup.py install
+script:
+    - ./build/tests/jamspell_tests
 addons:
   apt:
     sources:
