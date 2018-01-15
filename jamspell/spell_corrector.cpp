@@ -42,11 +42,18 @@ bool TSpellCorrector::LoadLangModel(const std::string& modelFile) {
     return true;
 }
 
-bool TSpellCorrector::TrainLangModel(const std::string& textFile, const std::string& alphabetFile) {
+bool TSpellCorrector::TrainLangModel(const std::string& textFile, const std::string& alphabetFile, const std::string& modelFile) {
     if (!LangModel.Train(textFile, alphabetFile)) {
         return false;
     }
     PrepareCache();
+    if (!LangModel.Dump(modelFile)) {
+        return false;
+    }
+    std::string cacheFile = modelFile + ".spell";
+    if (!SaveCache(cacheFile)) {
+        return false;
+    }
     return true;
 }
 

@@ -132,6 +132,37 @@ class FB2DataSource(DataSource):
                 continue
             sentences.append(line)
 
+def generateDatasetTxt(inFile, outFile):
+    source = TxtDataSource(inFile, None)
+    sentences = []
+    source.loadSentences(inFile, sentences)
+    assert sentences
+    processSentences(sentences, outFile)
+
+def processSentences(sentences, outFile):
+    print '[info] removing duplicates'
+
+    sentences = list(set(sentences))
+
+    print '[info] %d left' % len(sentences)
+    print '[info] shuffling'
+
+    random.seed(RANDOM_SEED)
+    random.shuffle(sentences)
+
+    total = len(sentences)
+    trainHalf = int(total * TRAIN_TEST_SPLIT)
+    trainSentences = sentences[:trainHalf]
+    testSentences = sentences[trainHalf:]
+
+    print '[info] saving train set'
+    saveSentences(trainSentences, outFile + '_train.txt')
+
+    print '[info] saving test set'
+    saveSentences(testSentences, outFile + '_test.txt')
+
+    print '[info] done'
+
 def main():
     parser = argparse.ArgumentParser(description='datset generator')
     parser.add_argument('out_file', type=str, help='will be created out_file_train and out_file_test')
@@ -170,28 +201,8 @@ def main():
         print '[error] no sentences loaded'
         return
 
-    print '[info] removing duplicates'
+    processSentences(sentences, args.out_file)
 
-    sentences = list(set(sentences))
-
-    print '[info] %d left' % len(sentences)
-    print '[info] shuffling'
-
-    random.seed(RANDOM_SEED)
-    random.shuffle(sentences)
-
-    total = len(sentences)
-    trainHalf = int(total * TRAIN_TEST_SPLIT)
-    trainSentences = sentences[:trainHalf]
-    testSentences = sentences[trainHalf:]
-
-    print '[info] saving train set'
-    saveSentences(trainSentences, args.out_file + '_train.txt')
-
-    print '[info] saving test set'
-    saveSentences(testSentences, args.out_file + '_test.txt')
-
-    print '[info] done'
 
 if __name__ == '__main__':
     main()

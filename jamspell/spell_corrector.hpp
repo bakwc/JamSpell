@@ -11,7 +11,7 @@ namespace NJamSpell {
 class TSpellCorrector {
 public:
     bool LoadLangModel(const std::string& modelFile);
-    bool TrainLangModel(const std::string& textFile, const std::string& alphabetFile);
+    bool TrainLangModel(const std::string& textFile, const std::string& alphabetFile, const std::string& modelFile);
     NJamSpell::TWords GetCandidatesRaw(const NJamSpell::TWords& sentence, size_t position) const;
     std::vector<std::wstring> GetCandidates(const std::vector<std::wstring>& sentence, size_t position) const;
     std::wstring FixFragment(const std::wstring& text) const;
