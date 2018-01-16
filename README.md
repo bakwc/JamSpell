@@ -6,7 +6,7 @@
 [travis]: https://travis-ci.org/bakwc/JamSpell
 
 [release-image]: https://img.shields.io/badge/release-0.0.7-blue.svg?style=flat
-[releases]: https://github.com/bakwc/PySyncObj/releases
+[releases]: https://github.com/bakwc/JamSpell/releases
 
 JamSpell is a spell checking library with following features:
 
