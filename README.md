@@ -64,3 +64,27 @@ JamSpell is a spell checking library with following features:
     <td>-</td>
   </tr>
 </table>
+
+## Python
+1. Install ```swig3``` (usually it is in your distro package manager)
+
+2. Install ```jamspel```:
+```bash
+pip install jamspell
+```
+3. Download or train language model
+
+4. Use it:
+
+```python
+import jamspell
+
+corrector = jamspell.TSpellCorrector()
+corrector.LoadLangModel('model_en.bin')
+
+corrector.FixFragment('I am the begt spell cherken!')
+# u'I am the best spell checker!'
+
+corrector.GetCandidates(['i', 'am', 'the', 'begt', 'spell', 'cherken'], 3)
+# (u'best', u'beat', u'belt', u'bet', u'bent', ... )
+```
