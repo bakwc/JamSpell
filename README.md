@@ -1,9 +1,12 @@
 # JamSpell
 
-[![Build Status][travis-image]][travis]
+[![Build Status][travis-image]][travis] [![Release][release-image]][releases]
 
 [travis-image]: https://travis-ci.org/bakwc/JamSpell.svg?branch=master
 [travis]: https://travis-ci.org/bakwc/JamSpell
+
+[release-image]: https://img.shields.io/badge/release-0.0.7-blue.svg?style=flat
+[releases]: https://github.com/bakwc/PySyncObj/releases
 
 JamSpell is a spell checking library with following features:
 
