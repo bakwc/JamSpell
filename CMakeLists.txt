@@ -9,7 +9,7 @@ link_directories(${PROJECT_BINARY_DIR}/jamspell)
 include_directories(${CMAKE_SOURCE_DIR})
 
 add_subdirectory(jamspell)
-add_subdirectory(train)
+add_subdirectory(main)
 add_subdirectory(contrib)
 
 if(GTest_FOUND)
