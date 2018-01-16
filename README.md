@@ -87,4 +87,7 @@ corrector.FixFragment('I am the begt spell cherken!')
 
 corrector.GetCandidates(['i', 'am', 'the', 'begt', 'spell', 'cherken'], 3)
 # (u'best', u'beat', u'belt', u'bet', u'bent', ... )
+
+corrector.GetCandidates(['i', 'am', 'the', 'begt', 'spell', 'cherken'], 5)
+# (u'checker', u'chicken', u'checked', u'wherein', u'coherent', ...)
 ```
