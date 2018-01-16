@@ -46,7 +46,7 @@ class Swig3Ext(build_ext):
         assert subprocess.check_output([swigBinary, "-version"]).find('SWIG Version 3') != -1
         return swigBinary
 
-VERSION = '0.0.7'
+VERSION = '0.0.8'
 
 setup(
     name='jamspell',

@@ -1,1 +1,2 @@
-graft jamspell contrib
+graft jamspell
+graft contrib
