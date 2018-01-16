@@ -72,7 +72,7 @@ JamSpell is a spell checking library with following features:
 ```bash
 pip install jamspell
 ```
-3. Download or train language model
+3. Download or [train](#train) language model
 
 4. Use it:
 
@@ -90,4 +90,26 @@ corrector.GetCandidates(['i', 'am', 'the', 'begt', 'spell', 'cherken'], 3)
 
 corrector.GetCandidates(['i', 'am', 'the', 'begt', 'spell', 'cherken'], 5)
 # (u'checker', u'chicken', u'checked', u'wherein', u'coherent', ...)
+```
+
+## Train
+To train custom model you need:
+
+1. Install ```cmake```
+
+2. Clone and build jamspell:
+```bash
+git clone https://github.com/bakwc/JamSpell.git
+cd JamSpell
+mkdir build
+cd build
+cmake ..
+make
+```
+
+3. Prepare a utf-8 text file with sentences to train at (eg. [```sherlockholmes.txt```](https://github.com/bakwc/JamSpell/blob/master/test_data/sherlockholmes.txt)) and another file with language alphabet (eg. [```alphabet_en.txt```](https://github.com/bakwc/JamSpell/blob/master/test_data/alphabet_en.txt))
+
+4. Train model:
+```bash
+./main/jamspell train ../test_data/alphabet_en.txt ../test_data/sherlockholmes.txt model_sherlock.bin
 ```
