@@ -75,7 +75,7 @@ We used following metrics:
 - **Broken** - percent of non-errored words that were broken by spell checker
 - **Speed** - number of words per second
 
-More details about reproducing available in "[Evaluate](#evaluate)" section.
+More details about reproducing available in "[Train](#train)" section.
 
 ## Python
 1. Install ```swig3``` (usually it is in your distro package manager)
@@ -125,5 +125,9 @@ make
 ```bash
 ./main/jamspell train ../test_data/alphabet_en.txt ../test_data/sherlockholmes.txt model_sherlock.bin
 ```
+5. To evaluate spellchecker you can use ```evaluate/evaluate.py``` script:
+```bash
+python evaluate/evalute.py -a alphabet_file.txt -jsp your_model.bin -mx 50000 your_test_data.txt
+```
+6. You can use ```evaluate/generate_dataset.py``` to generate you train/test data. It supports txt files, [Leipzig Corpora Collection](http://wortschatz.uni-leipzig.de/en/download/) format and fb2 books.
 
-## Evaluate
