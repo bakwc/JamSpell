@@ -65,6 +65,18 @@ JamSpell is a spell checking library with following features:
   </tr>
 </table>
 
+Model was trained on [300K wikipedia sentences + 300K news sentences (english)](http://wortschatz.uni-leipzig.de/en/download/). 95% was used for train, 5% was used for evaluation. [Errors model](https://github.com/bakwc/JamSpell/blob/master/evaluate/typo_model.py) was used to generate errored text from the original one. JamSpell corrector was compared with [Norvig's one](http://norvig.com/spell-correct.html), [Hunspell](http://hunspell.github.io/) and a dummy one (no corrections).
+
+We used following metrics:
+- **Errors** - percent of words with errors after spell checker processed
+- **Top 7 Errors** - percent of words that was missing in top7 candidated provided by spell checker
+- **Fix Rate** - percent of errored words that were fixed by spell checker
+- **Top 7 Fix Rate** - percent of errored words that were fixed by one of top7 candidates
+- **Broken** - percent of non-errored words that were broken by spell checker
+- **Speed** - number of words per second
+
+More details about reproducing available in "[Evaluate](#evaluate)" section.
+
 ## Python
 1. Install ```swig3``` (usually it is in your distro package manager)
 
@@ -113,3 +125,5 @@ make
 ```bash
 ./main/jamspell train ../test_data/alphabet_en.txt ../test_data/sherlockholmes.txt model_sherlock.bin
 ```
+
+## Evaluate
