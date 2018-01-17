@@ -69,10 +69,10 @@ Model was trained on [300K wikipedia sentences + 300K news sentences (english)](
 
 We used following metrics:
 - **Errors** - percent of words with errors after spell checker processed
-- **Top 7 Errors** - percent of words that was missing in top7 candidated provided by spell checker
-- **Fix Rate** - percent of errored words that were fixed by spell checker
-- **Top 7 Fix Rate** - percent of errored words that were fixed by one of top7 candidates
-- **Broken** - percent of non-errored words that were broken by spell checker
+- **Top 7 Errors** - percent of words missing in top7 candidated
+- **Fix Rate** - percent of errored words fixed by spell checker
+- **Top 7 Fix Rate** - percent of errored words fixed by one of top7 candidates
+- **Broken** - percent of non-errored words broken by spell checker
 - **Speed** - number of words per second
 
 More details about reproducing available in "[Train](#train)" section.
