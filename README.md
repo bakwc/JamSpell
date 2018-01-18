@@ -77,7 +77,8 @@ We used following metrics:
 
 More details about reproducing available in "[Train](#train)" section.
 
-## Python
+## Usage
+### Python
 1. Install ```swig3``` (usually it is in your distro package manager)
 
 2. Install ```jamspel```:
@@ -102,6 +103,31 @@ corrector.GetCandidates(['i', 'am', 'the', 'begt', 'spell', 'cherken'], 3)
 
 corrector.GetCandidates(['i', 'am', 'the', 'begt', 'spell', 'cherken'], 5)
 # (u'checker', u'chicken', u'checked', u'wherein', u'coherent', ...)
+```
+
+### C++
+1. Add jamspell and contrib dirs to your project
+
+2. Use it:
+
+```cpp
+#include <jamspell/spell_corrector.hpp>
+
+int main(int argc, const char** argv) {
+
+    NJamSpell::TSpellCorrector corrector;
+    corrector.LoadLangModel("model.bin");
+
+    corrector.FixFragment(L"I am the begt spell cherken!");
+    // "I am the best spell checker!"
+
+    corrector.GetCandidates({L"i", L"am", L"the", L"begt", L"spell", L"cherken"}, 3);
+    // "best", "beat", "belt", "bet", "bent", ... )
+
+    corrector.GetCandidates({L"i", L"am", L"the", L"begt", L"spell", L"cherken"}, 3);
+    // "checker", "chicken", "checked", "wherein", "coherent", ... )
+    return 0;
+}
 ```
 
 ## Train
