@@ -83,6 +83,57 @@ We used following metrics:
 - **Broken** - percent of non-errored words broken by spell checker
 - **Speed** - number of words per second
 
+To ensure that our model is not too overfitted for wikipedia+news we checked it on "The Adventures of Sherlock Holmes" text:
+
+<table>
+  <tr>
+    <td></td>
+    <td>Errors</td>
+    <td>Top 7 Errors</td>
+    <td>Fix Rate</td>
+    <td>Top 7 Fix Rate</td>
+    <td>Broken</td>
+    <td>Speed
+(words per second)</td>
+  </tr>
+  <tr>
+    <td>JamSpell</td>
+    <td>3.56%</td>
+    <td>1.27%</td>
+    <td>72.03%</td>
+    <td>79.73%</td>
+    <td>0.50%</td>
+    <td>1764</td>
+  </tr>
+  <tr>
+    <td>Norvig</td>
+    <td>7.60%</td>
+    <td>5.30%</td>
+    <td>35.43%</td>
+    <td>56.06%</td>
+    <td>0.45%</td>
+    <td>647</td>
+  </tr>
+  <tr>
+    <td>Hunspell</td>
+    <td>9.36%</td>
+    <td>6.44%</td>
+    <td>39.61%</td>
+    <td>65.77%</td>
+    <td>2.95%</td>
+    <td>284</td>
+  </tr>
+  <tr>
+    <td>Dummy</td>
+    <td>11.16%</td>
+    <td>11.16%</td>
+    <td>0.00%</td>
+    <td>0.00%</td>
+    <td>0.00%</td>
+    <td>-</td>
+  </tr>
+</table>
+
 More details about reproducing available in "[Train](#train)" section.
 
 ## Usage
