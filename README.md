@@ -165,7 +165,7 @@ corrector.GetCandidates(['i', 'am', 'the', 'begt', 'spell', 'cherken'], 5)
 ```
 
 ### C++
-1. Add jamspell and contrib dirs to your project
+1. Add `jamspell` and `contrib` dirs to your project
 
 2. Use it:
 
