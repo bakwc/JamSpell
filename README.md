@@ -144,7 +144,7 @@ More details about reproducing available in "[Train](#train)" section.
 ```bash
 pip install jamspell
 ```
-3. Download or [train](#train) language model
+3. [Download](#download-models) or [train](#train) language model
 
 4. Use it:
 
@@ -219,3 +219,9 @@ python evaluate/evalute.py -a alphabet_file.txt -jsp your_model.bin -mx 50000 yo
 ```
 6. You can use ```evaluate/generate_dataset.py``` to generate you train/test data. It supports txt files, [Leipzig Corpora Collection](http://wortschatz.uni-leipzig.de/en/download/) format and fb2 books.
 
+## Download models
+Here is a few simple models. They are trained on 300K news + 300k wikipedia sentences. We strongly recomend to train your own model, at least on a few million sentences to achieve better quality. See [Train](#train) secion above.
+
+ - [en.tar.gz](https://github.com/bakwc/JamSpell-models/raw/master/en.tar.gz) (35Mb)
+ - [fr.tar.gz](https://github.com/bakwc/JamSpell-models/raw/master/fr.tar.gz) (31Mb)
+ - [ru.tar.gz](https://github.com/bakwc/JamSpell-models/raw/master/ru.tar.gz) (38Mb)
