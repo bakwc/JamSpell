@@ -10,7 +10,7 @@
 
 JamSpell is a spell checking library with following features:
 
-- **accurate** - it consider words surroundings for better correction
+- **accurate** - it consider words surroundings (context) for better correction
 - **fast** - near 2K words per second
 - **multi-language** - it's written in C++ and available for many languages with swig bindings
 
