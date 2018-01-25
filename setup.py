@@ -43,7 +43,7 @@ class Swig3Ext(build_ext):
     def find_swig(self):
         swigBinary = find_executable('swig3.0') or find_executable('swig')
         assert swigBinary is not None
-        assert subprocess.check_output([swigBinary, "-version"]).find('SWIG Version 3') != -1
+        assert subprocess.check_output([swigBinary, "-version"]).find(b'SWIG Version 3') != -1
         return swigBinary
 
 VERSION = '0.0.8'
