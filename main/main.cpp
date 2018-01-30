@@ -25,7 +25,10 @@ int Train(const std::string& alphabetFile,
 int Score(const std::string& modelFile) {
     TLangModel model;
     std::cerr << "[info] loading model" << std::endl;
-    model.Load(modelFile);
+    if (!model.Load(modelFile)) {
+        std::cerr << "[error] failed to load model" << std::endl;
+        return 42;
+    }
     std::cerr << "[info] loaded" << std::endl;
     std::cerr << ">> ";
     for (std::string line; std::getline(std::cin, line);) {
@@ -39,7 +42,10 @@ int Score(const std::string& modelFile) {
 int Correct(const std::string& modelFile) {
     TSpellCorrector corrector;
     std::cerr << "[info] loading model" << std::endl;
-    corrector.LoadLangModel(modelFile);
+    if (!corrector.LoadLangModel(modelFile)) {
+        std::cerr << "[error] failed to load model" << std::endl;
+        return 42;
+    }
     std::cerr << "[info] loaded" << std::endl;
     std::cerr << ">> ";
     for (std::string line; std::getline(std::cin, line);) {
