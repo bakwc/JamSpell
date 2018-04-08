@@ -21,8 +21,6 @@ class STATE:
     DOT = 2
     SPACE = 3
 
-def generateTypos(text):
-    return map(typo_model.generateTypo, text)
 
 class Corrector(object):
     def __init__(self):

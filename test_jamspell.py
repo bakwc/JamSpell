@@ -1,8 +1,10 @@
 import os
 import pytest
-import jamspell
+#import jamspell
 from evaluate import generate_dataset
 from evaluate.evaluate import evaluateJamspell
+from evaluate.typo_model import generateTypos
+from evaluate.utils import loadText
 
 
 def removeFile(fname):
@@ -40,3 +42,15 @@ def test_evaluation(sourceFile, alphabetFile, expected):
     trainLangModel(TEMP_TRAIN, alphabetFile, TEMP_MODEL)
     results = evaluateJamspell(TEMP_MODEL, TEMP_TEST, alphabetFile)
     assert results == expected
+
+@pytest.mark.parametrize('sourceFile', ['sherlockholmes.txt'])
+def test_generateTypos(sourceFile):
+    origText = loadText(TEST_DATA + sourceFile)
+    errText = generateTypos(origText)
+
+    assert len(origText) == len(errText)
+
+    for w in errText:
+        assert isinstance(w, unicode) or \
+            isinstance(w, type(None)) or \
+            isinstance(w, tuple)

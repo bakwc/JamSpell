@@ -16,6 +16,8 @@ REMOVE_PROB = 0.1
 TRANSPOSE_PROB = 0.1
 TRANSPOSE_DISTANCE_PROB = [0.8, 0.15, 0.04, 0.01]
 EPSILON = 0.001
+WORD_SPLIT_CHANCE = 0.03
+WORD_JOIN_CHANCE = 0.03
 
 
 assert 1.0 >= TYPO_PROB > 0
@@ -94,3 +96,39 @@ def generateTypo(word):
         typoType = weightedChoice(enumerate(TYPO_TYPES))
         word = TYPO_GENERATORS[typoType](word)
     return word
+
+
+# orig:  the quick brown fox jumped over the lazy dog
+# err:   the qrick brown fox jumpd over the lazy dag
+# comp:  the qri ck brown fox jumpd over the lazydag
+
+#        0    1      2      3    4       5     6    7     8
+# orig:  the, quick, brown, fox, jumped, over, the, lazy, dog
+
+#       0    1          2      3    4      5     6    7        8
+# comp: the, (qri, ck), brown, fox, jumpd, over, the, lazydag, None
+
+
+def generateTypos(origText):
+    errText = map(generateTypo, origText)
+    compText = []
+    i = 0
+    while i < len(errText) - 1:
+        word = errText[i]
+        nextWord = errText[i + 1]
+        if random.random() < WORD_SPLIT_CHANCE and len(word) >= 2:
+            pos = random.randint(1, len(word) - 1)
+            w1 = word[:pos]
+            w2 = word[pos:]
+            compText.append((w1, w2))
+            i += 1
+            continue
+        if random.random() < WORD_JOIN_CHANCE and word != '.' and nextWord != '.':
+            compText.append(word + nextWord)
+            compText.append(None)
+            i += 2
+            continue
+        compText.append(word)
+        i += 1
+    compText.append(errText[-1])
+    return compText
