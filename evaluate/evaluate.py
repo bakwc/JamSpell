@@ -44,6 +44,8 @@ class HunspellCorrector(Corrector):
 
     def correct(self, sentence, position):
         word = sentence[position]
+        if word is None or isinstance(word, tuple):
+            return None
         if self.__model.spell(word):
             return word
         return self.__model.suggest(word)
@@ -57,6 +59,8 @@ class NorvigCorrector(Corrector):
     def correct(self, sentence, position):
         word = sentence[position]
         import norvig_spell
+        if word is None or isinstance(word, tuple):
+            return None
         return norvig_spell.correction(word)
 
 class ContextCorrector(Corrector):
@@ -132,7 +136,7 @@ def evaluateCorrector(correctorName, corrector, originalSentences, erroredSenten
                 origErrors += 1
                 if fixedWord == originalWord:
                     fixedErrors += 1
-                if fixedWord != erroredWord and originalWord in fixedCandidates:
+                if fixedWord != erroredWord and originalWord in fixedWords:
                     topNfixed += 1
             else:
                 totalNotTouched += 1
@@ -190,7 +194,7 @@ def evaluateJamspell(modelFile, testText, alphabetFile, maxWords = 50000):
     corrector = JamspellCorrector(modelFile)
     random.seed(42)
     originalText = loadText(testText)
-    erroredText = generateTypos(originalText)
+    erroredText = typo_model.generateTypos(originalText)
     assert len(originalText) == len(erroredText)
     originalSentences = generateSentences(originalText)
     erroredSentences = generateSentences(erroredText)
@@ -246,7 +250,7 @@ def main():
     originalText = loadText(args.file)
 
     print '[info] generating typos'
-    erroredText = generateTypos(originalText)
+    erroredText = typo_model.generateTypos(originalText)
 
     assert len(originalText) == len(erroredText)
 
