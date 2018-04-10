@@ -10,6 +10,7 @@ void PrintUsage(const char** argv) {
     std::cerr << "    train alphabet.txt dataset.txt resultModel.bin  - train model" << std::endl;
     std::cerr << "    score model.bin - input sentences and get score" << std::endl;
     std::cerr << "    correct model.bin - input sentences and get corrected one" << std::endl;
+    std::cerr << "    fix model.bin input.txt output.txt - automatically fix txt file" << std::endl;
 }
 
 int Train(const std::string& alphabetFile,
@@ -36,6 +37,26 @@ int Score(const std::string& modelFile) {
         std::cerr << model.Score(wtext) << "\n";
         std::cerr << ">> ";
     }
+    return 0;
+}
+
+int Fix(const std::string& modelFile,
+        const std::string& inputFile,
+        const std::string& outFile)
+{
+    TSpellCorrector corrector;
+    std::cerr << "[info] loading model" << std::endl;
+    if (!corrector.LoadLangModel(modelFile)) {
+        std::cerr << "[error] failed to load model" << std::endl;
+        return 42;
+    }
+    std::cerr << "[info] loaded" << std::endl;
+    std::wstring text = UTF8ToWide(LoadFile(inputFile));
+    uint64_t startTime = GetCurrentTimeMs();
+    std::wstring result = corrector.FixFragment(text);
+    uint64_t finishTime = GetCurrentTimeMs();
+    SaveFile(outFile, WideToUTF8(result));
+    std::cerr << "[info] process time: " << finishTime - startTime << "ms" << std::endl;
     return 0;
 }
 
@@ -86,6 +107,15 @@ int main(int argc, const char** argv) {
         }
         std::string modelFile = argv[2];
         return Correct(modelFile);
+    } else if (mode == "fix") {
+        if (argc < 5) {
+            PrintUsage(argv);
+            return 42;
+        }
+        std::string modelFile = argv[2];
+        std::string inFile = argv[3];
+        std::string outFile = argv[4];
+        return Fix(modelFile, inFile, outFile);
     }
 
     PrintUsage(argv);

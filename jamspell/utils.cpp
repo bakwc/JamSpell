@@ -26,6 +26,11 @@ std::string LoadFile(const std::string& fileName) {
     return out.str();
 }
 
+void SaveFile(const std::string& fileName, const std::string& data) {
+    std::ofstream out(fileName, std::ios::binary);
+    out << data;
+}
+
 TTokenizer::TTokenizer()
     : Locale("en_US.utf-8")
 {
