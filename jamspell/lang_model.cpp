@@ -4,6 +4,7 @@
 #include <fstream>
 #include <sstream>
 #include <ostream>
+#include <cstring>
 
 #include "lang_model.hpp"
 
