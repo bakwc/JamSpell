@@ -271,7 +271,7 @@ void TLangModel::Clear() {
     Tokenizer.Clear();
 }
 
-const std::unordered_map<std::wstring, TWordId>& TLangModel::GetWordToId() {
+const TRobinHash& TLangModel::GetWordToId() {
     return WordToId;
 }
 
