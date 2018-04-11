@@ -95,25 +95,7 @@ TWords TSpellCorrector::GetCandidatesRaw(const TWords& sentence, size_t position
 
     std::unordered_set<TWord, TWordHashPtr> uniqueCandidates(candidates.begin(), candidates.end());
 
-    if (uniqueCandidates.size() > 14) {
-        using TCountCand = std::pair<TCount, TWord>;
-        std::vector<TCountCand> candidateCounts;
-        for (auto&& c: uniqueCandidates) {
-            TCount cnt = LangModel.GetWordCount(LangModel.GetWordIdNoCreate(c));
-            candidateCounts.push_back(std::make_pair(cnt, c));
-        }
-        uniqueCandidates.clear();
-        std::sort(candidateCounts.begin(), candidateCounts.end(), [](const TCountCand& a, const TCountCand& b) {
-            return a.first > b.first;
-        });
-
-        for (size_t i = 0; i < 14; ++ i) {
-            uniqueCandidates.insert(candidateCounts[i].second);
-        }
-        uniqueCandidates.insert(w);
-    }
-
-    //std::cerr << "candidates: " << candidates.size() << " " << uniqueCandidates.size() << "\n";
+    FilterCandidatesByFrequency(uniqueCandidates, w);
 
     std::vector<TScoredWord> scoredCandidates;
     scoredCandidates.reserve(uniqueCandidates.size());
@@ -156,6 +138,28 @@ TWords TSpellCorrector::GetCandidatesRaw(const TWords& sentence, size_t position
         candidates.push_back(s.Word);
     }
     return candidates;
+}
+
+void TSpellCorrector::FilterCandidatesByFrequency(std::unordered_set<TWord, TWordHashPtr>& uniqueCandidates, TWord origWord) const {
+    if (uniqueCandidates.size() <= MaxCandiatesToCheck) {
+        return;
+    }
+
+    using TCountCand = std::pair<TCount, TWord>;
+    std::vector<TCountCand> candidateCounts;
+    for (auto&& c: uniqueCandidates) {
+        TCount cnt = LangModel.GetWordCount(LangModel.GetWordIdNoCreate(c));
+        candidateCounts.push_back(std::make_pair(cnt, c));
+    }
+    uniqueCandidates.clear();
+    std::sort(candidateCounts.begin(), candidateCounts.end(), [](const TCountCand& a, const TCountCand& b) {
+        return a.first > b.first;
+    });
+
+    for (size_t i = 0; i < MaxCandiatesToCheck; ++ i) {
+        uniqueCandidates.insert(candidateCounts[i].second);
+    }
+    uniqueCandidates.insert(origWord);
 }
 
 std::vector<std::wstring> TSpellCorrector::GetCandidates(const std::vector<std::wstring>& sentence, size_t position) const {
@@ -244,6 +248,10 @@ std::wstring TSpellCorrector::FixFragmentNormalized(const std::wstring& text) co
 void TSpellCorrector::SetPenalty(double knownWordsPenaly, double unknownWordsPenalty) {
     KnownWordsPenalty = knownWordsPenaly;
     UnknownWordsPenalty = unknownWordsPenalty;
+}
+
+void TSpellCorrector::SetMaxCandiatesToCheck(size_t maxCandidatesToCheck) {
+    MaxCandiatesToCheck = maxCandidatesToCheck;
 }
 
 template<typename T>

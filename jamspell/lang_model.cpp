@@ -376,12 +376,6 @@ TCount GetGramHashCount(T key,
                         const TPerfectHash& ph,
                         const std::vector<std::pair<uint16_t, uint16_t>>& buckets)
 {
-//    static std::map<T, TCount> cache;
-//    auto it = cache.find(key);
-//    if (it != cache.end()) {
-//        return it->second;
-//    }
-
     constexpr int TMP_BUF_SIZE = 128;
     static char tmpBuff[TMP_BUF_SIZE];
     static MemStream tmpBuffStream(tmpBuff, TMP_BUF_SIZE - 1);
@@ -400,7 +394,6 @@ TCount GetGramHashCount(T key,
     if (data.first == CityHash16(tmpBuff, tmpBuffStream.Size())) {
         res = UnpackInt32(data.second);
     }
-//    cache[key] = res;
     return res;
 }
 
@@ -410,16 +403,6 @@ TCount TLangModel::GetGram1HashCount(TWordId word) const {
     }
     TGram1Key key = word;
     return GetGramHashCount(key, PerfectHash, Buckets);
-//    static std::map<TWordId, TCount> cache;
-//    TCount res = 0;
-//    auto it = cache.find(key);
-//    if (it == cache.end()) {
-//        res = GetGramHashCount(key, PerfectHash, Buckets);
-//        cache[key] = res;
-//    } else {
-//        res = it->second;
-//    }
-//    return res;
 }
 
 TCount TLangModel::GetGram2HashCount(TWordId word1, TWordId word2) const {
