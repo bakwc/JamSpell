@@ -61,5 +61,6 @@ uint64_t GetCurrentTimeMs();
 void ToLower(std::wstring& text);
 wchar_t MakeUpperIfRequired(wchar_t orig, wchar_t sample);
 uint16_t CityHash16(const std::string& str);
+uint16_t CityHash16(const char* str, size_t size);
 
 } // NJamSpell

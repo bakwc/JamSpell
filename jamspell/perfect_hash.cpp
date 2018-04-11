@@ -64,6 +64,12 @@ uint32_t TPerfectHash::Hash(const std::string& value) const {
     return PHF::hash<std::string>((phf*)Phf, value);
 }
 
+uint32_t TPerfectHash::Hash(const char* value, size_t size) const {
+    assert(Phf && "Not initialized");
+    phf_string_t phfValue = {value, size};
+    return PHF::hash<phf_string_t>((phf*)Phf, phfValue);
+}
+
 uint32_t TPerfectHash::BucketsNumber() const {
     const phf* p = (phf*)Phf;
     return p->m;

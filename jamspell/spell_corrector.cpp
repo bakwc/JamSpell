@@ -95,8 +95,28 @@ TWords TSpellCorrector::GetCandidatesRaw(const TWords& sentence, size_t position
 
     std::unordered_set<TWord, TWordHashPtr> uniqueCandidates(candidates.begin(), candidates.end());
 
+    if (uniqueCandidates.size() > 14) {
+        using TCountCand = std::pair<TCount, TWord>;
+        std::vector<TCountCand> candidateCounts;
+        for (auto&& c: uniqueCandidates) {
+            TCount cnt = LangModel.GetWordCount(LangModel.GetWordIdNoCreate(c));
+            candidateCounts.push_back(std::make_pair(cnt, c));
+        }
+        uniqueCandidates.clear();
+        std::sort(candidateCounts.begin(), candidateCounts.end(), [](const TCountCand& a, const TCountCand& b) {
+            return a.first > b.first;
+        });
+
+        for (size_t i = 0; i < 14; ++ i) {
+            uniqueCandidates.insert(candidateCounts[i].second);
+        }
+        uniqueCandidates.insert(w);
+    }
+
+    //std::cerr << "candidates: " << candidates.size() << " " << uniqueCandidates.size() << "\n";
+
     std::vector<TScoredWord> scoredCandidates;
-    scoredCandidates.reserve(candidates.size());
+    scoredCandidates.reserve(uniqueCandidates.size());
 
     for (TWord cand: uniqueCandidates) {
         TWords candSentence;
@@ -265,7 +285,7 @@ TWords TSpellCorrector::Edits2(const TWord& word, bool lastLevel) const {
         // delete
         if (i < w.size()) {
             std::wstring s = w.substr(0, i) + w.substr(i+1);
-            TWord c = LangModel.GetWord(s);
+            TWord c = LangModel.GetWord(s); // todo: optimize with another hash table
             if (c.Ptr && c.Len) {
                 result.push_back(c);
             }
@@ -304,6 +324,8 @@ TWords TSpellCorrector::Edits2(const TWord& word, bool lastLevel) const {
                 }
             }
         }
+
+        // todo: optimize with bloom filter
 
         // inserts
         {
