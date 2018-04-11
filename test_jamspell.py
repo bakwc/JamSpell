@@ -39,7 +39,4 @@ def test_evaluation(sourceFile, alphabetFile, expected):
     generate_dataset.generateDatasetTxt(TEST_DATA + sourceFile, TEMP)
     trainLangModel(TEMP_TRAIN, alphabetFile, TEMP_MODEL)
     results = evaluateJamspell(TEMP_MODEL, TEMP_TEST, alphabetFile)
-
-    print ' === res:', results
-
     assert results == expected
