@@ -94,7 +94,6 @@ private:
     const TWordId UnknownWordId = std::numeric_limits<TWordId>::max();
     double K = LANG_MODEL_DEFAULT_K;
     TRobinHash WordToId;
-    //std::unordered_map<std::wstring, TWordId> WordToId;
     std::vector<const std::wstring*> IdToWord;
     TWordId LastWordID = 0;
     TWordId TotalWords = 0;
