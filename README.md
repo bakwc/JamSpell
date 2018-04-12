@@ -5,7 +5,7 @@
 [travis-image]: https://travis-ci.org/bakwc/JamSpell.svg?branch=master
 [travis]: https://travis-ci.org/bakwc/JamSpell
 
-[release-image]: https://img.shields.io/badge/release-0.0.9-blue.svg?style=flat
+[release-image]: https://img.shields.io/badge/release-0.0.10-blue.svg?style=flat
 [releases]: https://github.com/bakwc/JamSpell/releases
 
 JamSpell is a spell checking library with following features:
