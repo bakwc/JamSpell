@@ -4,6 +4,7 @@
 #include <fstream>
 #include <sstream>
 #include <ostream>
+#include <cstring>
 
 #include "lang_model.hpp"
 
@@ -11,6 +12,35 @@
 
 
 namespace NJamSpell {
+
+class MemStream: public std::basic_streambuf<char> {
+public:
+    MemStream(char* buff, long maxSize)
+        : Buff(buff)
+        , MaxSize(maxSize)
+        , Pos(0)
+    {
+    }
+    long xsputn(const char* s, long n) override {
+        if (n <= 0) {
+            return n;
+        }
+        long toCopy = std::min(n, MaxSize - Pos);
+        memcpy(Buff + Pos, s, toCopy);
+        Pos += toCopy;
+        return n;
+    }
+    void Reset() {
+        Pos = 0;
+    }
+    long Size() const {
+        return Pos;
+    }
+private:
+    char* Buff;
+    long MaxSize;
+    long Pos;
+};
 
 template<typename T>
 std::string DumpKey(const T& key) {
@@ -241,7 +271,7 @@ void TLangModel::Clear() {
     Tokenizer.Clear();
 }
 
-const std::unordered_map<std::wstring, TWordId>& TLangModel::GetWordToId() {
+const TRobinHash& TLangModel::GetWordToId() {
     return WordToId;
 }
 
@@ -347,14 +377,25 @@ TCount GetGramHashCount(T key,
                         const TPerfectHash& ph,
                         const std::vector<std::pair<uint16_t, uint16_t>>& buckets)
 {
-    std::string s = DumpKey(key);
-    uint32_t bucket = ph.Hash(s);
+    constexpr int TMP_BUF_SIZE = 128;
+    static char tmpBuff[TMP_BUF_SIZE];
+    static MemStream tmpBuffStream(tmpBuff, TMP_BUF_SIZE - 1);
+    static std::ostream out(&tmpBuffStream);
+
+    tmpBuffStream.Reset();
+
+    NHandyPack::Dump(out, key);
+
+    uint32_t bucket = ph.Hash(tmpBuff, tmpBuffStream.Size());
+
     assert(bucket < ph.BucketsNumber());
     const std::pair<uint16_t, uint16_t>& data = buckets[bucket];
-    if (data.first == CityHash16(s)) {
-        return UnpackInt32(data.second);
+
+    TCount res = TCount();
+    if (data.first == CityHash16(tmpBuff, tmpBuffStream.Size())) {
+        res = UnpackInt32(data.second);
     }
-    return TCount();
+    return res;
 }
 
 TCount TLangModel::GetGram1HashCount(TWordId word) const {

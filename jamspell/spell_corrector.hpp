@@ -17,7 +17,9 @@ public:
     std::wstring FixFragment(const std::wstring& text) const;
     std::wstring FixFragmentNormalized(const std::wstring& text) const;
     void SetPenalty(double knownWordsPenaly, double unknownWordsPenalty);
+    void SetMaxCandiatesToCheck(size_t maxCandidatesToCheck);
 private:
+    void FilterCandidatesByFrequency(std::unordered_set<NJamSpell::TWord, NJamSpell::TWordHashPtr>& uniqueCandidates, NJamSpell::TWord origWord) const;
     NJamSpell::TWords Edits(const NJamSpell::TWord& word) const;
     NJamSpell::TWords Edits2(const NJamSpell::TWord& word, bool lastLevel = true) const;
     void Inserts(const std::wstring& w, NJamSpell::TWords& result) const;
@@ -31,6 +33,7 @@ private:
     std::unique_ptr<TBloomFilter> Deletes2;
     double KnownWordsPenalty = 20.0;
     double UnknownWordsPenalty = 5.0;
+    size_t MaxCandiatesToCheck = 14;
 };
 
 

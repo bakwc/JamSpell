@@ -156,5 +156,9 @@ uint16_t CityHash16(const std::string& str) {
     return hash % std::numeric_limits<uint16_t>::max();
 }
 
+uint16_t CityHash16(const char* str, size_t size) {
+    uint32_t hash = CityHash32(str, size);
+    return hash % std::numeric_limits<uint16_t>::max();
+}
 
 } // NJamSpell

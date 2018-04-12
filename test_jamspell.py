@@ -29,10 +29,10 @@ def trainLangModel(trainText, alphabetFile, modelFile):
     corrector.TrainLangModel(trainText, alphabetFile, modelFile)
 
 @pytest.mark.parametrize('sourceFile,alphabetFile,expected', [
-    ('sherlockholmes.txt', 'alphabet_en.txt', (0.04519985057900635, 0.7005163511187608, 0.014246804944479363,
-                                               0.01363466567052671, 0.7676419965576592)),
+    ('sherlockholmes.txt', 'alphabet_en.txt', (0.04538662682106836, 0.6987951807228916, 0.014246804944479363,
+                                               0.013821441912588718, 0.76592082616179)),
     ('kapitanskaya_dochka.txt', 'alphabet_ru.txt', (0.12330535829567463, 0.391304347826087, 0.03866565579984837,
-                                                    0.05422853453841188, 0.4391304347826087)),
+                                                    0.05358295674628793, 0.4391304347826087)),
 ])
 def test_evaluation(sourceFile, alphabetFile, expected):
     alphabetFile = TEST_DATA + alphabetFile

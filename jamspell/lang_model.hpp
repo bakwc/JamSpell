@@ -7,6 +7,7 @@
 #include <limits>
 
 #include <contrib/handypack/handypack.hpp>
+#include <contrib/tsl/robin_map.h>
 #include "utils.hpp"
 #include "perfect_hash.hpp"
 
@@ -43,6 +44,17 @@ public:
   }
 };
 
+class TRobinSerializer: public NHandyPack::TUnorderedMapSerializer<tsl::robin_map<std::wstring, TWordId>, std::wstring, TWordId> {};
+class TRobinHash: public tsl::robin_map<std::wstring, TWordId> {
+public:
+    inline virtual void Dump(std::ostream& out) const {
+        TRobinSerializer::Dump(out, *this);
+    }
+    inline virtual void Load(std::istream& in) {
+        TRobinSerializer::Load(in, *this);
+    }
+};
+
 class TLangModel {
 public:
     bool Train(const std::string& fileName, const std::string& alphabetFile);
@@ -56,7 +68,7 @@ public:
     bool Load(const std::string& modelFileName);
     void Clear();
 
-    const std::unordered_map<std::wstring, TWordId>& GetWordToId();
+    const TRobinHash& GetWordToId();
 
     TWordId GetWordId(const TWord& word);
     TWordId GetWordIdNoCreate(const TWord& word) const;
@@ -81,7 +93,7 @@ private:
 private:
     const TWordId UnknownWordId = std::numeric_limits<TWordId>::max();
     double K = LANG_MODEL_DEFAULT_K;
-    std::unordered_map<std::wstring, TWordId> WordToId;
+    TRobinHash WordToId;
     std::vector<const std::wstring*> IdToWord;
     TWordId LastWordID = 0;
     TWordId TotalWords = 0;
