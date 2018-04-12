@@ -42,7 +42,7 @@ JamSpell is a spell checking library with following features:
     <td>79.53%</td>
     <td>84.10%</td>
     <td>0.64%</td>
-    <td>4016</td>
+    <td>4854</td>
   </tr>
   <tr>
     <td>Norvig</td>
@@ -103,7 +103,7 @@ To ensure that our model is not too overfitted for wikipedia+news we checked it 
     <td>72.03%</td>
     <td>79.73%</td>
     <td>0.50%</td>
-    <td>4552</td>
+    <td>5524</td>
   </tr>
   <tr>
     <td>Norvig</td>
