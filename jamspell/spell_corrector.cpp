@@ -293,7 +293,7 @@ TWords TSpellCorrector::Edits2(const TWord& word, bool lastLevel) const {
         // delete
         if (i < w.size()) {
             std::wstring s = w.substr(0, i) + w.substr(i+1);
-            TWord c = LangModel.GetWord(s); // todo: optimize with another hash table
+            TWord c = LangModel.GetWord(s);
             if (c.Ptr && c.Len) {
                 result.push_back(c);
             }
@@ -332,8 +332,6 @@ TWords TSpellCorrector::Edits2(const TWord& word, bool lastLevel) const {
                 }
             }
         }
-
-        // todo: optimize with bloom filter
 
         // inserts
         {
