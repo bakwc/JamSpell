@@ -152,7 +152,7 @@ void TSpellCorrector::FilterCandidatesByFrequency(std::unordered_set<TWord, TWor
         candidateCounts.push_back(std::make_pair(cnt, c));
     }
     uniqueCandidates.clear();
-    std::sort(candidateCounts.begin(), candidateCounts.end(), [](const TCountCand& a, const TCountCand& b) {
+    std::stable_sort(candidateCounts.begin(), candidateCounts.end(), [](const TCountCand& a, const TCountCand& b) {
         return a.first > b.first;
     });
 
