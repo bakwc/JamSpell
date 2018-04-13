@@ -75,7 +75,10 @@ public:
     TWordId GetWordId(const TWord& word);
     TWordId GetWordIdNoCreate(const TWord& word) const;
     TWord GetWordById(TWordId wid) const;
+    const std::wstring& GetWstrById(TWordId wid) const;
     TCount GetWordCount(TWordId wid) const;
+
+    TWordId GetLastWordID() const;
 
     uint64_t GetCheckSum() const;
 

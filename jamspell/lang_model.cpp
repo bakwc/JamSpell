@@ -321,8 +321,17 @@ TWord TLangModel::GetWordById(TWordId wid) const {
     return TWord(*IdToWord[wid]);
 }
 
+const std::wstring& TLangModel::GetWstrById(TWordId wid) const {
+    assert(wid < IdToWord.size());
+    return *IdToWord[wid];
+}
+
 TCount TLangModel::GetWordCount(TWordId wid) const {
     return GetGram1HashCount(wid);
+}
+
+TWordId TLangModel::GetLastWordID() const {
+    return LastWordID;
 }
 
 uint64_t TLangModel::GetCheckSum() const {

@@ -254,6 +254,22 @@ void TSpellCorrector::SetMaxCandiatesToCheck(size_t maxCandidatesToCheck) {
     MaxCandiatesToCheck = maxCandidatesToCheck;
 }
 
+void TSpellCorrector::AddTextFragment(const std::wstring& text, uint32_t count) {
+    TWordId startWordID = LangModel.GetLastWordID();
+    LangModel.AddTextFragment(text, count);
+    TWordId endWordID = LangModel.GetLastWordID();
+    for (TWordId wid = startWordID; wid < endWordID; ++wid) {
+        const std::wstring& w = LangModel.GetWstrById(wid);
+        auto deletes = GetDeletes2(w);
+        for (auto&& w1: deletes) {
+            Deletes1->Insert(WideToUTF8(w1.back()));
+            for (size_t i = 0; i < w1.size() - 1; ++i) {
+                Deletes2->Insert(WideToUTF8(w1[i]));
+            }
+        }
+    }
+}
+
 template<typename T>
 inline void AddVec(T& target, const T& source) {
     target.insert(target.end(), source.begin(), source.end());
