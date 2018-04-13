@@ -10,3 +10,4 @@
 *.tar.gz
 *.spell
 *.cache
+.DS_Store

@@ -152,13 +152,17 @@ wchar_t MakeUpperIfRequired(wchar_t orig, wchar_t sample) {
 }
 
 uint16_t CityHash16(const std::string& str) {
-    uint32_t hash = CityHash32(&str[0], str.size());
+    uint32_t hash = ::CityHash32(&str[0], str.size());
     return hash % std::numeric_limits<uint16_t>::max();
 }
 
 uint16_t CityHash16(const char* str, size_t size) {
-    uint32_t hash = CityHash32(str, size);
+    uint32_t hash = ::CityHash32(str, size);
     return hash % std::numeric_limits<uint16_t>::max();
+}
+
+uint32_t CityHash32(const char *str, size_t size) {
+    return ::CityHash32(str, size);
 }
 
 } // NJamSpell

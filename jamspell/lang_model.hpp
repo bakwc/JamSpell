@@ -55,6 +55,8 @@ public:
     }
 };
 
+using TRuntimeModelCounts = tsl::robin_map<uint32_t, TCount>;
+
 class TLangModel {
 public:
     bool Train(const std::string& fileName, const std::string& alphabetFile);
@@ -76,6 +78,8 @@ public:
     TCount GetWordCount(TWordId wid) const;
 
     uint64_t GetCheckSum() const;
+
+    void AddTextFragment(const std::wstring& text, uint32_t count = 1);
 
     HANDYPACK(WordToId, LastWordID, TotalWords, VocabSize,
               PerfectHash, Buckets, Tokenizer, CheckSum)
@@ -102,6 +106,9 @@ private:
     std::vector<std::pair<uint16_t, uint16_t>> Buckets;
     TPerfectHash PerfectHash;
     uint64_t CheckSum;
+
+    TWordId BaseModelLastWordID = 0;
+    TRuntimeModelCounts RuntimeModelCounts;
 };
 
 

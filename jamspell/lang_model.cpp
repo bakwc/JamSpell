@@ -260,6 +260,7 @@ bool TLangModel::Load(const std::string& modelFileName) {
     for (auto&& it: WordToId) {
         IdToWord[it.second] = &it.first;
     }
+    BaseModelLastWordID = LastWordID;
     return true;
 }
 
@@ -328,6 +329,35 @@ uint64_t TLangModel::GetCheckSum() const {
     return CheckSum;
 }
 
+template <typename T>
+inline void IncCount(TRuntimeModelCounts& counts, const T& key, TCount value) {
+    std::string tmp = DumpKey(key);
+    uint32_t cityHash32 = CityHash32(&tmp[0], tmp.size());
+    counts[cityHash32] += value;
+}
+
+void TLangModel::AddTextFragment(const std::wstring& text, uint32_t count) {
+    std::wstring trainText = text;
+    ToLower(trainText);
+    TSentences sentences = Tokenizer.Process(trainText);
+    TIdSentences sentenceIds = ConvertToIds(sentences);
+
+    for (size_t i = 0; i < sentenceIds.size(); ++i) {
+        const TWordIds& words = sentenceIds[i];
+        for (auto w: words) {
+            IncCount(RuntimeModelCounts, w, count);
+        }
+        for (ssize_t j = 0; j < (ssize_t)words.size() - 1; ++j) {
+            TGram2Key key(words[j], words[j+1]);
+            IncCount(RuntimeModelCounts, key, count);
+        }
+        for (ssize_t j = 0; j < (ssize_t)words.size() - 2; ++j) {
+            TGram3Key key(words[j], words[j+1], words[j+2]);
+            IncCount(RuntimeModelCounts, key, count);
+        }
+    }
+}
+
 TWord TLangModel::GetWord(const std::wstring& word) const {
     auto it = WordToId.find(word);
     if (it != WordToId.end()) {
@@ -372,10 +402,18 @@ double TLangModel::GetGram3Prob(TWordId word1, TWordId word2, TWordId word3) con
     return countsGram3 / countsGram2;
 }
 
+enum ECheckPolicy {
+    CP_Both = 0,
+    CP_Base = 1,
+    CP_Runtime = 2,
+};
+
 template<typename T>
 TCount GetGramHashCount(T key,
                         const TPerfectHash& ph,
-                        const std::vector<std::pair<uint16_t, uint16_t>>& buckets)
+                        const TRuntimeModelCounts& runtimeModelCounts,
+                        const std::vector<std::pair<uint16_t, uint16_t>>& buckets,
+                        ECheckPolicy checkPolicy)
 {
     constexpr int TMP_BUF_SIZE = 128;
     static char tmpBuff[TMP_BUF_SIZE];
@@ -392,8 +430,17 @@ TCount GetGramHashCount(T key,
     const std::pair<uint16_t, uint16_t>& data = buckets[bucket];
 
     TCount res = TCount();
-    if (data.first == CityHash16(tmpBuff, tmpBuffStream.Size())) {
-        res = UnpackInt32(data.second);
+    uint32_t cityHash32 = CityHash32(tmpBuff, tmpBuffStream.Size());
+    uint16_t cityHash16 = cityHash32 % std::numeric_limits<uint16_t>::max();
+    if (checkPolicy == CP_Base || checkPolicy == CP_Both) {
+        if (data.first == cityHash16) {
+            res += UnpackInt32(data.second);
+        }
+    }
+    if (checkPolicy == CP_Runtime || checkPolicy == CP_Both) {
+        auto it = runtimeModelCounts.find(cityHash32);
+        assert(checkPolicy != CP_Runtime || it != runtimeModelCounts.end());
+        res += it->second;
     }
     return res;
 }
@@ -403,7 +450,8 @@ TCount TLangModel::GetGram1HashCount(TWordId word) const {
         return TCount();
     }
     TGram1Key key = word;
-    return GetGramHashCount(key, PerfectHash, Buckets);
+    ECheckPolicy policy = key >= BaseModelLastWordID ? CP_Runtime : CP_Base;
+    return GetGramHashCount(key, PerfectHash, RuntimeModelCounts, Buckets, policy);
 }
 
 TCount TLangModel::GetGram2HashCount(TWordId word1, TWordId word2) const {
@@ -411,7 +459,7 @@ TCount TLangModel::GetGram2HashCount(TWordId word1, TWordId word2) const {
         return TCount();
     }
     TGram2Key key({word1, word2});
-    return GetGramHashCount(key, PerfectHash, Buckets);
+    return GetGramHashCount(key, PerfectHash, RuntimeModelCounts, Buckets, CP_Both);
 }
 
 TCount TLangModel::GetGram3HashCount(TWordId word1, TWordId word2, TWordId word3) const {
@@ -419,7 +467,7 @@ TCount TLangModel::GetGram3HashCount(TWordId word1, TWordId word2, TWordId word3
         return TCount();
     }
     TGram3Key key(word1, word2, word3);
-    return GetGramHashCount(key, PerfectHash, Buckets);
+    return GetGramHashCount(key, PerfectHash, RuntimeModelCounts, Buckets, CP_Both);
 }
 
 } // NJamSpell
