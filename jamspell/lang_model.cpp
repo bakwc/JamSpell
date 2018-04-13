@@ -437,10 +437,13 @@ TCount GetGramHashCount(T key,
             res += UnpackInt32(data.second);
         }
     }
+
     if (checkPolicy == CP_Runtime || checkPolicy == CP_Both) {
         auto it = runtimeModelCounts.find(cityHash32);
         assert(checkPolicy != CP_Runtime || it != runtimeModelCounts.end());
-        res += it->second;
+        if (it != runtimeModelCounts.end()) {
+            res += it->second;
+        }
     }
     return res;
 }
