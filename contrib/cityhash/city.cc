@@ -102,7 +102,7 @@ static uint32 UNALIGNED_LOAD32(const char *p) {
 #endif
 
 #if !defined(LIKELY)
-#if HAVE_BUILTIN_EXPECT
+#if HAVE_BUILTIN_EXPECT && !defined(_MSC_VER)
 #define LIKELY(x) (__builtin_expect(!!(x), 1))
 #else
 #define LIKELY(x) (x)
