@@ -7,7 +7,8 @@ before_install:
     - sudo unlink /usr/bin/gcc && sudo ln -s /usr/bin/gcc-5 /usr/bin/gcc
     - gcc --version
     - g++ --version
-    - sudo apt-get -qq update
+    - sudo rm -rf /var/lib/apt/lists/partial/*
+    - sudo apt -o Acquire::https::No-Cache=True -o Acquire::http::No-Cache=True update
     - sudo apt-get install -y cmake
     - sudo apt-get install -y libgtest-dev
     - sudo apt-get install -y python2.7 python-pip
