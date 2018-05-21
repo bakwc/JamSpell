@@ -10,6 +10,9 @@
 
 #include <contrib/cityhash/city.h>
 
+#ifndef ssize_t
+#define ssize_t int
+#endif
 
 namespace NJamSpell {
 
@@ -21,7 +24,7 @@ public:
         , Pos(0)
     {
     }
-    long xsputn(const char* s, long n) override {
+    long xsputn(const char* s, long n) {
         if (n <= 0) {
             return n;
         }
