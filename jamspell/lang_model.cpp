@@ -204,101 +204,98 @@ bool TLangModel::LoadNGrams(const std::string& gram1File,
             std::cerr << "[error] failed to load alphabet" << std::endl;
             return false;
         }
-//        std::wstring trainText = UTF8ToWide(LoadFile(fileName));
-//        ToLower(trainText);
-//        TSentences sentences = Tokenizer.Process(trainText);
-//        if (sentences.empty()) {
-//            std::cerr << "[error] no sentences" << std::endl;
-//            return false;
-//        }
-
-//        TIdSentences sentenceIds = ConvertToIds(sentences);
-//
-//        assert(sentences.size() == sentenceIds.size());
-//        {
-//            std::wstring tmp;
-//            trainText.swap(tmp);
-//        }
-//        {
-//            TSentences tmp;
-//            sentences.swap(tmp);
-//        }
-
-        io::CSVReader<2> in(gram1File);
-//        in.read_header(io::ignore_no_column, "vendor", "size", "speed");
-        std::string w; int freq;
-        while(in.read_row(freq, w)){
-            std::cerr << w << "\n";
-        }
-
 
         std::unordered_map<TGram1Key, TCount> grams1;
         std::unordered_map<TGram2Key, TCount, TGram2KeyHash> grams2;
         std::unordered_map<TGram3Key, TCount, TGram3KeyHash> grams3;
+        TCount lines = 0;
 
-//        std::cerr << "[info] generating N-grams " << sentences.size() << std::endl;
-//        uint64_t lastTime = GetCurrentTimeMs();
-//        size_t total = sentenceIds.size();
-//        for (size_t i = 0; i < total; ++i) {
-//            const TWordIds& words = sentenceIds[i];
-//
-//            for (auto w: words) {
-//                grams1[w] += 1;
-//                TotalWords += 1;
-//            }
-//
-//            for (ssize_t j = 0; j < (ssize_t)words.size() - 1; ++j) {
-//                TGram2Key key(words[j], words[j+1]);
-//                grams2[key] += 1;
-//            }
-//            for (ssize_t j = 0; j < (ssize_t)words.size() - 2; ++j) {
-//                TGram3Key key(words[j], words[j+1], words[j+2]);
-//                grams3[key] += 1;
-//            }
-//            uint64_t currTime = GetCurrentTimeMs();
-//            if (currTime - lastTime > 4000) {
-//                std::cerr << "[info] processed " << (100.0 * float(i) / float(total)) << "%" << std::endl;
-//                lastTime = currTime;
-//            }
-//        }
-//
-//        VocabSize = grams1.size();
-//
-//        std::cerr << "[info] generating keys" << std::endl;
-//
-//        {
-//            std::vector<std::string> keys;
-//            keys.reserve(grams1.size() + grams2.size() + grams3.size());
-//
-//            std::cerr << "[info] ngrams1: " << grams1.size() << "\n";
-//            std::cerr << "[info] ngrams2: " << grams2.size() << "\n";
-//            std::cerr << "[info] ngrams3: " << grams3.size() << "\n";
-//            std::cerr << "[info] total: " << grams3.size() + grams2.size() + grams1.size() << "\n";
-//
-//            PrepareNgramKeys(grams1, keys);
-//            PrepareNgramKeys(grams2, keys);
-//            PrepareNgramKeys(grams3, keys);
-//
-//            std::cerr << "[info] generating perf hash" << std::endl;
-//
-//            PerfectHash.Init(keys);
-//        }
-//
-//        std::cerr << "[info] finished, buckets: " << PerfectHash.BucketsNumber() << "\n";
-//
-//        Buckets.resize(PerfectHash.BucketsNumber());
-//        InitializeBuckets(grams1, PerfectHash, Buckets);
-//        InitializeBuckets(grams2, PerfectHash, Buckets);
-//        InitializeBuckets(grams3, PerfectHash, Buckets);
-//
-//        std::cerr << "[info] buckets filled" << std::endl;
-//
-//        std::stringbuf checkSumBuf;
-//        std::ostream checkSumOut(&checkSumBuf);
-//        NHandyPack::Dump(checkSumOut, trainStarTime, grams1.size(), grams2.size(),
-//                         grams3.size(), Buckets.size(), trainText.size(), sentences.size());
-//        std::string checkSumStr = checkSumBuf.str();
-//        CheckSum = CityHash64(&checkSumStr[0], checkSumStr.size());
+        {
+            io::CSVReader<2> in(gram1File);
+            std::string w;
+            TCount freq;
+            try {
+                std::cerr << "[info] generating 1-grams " << std::endl;
+                while(in.read_row(freq, w)){
+                    TWordId id = GetWordId(TWord(UTF8ToWide(w)));
+                    grams1[id] = freq;
+                    TotalWords += freq;
+                    lines++;
+                }
+            } catch (::io::error::too_few_columns &e) {}
+        }
+
+        {
+            io::CSVReader<3> in(gram2File);
+            std::string w1, w2;
+            TCount freq;
+            try {
+                std::cerr << "[info] generating 2-grams " << std::endl;
+                while (in.read_row(freq, w1, w2)) {
+                    TWordId id1 = GetWordId(TWord(UTF8ToWide(w1)));
+                    TWordId id2 = GetWordId(TWord(UTF8ToWide(w2)));
+                    TGram2Key key(id1, id2);
+                    grams2[key] = freq;
+                    lines++;
+                }
+            } catch (::io::error::too_few_columns &e) {}
+        }
+
+        {
+            io::CSVReader<4> in(gram3File);
+            std::string w1, w2, w3;
+            TCount freq;
+            try {
+                std::cerr << "[info] generating 3-grams " << std::endl;
+                while (in.read_row(freq, w1, w2, w3)) {
+                    TWordId id1 = GetWordId(TWord(UTF8ToWide(w1)));
+                    TWordId id2 = GetWordId(TWord(UTF8ToWide(w2)));
+                    TWordId id3 = GetWordId(TWord(UTF8ToWide(w3)));
+                    TGram3Key key(id1, id2, id3);
+                    grams3[key] = freq;
+                    lines++;
+                }
+            } catch (::io::error::too_few_columns &e) {}
+        }
+
+
+        VocabSize = grams1.size();
+
+        std::cerr << "[info] generating keys" << std::endl;
+
+        {
+            std::vector<std::string> keys;
+            keys.reserve(grams1.size() + grams2.size() + grams3.size());
+
+            std::cerr << "[info] ngrams1: " << grams1.size() << "\n";
+            std::cerr << "[info] ngrams2: " << grams2.size() << "\n";
+            std::cerr << "[info] ngrams3: " << grams3.size() << "\n";
+            std::cerr << "[info] total: " << grams3.size() + grams2.size() + grams1.size() << "\n";
+
+            PrepareNgramKeys(grams1, keys);
+            PrepareNgramKeys(grams2, keys);
+            PrepareNgramKeys(grams3, keys);
+
+            std::cerr << "[info] generating perf hash" << std::endl;
+
+            PerfectHash.Init(keys);
+        }
+
+        std::cerr << "[info] finished, buckets: " << PerfectHash.BucketsNumber() << "\n";
+
+        Buckets.resize(PerfectHash.BucketsNumber());
+        InitializeBuckets(grams1, PerfectHash, Buckets);
+        InitializeBuckets(grams2, PerfectHash, Buckets);
+        InitializeBuckets(grams3, PerfectHash, Buckets);
+
+        std::cerr << "[info] buckets filled" << std::endl;
+
+        std::stringbuf checkSumBuf;
+        std::ostream checkSumOut(&checkSumBuf);
+        NHandyPack::Dump(checkSumOut, trainStarTime, grams1.size(), grams2.size(),
+                         grams3.size(), Buckets.size(), lines, lines);
+        std::string checkSumStr = checkSumBuf.str();
+        CheckSum = CityHash64(&checkSumStr[0], checkSumStr.size());
         return true;
     }
 
