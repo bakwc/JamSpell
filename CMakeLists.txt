@@ -22,6 +22,7 @@ endif()
 add_subdirectory(jamspell)
 add_subdirectory(main)
 add_subdirectory(contrib)
+add_subdirectory(web_server)
 
 if(GTest_FOUND)
     add_subdirectory(tests)
