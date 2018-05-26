@@ -19,9 +19,12 @@ if(USE_BOOST_CONVERT)
     add_definitions(-DUSE_BOOST_CONVERT)
 endif()
 
+find_package (Threads)
+
 add_subdirectory(jamspell)
 add_subdirectory(main)
 add_subdirectory(contrib)
+add_subdirectory(web_server)
 
 if(GTest_FOUND)
     add_subdirectory(tests)

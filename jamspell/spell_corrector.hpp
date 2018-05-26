@@ -18,6 +18,7 @@ public:
     std::wstring FixFragmentNormalized(const std::wstring& text) const;
     void SetPenalty(double knownWordsPenaly, double unknownWordsPenalty);
     void SetMaxCandiatesToCheck(size_t maxCandidatesToCheck);
+    const NJamSpell::TLangModel& GetLangModel() const;
 private:
     void FilterCandidatesByFrequency(std::unordered_set<NJamSpell::TWord, NJamSpell::TWordHashPtr>& uniqueCandidates, NJamSpell::TWord origWord) const;
     NJamSpell::TWords Edits(const NJamSpell::TWord& word) const;
