@@ -1,1 +1,1 @@
-add_library(httplib httplib.cpp)
+add_library(httplib httplib.cpp httplib.h)

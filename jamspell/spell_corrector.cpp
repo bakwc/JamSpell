@@ -254,6 +254,10 @@ void TSpellCorrector::SetMaxCandiatesToCheck(size_t maxCandidatesToCheck) {
     MaxCandiatesToCheck = maxCandidatesToCheck;
 }
 
+const TLangModel& TSpellCorrector::GetLangModel() const {
+    return LangModel;
+}
+
 template<typename T>
 inline void AddVec(T& target, const T& source) {
     target.insert(target.end(), source.begin(), source.end());
