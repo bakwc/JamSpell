@@ -72,8 +72,16 @@ int main(int argc, const char** argv) {
         resp.set_content(FixText(corrector, req.get_param_value("text")), "text/plain");
     });
 
+    srv.Post("/fix", [&corrector](const httplib::Request& req, httplib::Response& resp) {
+        resp.set_content(FixText(corrector, req.body), "text/plain");
+    });
+
     srv.Get("/candidates", [&corrector](const httplib::Request& req, httplib::Response& resp) {
         resp.set_content(GetCandidates(corrector, req.get_param_value("text")), "text/plain");
+    });
+
+    srv.Post("/candidates", [&corrector](const httplib::Request& req, httplib::Response& resp) {
+        resp.set_content(GetCandidates(corrector, req.body), "text/plain");
     });
 
     std::cerr << "[info] starting web server at localhost:" << port << std::endl;
