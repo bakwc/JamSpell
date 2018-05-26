@@ -1,6 +1,7 @@
 #include "jamspell/spell_corrector.hpp"
 #include "contrib/httplib/httplib.h"
 #include "contrib/nlohmann/json.hpp"
+#include <cwctype>
 
 std::string GetCandidates(const NJamSpell::TSpellCorrector& corrector,
                           const std::string& text)
