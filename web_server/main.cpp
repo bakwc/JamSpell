@@ -52,13 +52,14 @@ std::string FixText(const NJamSpell::TSpellCorrector& corrector,
 }
 
 int main(int argc, const char** argv) {
-    if (argc != 3) {
-        std::cerr << "Usage: " << argv[0] << " model.bin 8080\n";
+    if (argc != 4) {
+        std::cerr << "Usage: " << argv[0] << " model.bin localhost 8080\n";
         return 42;
     }
 
     std::string modelFile = argv[1];
-    int port = std::stoi(argv[2]);
+    std::string hostname = argv[2];
+    int port = std::stoi(argv[3]);
 
     NJamSpell::TSpellCorrector corrector;
     std::cerr << "[info] loading model" << std::endl;
@@ -69,22 +70,22 @@ int main(int argc, const char** argv) {
 
     httplib::Server srv;
     srv.Get("/fix", [&corrector](const httplib::Request& req, httplib::Response& resp) {
-        resp.set_content(FixText(corrector, req.get_param_value("text")), "text/plain");
+        resp.set_content(FixText(corrector, req.get_param_value("text")) + "\n", "text/plain");
     });
 
     srv.Post("/fix", [&corrector](const httplib::Request& req, httplib::Response& resp) {
-        resp.set_content(FixText(corrector, req.body), "text/plain");
+        resp.set_content(FixText(corrector, req.body) + "\n", "text/plain");
     });
 
     srv.Get("/candidates", [&corrector](const httplib::Request& req, httplib::Response& resp) {
-        resp.set_content(GetCandidates(corrector, req.get_param_value("text")), "text/plain");
+        resp.set_content(GetCandidates(corrector, req.get_param_value("text")) + "\n", "text/plain");
     });
 
     srv.Post("/candidates", [&corrector](const httplib::Request& req, httplib::Response& resp) {
-        resp.set_content(GetCandidates(corrector, req.body), "text/plain");
+        resp.set_content(GetCandidates(corrector, req.body) + "\n", "text/plain");
     });
 
-    std::cerr << "[info] starting web server at localhost:" << port << std::endl;
-    srv.listen("localhost", port);
+    std::cerr << "[info] starting web server at " << hostname << ":" << port << std::endl;
+    srv.listen(hostname.c_str(), port);
     return 0;
 }

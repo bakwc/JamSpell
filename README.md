@@ -20,6 +20,7 @@ JamSpell is a spell checking library with following features:
   - [Python](#python)
   - [C++](#c)
   - [Other languages](#other-languages)
+  - [HTTP API](#http-api)
 - [Train](#train)
 
 ## Benchmarks
@@ -191,6 +192,76 @@ int main(int argc, const char** argv) {
 
 ### Other languages
 You can generate extensions for other languages using [swig tutorial](http://www.swig.org/tutorial.html). The swig interface file is `jamspell.i`. Pull requests with build scripts are welcome.
+
+## HTTP API
+* Install ```cmake```
+
+* Clone and build jamspell (it includes http server):
+```bash
+git clone https://github.com/bakwc/JamSpell.git
+cd JamSpell
+mkdir build
+cd build
+cmake ..
+make
+```
+* [Download](#download-models) or [train](#train) language model
+* Run http server:
+```bash
+./web_server/web_server en.bin localhost 8080
+```
+* **GET** Request example:
+```bash
+$ curl "http://localhost:8080/fix?text=I am the begt spell cherken"
+I am the best spell checker
+```
+* **POST** Request example
+```bash
+$ curl -d "I am the begt spell cherken" http://localhost:8080/fix
+I am the best spell checker
+```
+* Candidate example
+
+Request:
+```bash
+curl "http://localhost:8080/candidates?text=I am the begt spell cherken"
+# or
+curl -d "I am the begt spell cherken" http://localhost:8080/candidates
+```
+Response:
+```json
+{
+    "results": [
+        {
+            "candidates": [
+                "best",
+                "beat",
+                "belt",
+                "bet",
+                "bent",
+                "beet",
+                "beit"
+            ],
+            "len": 4,
+            "pos_from": 9
+        },
+        {
+            "candidates": [
+                "checker",
+                "chicken",
+                "checked",
+                "wherein",
+                "coherent",
+                "cheered",
+                "cherokee"
+            ],
+            "len": 7,
+            "pos_from": 20
+        }
+    ]
+}
+```
+Here `pos_from` - misspelled word first letter position, `len` - misspelled word len
 
 ## Train
 To train custom model you need:
