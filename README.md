@@ -222,13 +222,13 @@ I am the best spell checker
 ```
 * Candidate example
 
-* * Request:
+  * Request:
 ```bash
 curl "http://localhost:8080/candidates?text=I am the begt spell cherken"
 # or
 curl -d "I am the begt spell cherken" http://localhost:8080/candidates
 ```
-* * Response:
+  * Response:
 ```javascript
 {
     "results": [
