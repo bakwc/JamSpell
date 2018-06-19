@@ -5,7 +5,7 @@
 #include <sstream>
 #include <ostream>
 #include <cstring>
-
+#include <algorithm>
 #include "lang_model.hpp"
 
 #include <contrib/cityhash/city.h>
@@ -24,11 +24,12 @@ public:
         , Pos(0)
     {
     }
-    long xsputn(const char* s, long n) {
+
+	std::streamsize xsputn(const char* s, std::streamsize n) override {
         if (n <= 0) {
             return n;
         }
-        long toCopy = std::min(n, MaxSize - Pos);
+        long toCopy = std::min<long>(n, MaxSize - Pos);
         memcpy(Buff + Pos, s, toCopy);
         Pos += toCopy;
         return n;
