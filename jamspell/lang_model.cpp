@@ -193,10 +193,11 @@ bool TLangModel::Train(const std::string& fileName, const std::string& alphabetF
     return true;
 }
 
-bool TLangModel::LoadNGrams(const std::string& gram1File,
-                            const std::string& gram2File,
-                            const std::string& gram3File,
-                            const std::string& alphabetFile) {
+bool TLangModel::TrainNGrams(const std::string &gram1File,
+                             const std::string &gram2File,
+                             const std::string &gram3File,
+                             const std::string &datasetFile,
+                             const std::string &alphabetFile) {
 
         std::cerr << "[info] loading corpora" << std::endl;
         uint64_t trainStarTime = GetCurrentTimeMs();
@@ -256,6 +257,58 @@ bool TLangModel::LoadNGrams(const std::string& gram1File,
                     lines++;
                 }
             } catch (::io::error::too_few_columns &e) {}
+        }
+
+
+        std::cerr << "[info] loading text" << std::endl;
+        if (!Tokenizer.LoadAlphabet(alphabetFile)) {
+            std::cerr << "[error] failed to load alphabet" << std::endl;
+            return false;
+        }
+        std::wstring trainText = UTF8ToWide(LoadFile(datasetFile));
+        ToLower(trainText);
+        TSentences sentences = Tokenizer.Process(trainText);
+        if (sentences.empty()) {
+            std::cerr << "[error] no sentences" << std::endl;
+            return false;
+        }
+
+        TIdSentences sentenceIds = ConvertToIds(sentences);
+
+        assert(sentences.size() == sentenceIds.size());
+        {
+            std::wstring tmp;
+            trainText.swap(tmp);
+        }
+        {
+            TSentences tmp;
+            sentences.swap(tmp);
+        }
+
+        std::cerr << "[info] generating N-grams " << sentences.size() << std::endl;
+        uint64_t lastTime = GetCurrentTimeMs();
+        size_t total = sentenceIds.size();
+        for (size_t i = 0; i < total; ++i) {
+            const TWordIds& words = sentenceIds[i];
+
+            for (auto w: words) {
+                grams1[w] += 1;
+                TotalWords += 1;
+            }
+
+            for (ssize_t j = 0; j < (ssize_t)words.size() - 1; ++j) {
+                TGram2Key key(words[j], words[j+1]);
+                grams2[key] += 1;
+            }
+            for (ssize_t j = 0; j < (ssize_t)words.size() - 2; ++j) {
+                TGram3Key key(words[j], words[j+1], words[j+2]);
+                grams3[key] += 1;
+            }
+            uint64_t currTime = GetCurrentTimeMs();
+            if (currTime - lastTime > 4000) {
+                std::cerr << "[info] processed " << (100.0 * float(i) / float(total)) << "%" << std::endl;
+                lastTime = currTime;
+            }
         }
 
 
