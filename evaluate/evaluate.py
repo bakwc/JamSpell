@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 import codecs
@@ -15,14 +15,17 @@ try:
 except:
     pass
 
+
 class STATE:
     NONE = 0
     LETTER = 1
     DOT = 2
     SPACE = 3
 
+
 def generateTypos(text):
-    return map(typo_model.generateTypo, text)
+    return list(map(typo_model.generateTypo, text))
+
 
 class Corrector(object):
     def __init__(self):
@@ -31,12 +34,14 @@ class Corrector(object):
     def correct(self, sentence, position):
         pass
 
+
 class DummyCorrector(Corrector):
     def __init__(self):
         super(DummyCorrector, self).__init__()
 
     def correct(self, sentence, position):
         return sentence[position]
+
 
 class HunspellCorrector(Corrector):
     def __init__(self, modelPath):
@@ -50,6 +55,7 @@ class HunspellCorrector(Corrector):
             return word
         return self.__model.suggest(word)
 
+
 class NorvigCorrector(Corrector):
     def __init__(self, trainFile):
         super(NorvigCorrector, self).__init__()
@@ -61,6 +67,7 @@ class NorvigCorrector(Corrector):
         import norvig_spell
         return norvig_spell.correction(word)
 
+
 class ContextCorrector(Corrector):
     def __init__(self, modelPath):
         super(ContextCorrector, self).__init__()
@@ -70,6 +77,7 @@ class ContextCorrector(Corrector):
     def correct(self, sentence, position):
         import context_spell
         return context_spell.correction(sentence, position)
+
 
 class ContextPrototypeCorrector(Corrector):
     def __init__(self, modelPath):
@@ -81,12 +89,13 @@ class ContextPrototypeCorrector(Corrector):
         import context_spell_prototype
         return context_spell_prototype.correction(sentence, position)
 
+
 class JamspellCorrector(Corrector):
     def __init__(self, modelFile):
         super(JamspellCorrector, self).__init__()
         import jamspell
         self.model = jamspell.TSpellCorrector()
-        #self.model.SetPenalty(16.0, 0.0)
+        # self.model.SetPenalty(16.0, 0.0)
         if not (self.model.LoadLangModel(modelFile)):
             raise Exception('wrong model file: %s' % modelFile)
 
@@ -95,6 +104,7 @@ class JamspellCorrector(Corrector):
         if len(cands) == 0:
             return sentence[position]
         return cands
+
 
 def evaluateCorrector(correctorName, corrector, originalSentences, erroredSentences, maxWords=None):
     totalErrors = 0
@@ -109,10 +119,10 @@ def evaluateCorrector(correctorName, corrector, originalSentences, erroredSenten
 
     startTime = lastTime = time.time()
     n = 0
-    for sentID in xrange(len(originalSentences)):
+    for sentID in range(len(originalSentences)):
         originalText = originalSentences[sentID]
         erroredText = erroredSentences[sentID]
-        for pos in xrange(len(originalText)):
+        for pos in range(len(originalText)):
             erroredWord = erroredText[pos]
             originalWord = originalText[pos]
             fixedCandidates = corrector.correct(erroredText, pos)
@@ -140,7 +150,7 @@ def evaluateCorrector(correctorName, corrector, originalSentences, erroredSenten
                 totalNotTouched += 1
                 if fixedWord != originalWord:
                     broken += 1
-                    #print originalWord, fixedWord
+                    # print originalWord, fixedWord
 
             if fixedWord != originalWord:
                 totalErrors += 1
@@ -153,8 +163,8 @@ def evaluateCorrector(correctorName, corrector, originalSentences, erroredSenten
                 err_rate = float(totalErrors) / n
                 if maxWords is not None:
                     progress = float(n) / maxWords
-                print '[debug] %s: processed %.2f%%, error rate: %.2f%%' % \
-                      (correctorName, 100.0 * progress, 100.0 * err_rate)
+                print('[debug] %s: processed %.2f%%, error rate: %.2f%%' % \
+                      (correctorName, 100.0 * progress, 100.0 * err_rate))
                 lastTime = time.time()
 
             if maxWords is not None and n >= maxWords:
@@ -163,15 +173,16 @@ def evaluateCorrector(correctorName, corrector, originalSentences, erroredSenten
         if maxWords is not None and n >= maxWords:
             break
 
-        #if fixedWord != originalWord:
+        # if fixedWord != originalWord:
         #    print originalWord, erroredWord, fixedWord
 
-    return float(totalErrors) / n,\
-           float(fixedErrors) / origErrors,\
-           float(broken) / totalNotTouched,\
-           float(topNtotalErrors) / n,\
+    return float(totalErrors) / n, \
+           float(fixedErrors) / origErrors, \
+           float(broken) / totalNotTouched, \
+           float(topNtotalErrors) / n, \
            float(topNfixed) / origErrors, \
-            time.time() - startTime
+           time.time() - startTime
+
 
 def testMode(corrector):
     while True:
@@ -180,14 +191,15 @@ def testMode(corrector):
         if not sentence:
             continue
         newSentence = []
-        for i in xrange(len(sentence)):
+        for i in range(len(sentence)):
             fix = corrector.correct(sentence, i)
             if isinstance(fix, list):
                 fix = fix[0]
             newSentence.append(fix)
-        print ' '.join(newSentence)
+        print(' '.join(newSentence))
 
-def evaluateJamspell(modelFile, testText, alphabetFile, maxWords = 50000):
+
+def evaluateJamspell(modelFile, testText, alphabetFile, maxWords=50000):
     utils.loadAlphabet(alphabetFile)
     corrector = JamspellCorrector(modelFile)
     random.seed(42)
@@ -200,10 +212,11 @@ def evaluateJamspell(modelFile, testText, alphabetFile, maxWords = 50000):
         evaluateCorrector('jamspell', corrector, originalSentences, erroredSentences, maxWords)
     return errorsRate, fixRate, broken, topNerr, topNfix
 
+
 def main():
     parser = argparse.ArgumentParser(description='spelling correctors evaluation')
     parser.add_argument('file', type=str, help='text file to use for evaluation')
-    parser.add_argument('-hs', '--hunspell' , type=str, help='path to hunspell model')
+    parser.add_argument('-hs', '--hunspell', type=str, help='path to hunspell model')
     parser.add_argument('-ns', '--norvig', type=str, help='path to train file for Norvig spell corrector')
     parser.add_argument('-cs', '--context', type=str, help='path to context spell model')
     parser.add_argument('-csp', '--context_prototype', type=str, help='path to context spell prototype model')
@@ -219,11 +232,11 @@ def main():
     correctors = {
         'dummy': DummyCorrector(),
     }
-    #corrector = correctors['dummy']
+    # corrector = correctors['dummy']
 
     maxWords = args.max_words
 
-    print '[info] loading models'
+    print('[info] loading models')
 
     if args.hunspell:
         corrector = correctors['hunspell'] = HunspellCorrector(args.hunspell)
@@ -244,44 +257,47 @@ def main():
         return testMode(corrector)
 
     random.seed(42)
-    print '[info] loading text'
+    print('[info] loading text')
     originalText = loadText(args.file)
+    originalTextLen = len(list(originalText))
 
-    print '[info] generating typos'
+    print('[info] generating typos')
     erroredText = generateTypos(originalText)
+    erroredTextLen = len(list(erroredText))
 
-    assert len(originalText) == len(erroredText)
+    assert originalTextLen == erroredTextLen
 
     originalSentences = generateSentences(originalText)
     erroredSentences = generateSentences(erroredText)
 
     assert len(originalSentences) == len(erroredSentences)
 
-    #for s in originalSentences[:50]:
+    # for s in originalSentences[:50]:
     #    print ' '.join(s) + '.'
 
-    print '[info] total words: %d' % len(originalText)
-    print '[info] evaluating'
+    print('[info] total words: %d' % len(originalText))
+    print('[info] evaluating')
 
     results = {}
 
-    for correctorName, corrector in correctors.iteritems():
+    for correctorName, corrector in correctors.items():
         errorsRate, fixRate, broken, topNerr, topNfix, execTime = \
             evaluateCorrector(correctorName, corrector, originalSentences, erroredSentences, maxWords)
         results[correctorName] = errorsRate, fixRate, broken, topNerr, topNfix, execTime
 
-    print
+    print('')
 
-    print '[info] %12s %8s  %8s  %8s  %8s  %8s  %8s' % ('', 'errRate', 'fixRate', 'broken', 'topNerr', 'topNfix', 'time')
+    print(
+        '[info] %12s %8s  %8s  %8s  %8s  %8s  %8s' % ('', 'errRate', 'fixRate', 'broken', 'topNerr', 'topNfix', 'time'))
     for k, _ in sorted(results.items(), key=lambda x: x[1]):
-        print '[info] %10s  %8.2f%% %8.2f%% %8.2f%% %8.2f%% %8.2f%% %8.2fs' % \
+        print('[info] %10s  %8.2f%% %8.2f%% %8.2f%% %8.2f%% %8.2f%% %8.2fs' % \
               (k,
                100.0 * results[k][0],
                100.0 * results[k][1],
                100.0 * results[k][2],
                100.0 * results[k][3],
                100.0 * results[k][4],
-               results[k][5])
+               results[k][5]))
 
 
 if __name__ == '__main__':

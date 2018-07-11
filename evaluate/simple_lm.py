@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 from utils import loadText, normalize, generateSentences
@@ -10,41 +10,40 @@ import time
 
 
 class SimpleLangModel(object):
-
     K = 0.05
 
     def __init__(self):
-        self.wordToId = {} # word => int id
-        self.idToWord = {} # int id => word
+        self.wordToId = {}  # word => int id
+        self.idToWord = {}  # int id => word
         self.lastID = 0
         self.totalWords = 0
-        self.gram1 = defaultdict(int) # word => count
-        self.gram2 = defaultdict(int) # (word1, word2) => count
-        self.gram3 = defaultdict(int) # (word1, word2, word3) => count
+        self.gram1 = defaultdict(int)  # word => count
+        self.gram2 = defaultdict(int)  # (word1, word2) => count
+        self.gram3 = defaultdict(int)  # (word1, word2, word3) => count
 
     def train(self, trainFile):
-        print '[info] loading text'
+        print('[info] loading text')
         text = loadText(trainFile)
         sentences = generateSentences(text)
         sentences = self.convertToIDs(sentences)
 
-        print '[info] generating N-grams', len(sentences)
+        print('[info] generating N-grams', len(sentences))
         total = len(sentences)
         lastTime = time.time()
-        for i in xrange(0, total):
+        for i in range(0, total):
             sentence = sentences[i]
             for w in sentence:
                 self.gram1[w] += 1
                 self.totalWords += 1
-            for j in xrange(len(sentence) - 1):
-                self.gram2[(sentence[j], sentence[j+1])] += 1
-            for j in xrange(len(sentence) - 2):
-                self.gram3[(sentence[j], sentence[j+1], sentence[j+2])] += 1
+            for j in range(len(sentence) - 1):
+                self.gram2[(sentence[j], sentence[j + 1])] += 1
+            for j in range(len(sentence) - 2):
+                self.gram3[(sentence[j], sentence[j + 1], sentence[j + 2])] += 1
             if time.time() - lastTime >= 4.0:
                 lastTime = time.time()
-                print '[info] processed %.2f%%' % (100.0 * i / total)
+                print('[info] processed %.2f%%' % (100.0 * i / total))
 
-        print '[info] finished training'
+        print('[info] finished training')
 
     def convertToIDs(self, sentences):
         newSentences = []
@@ -97,16 +96,17 @@ class SimpleLangModel(object):
     def predict(self, sentence):
         sentence = [self.getWordID(w, False) for w in normalize(sentence).split()] + [None] * 2
         result = 0
-        for i in xrange(0, len(sentence) - 2):
+        for i in range(0, len(sentence) - 2):
             p2 = self.getGram3Prob(sentence[i], sentence[i + 1], sentence[i + 2])
             p3 = self.getGram2Prob(sentence[i], sentence[i + 1])
             p4 = self.getGram1Prob(sentence[i])
-            result += math.log(p2*p3*p4)
+            result += math.log(p2 * p3 * p4)
         return result
+
 
 if __name__ == '__main__':
     if len(sys.argv) != 3:
-        print 'usage: %s trainFile model.bin' % sys.argv[0]
+        print('usage: %s trainFile model.bin' % sys.argv[0])
         sys.exit(42)
 
     trainFile = sys.argv[1]
