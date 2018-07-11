@@ -35,9 +35,9 @@ class SimpleLangModel(object):
             for w in sentence:
                 self.gram1[w] += 1
                 self.totalWords += 1
-            for j in xrange(len(sentence) - 1):
+            for j in range(len(sentence) - 1):
                 self.gram2[(sentence[j], sentence[j + 1])] += 1
-            for j in xrange(len(sentence) - 2):
+            for j in range(len(sentence) - 2):
                 self.gram3[(sentence[j], sentence[j + 1], sentence[j + 2])] += 1
             if time.time() - lastTime >= 4.0:
                 lastTime = time.time()
@@ -96,7 +96,7 @@ class SimpleLangModel(object):
     def predict(self, sentence):
         sentence = [self.getWordID(w, False) for w in normalize(sentence).split()] + [None] * 2
         result = 0
-        for i in xrange(0, len(sentence) - 2):
+        for i in range(0, len(sentence) - 2):
             p2 = self.getGram3Prob(sentence[i], sentence[i + 1], sentence[i + 2])
             p3 = self.getGram2Prob(sentence[i], sentence[i + 1])
             p4 = self.getGram1Prob(sentence[i])

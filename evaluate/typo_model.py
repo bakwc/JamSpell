@@ -90,7 +90,7 @@ def generateTypo(word):
     if chance < required * SECOND_TYPO_CF:
         numTypo = 2
 
-    for _ in xrange(numTypo):
+    for _ in range(numTypo):
         typoType = weightedChoice(enumerate(TYPO_TYPES))
         word = TYPO_GENERATORS[typoType](word)
     return word

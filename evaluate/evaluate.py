@@ -119,10 +119,10 @@ def evaluateCorrector(correctorName, corrector, originalSentences, erroredSenten
 
     startTime = lastTime = time.time()
     n = 0
-    for sentID in xrange(len(originalSentences)):
+    for sentID in range(len(originalSentences)):
         originalText = originalSentences[sentID]
         erroredText = erroredSentences[sentID]
-        for pos in xrange(len(originalText)):
+        for pos in range(len(originalText)):
             erroredWord = erroredText[pos]
             originalWord = originalText[pos]
             fixedCandidates = corrector.correct(erroredText, pos)
@@ -259,11 +259,13 @@ def main():
     random.seed(42)
     print('[info] loading text')
     originalText = loadText(args.file)
+    originalTextLen = len(list(originalText))
 
     print('[info] generating typos')
     erroredText = generateTypos(originalText)
+    erroredTextLen = len(list(erroredText))
 
-    assert len(originalText) == len(erroredText)
+    assert originalTextLen == erroredTextLen
 
     originalSentences = generateSentences(originalText)
     erroredSentences = generateSentences(erroredText)
