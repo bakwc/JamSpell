@@ -24,7 +24,7 @@ class STATE:
 
 
 def generateTypos(text):
-    return map(typo_model.generateTypo, text)
+    return list(map(typo_model.generateTypo, text))
 
 
 class Corrector(object):
@@ -280,7 +280,7 @@ def main():
 
     results = {}
 
-    for correctorName, corrector in correctors.iteritems():
+    for correctorName, corrector in correctors.items():
         errorsRate, fixRate, broken, topNerr, topNfix, execTime = \
             evaluateCorrector(correctorName, corrector, originalSentences, erroredSentences, maxWords)
         results[correctorName] = errorsRate, fixRate, broken, topNerr, topNfix, execTime
