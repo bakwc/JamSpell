@@ -12,16 +12,19 @@ RANDOM_SEED = 42
 TRAIN_TEST_SPLIT = 0.95
 LANG_DETECT_FRAGMENT_SIZE = 2000
 
+
 def saveSentences(sentences, fname):
     with codecs.open(fname, 'w', 'utf-8') as f:
         for s in sentences:
             f.write(s)
             f.write('\n')
 
+
 def dirFilesIterator(dirPath):
     for root, directories, filenames in os.walk(dirPath):
         for filename in filenames:
             yield os.path.join(root, filename)
+
 
 class FB2Handler(xml.sax.handler.ContentHandler):
     def __init__(self, tagsToExclude):
@@ -51,8 +54,9 @@ class FB2Handler(xml.sax.handler.ContentHandler):
         if self._mayProcess():
             self.__buff.append(content)
 
+
 class DataSource(object):
-    def __init__(self, path, name, lang = None):
+    def __init__(self, path, name, lang=None):
         self.__path = path
         self.__name = name
         self.__lang = lang
@@ -77,6 +81,7 @@ class DataSource(object):
             return False
         return True
 
+
 class LeipzigDataSource(DataSource):
     def __init__(self, path, lang):
         super(LeipzigDataSource, self).__init__(path, 'leipzig', lang)
@@ -94,6 +99,7 @@ class LeipzigDataSource(DataSource):
                     continue
                 sentences.append(line.split('\t')[1].strip().lower())
 
+
 class TxtDataSource(DataSource):
     def __init__(self, path, lang):
         super(TxtDataSource, self).__init__(path, 'txt', lang)
@@ -109,6 +115,7 @@ class TxtDataSource(DataSource):
                     continue
                 sentences.append(line)
 
+
 class FB2DataSource(DataSource):
     def __init__(self, path, lang):
         super(FB2DataSource, self).__init__(path, 'FB2', lang)
@@ -120,17 +127,18 @@ class FB2DataSource(DataSource):
         parser = xml.sax.make_parser()
         handler = FB2Handler(['binary'])
         parser.setContentHandler(handler)
-        print '[info] loading file', pathToFile
+        print('[info] loading file', pathToFile)
         with open(pathToFile, 'rb') as f:
             parser.parse(f)
         data = handler.getBuff()
         if not self.checkLang(data[:LANG_DETECT_FRAGMENT_SIZE]):
-            print '[info] wrong language'
+            print('[info] wrong language')
         for line in data.split('\n'):
             line = line.strip().lower()
             if not line:
                 continue
             sentences.append(line)
+
 
 def generateDatasetTxt(inFile, outFile):
     source = TxtDataSource(inFile, None)
@@ -139,13 +147,14 @@ def generateDatasetTxt(inFile, outFile):
     assert sentences
     processSentences(sentences, outFile)
 
+
 def processSentences(sentences, outFile):
-    print '[info] removing duplicates'
+    print('[info] removing duplicates')
 
     sentences = list(set(sentences))
 
-    print '[info] %d left' % len(sentences)
-    print '[info] shuffling'
+    print('[info] %d left' % len(sentences))
+    print('[info] shuffling')
 
     random.seed(RANDOM_SEED)
     random.shuffle(sentences)
@@ -155,13 +164,14 @@ def processSentences(sentences, outFile):
     trainSentences = sentences[:trainHalf]
     testSentences = sentences[trainHalf:]
 
-    print '[info] saving train set'
+    print('[info] saving train set')
     saveSentences(trainSentences, outFile + '_train.txt')
 
-    print '[info] saving test set'
+    print('[info] saving test set')
     saveSentences(testSentences, outFile + '_test.txt')
 
-    print '[info] done'
+    print('[info] done')
+
 
 def main():
     parser = argparse.ArgumentParser(description='datset generator')
@@ -189,16 +199,16 @@ def main():
 
     sentences = []
     for dataSource in dataSources:
-        print '[info] loading %s collection' % dataSource.getName()
+        print('[info] loading %s collection' % dataSource.getName())
         path = dataSource.getPath()
         paths = [path] if os.path.isfile(path) else dirFilesIterator(path)
         for filePath in paths:
             if dataSource.isMatch(filePath):
                 dataSource.loadSentences(filePath, sentences)
 
-    print '[info] loaded %d sentences' % len(sentences)
+    print('[info] loaded %d sentences' % len(sentences))
     if not sentences:
-        print '[error] no sentences loaded'
+        print('[error] no sentences loaded')
         return
 
     processSentences(sentences, args.out_file)
