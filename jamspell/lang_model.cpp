@@ -127,7 +127,7 @@ bool TLangModel::Train(const std::string& fileName, const std::string& alphabetF
     std::unordered_map<TGram2Key, TCount, TGram2KeyHash> grams2;
     std::unordered_map<TGram3Key, TCount, TGram3KeyHash> grams3;
 
-    std::cerr << "[info] generating N-grams " << sentences.size() << std::endl;
+    std::cerr << "[info] generating N-grams " << sentenceIds.size() << std::endl;
     uint64_t lastTime = GetCurrentTimeMs();
     size_t total = sentenceIds.size();
     for (size_t i = 0; i < total; ++i) {
