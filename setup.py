@@ -24,7 +24,7 @@ jamspell = Extension(
         os.path.join('contrib', 'phf', 'phf.cc'),
         os.path.join('jamspell.i'),
     ],
-    extra_compile_args=['-std=c++11', '-O2'],
+    extra_compile_args=['-std=c++11', '-O2', '-stdlib=libc++'],
     swig_opts=['-c++'],
 )
 
