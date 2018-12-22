@@ -141,7 +141,7 @@ More details about reproducing available in "[Train](#train)" section.
 ### Python
 1. Install ```swig3``` (usually it is in your distro package manager)
 
-2. Install ```jamspel```:
+2. Install ```jamspell```:
 ```bash
 pip install jamspell
 ```
