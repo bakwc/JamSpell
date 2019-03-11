@@ -153,7 +153,7 @@ pip install jamspell
 import jamspell
 
 corrector = jamspell.TSpellCorrector()
-corrector.LoadLangModel('model_en.bin')
+corrector.LoadLangModel('en.bin')
 
 corrector.FixFragment('I am the begt spell cherken!')
 # u'I am the best spell checker!'
