@@ -37,7 +37,8 @@ class CustomBuild(build):
 class CustomInstall(install):
     def run(self):
         self.run_command('build_ext')
-        self.do_egg_install()
+        # self.do_egg_install()
+        install.run(self)
 
 class Swig3Ext(build_ext):
     def find_swig(self):
