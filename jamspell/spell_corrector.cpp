@@ -245,8 +245,8 @@ std::wstring TSpellCorrector::FixFragmentNormalized(const std::wstring& text) co
     return result;
 }
 
-void TSpellCorrector::SetPenalty(double knownWordsPenaly, double unknownWordsPenalty) {
-    KnownWordsPenalty = knownWordsPenaly;
+void TSpellCorrector::SetPenalty(double knownWordsPenalty, double unknownWordsPenalty) {
+    KnownWordsPenalty = knownWordsPenalty;
     UnknownWordsPenalty = unknownWordsPenalty;
 }
 
