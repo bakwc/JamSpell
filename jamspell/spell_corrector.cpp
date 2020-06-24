@@ -57,18 +57,14 @@ bool TSpellCorrector::TrainLangModel(const std::string& textFile, const std::str
     return true;
 }
 
-struct TScoredWord {
-    TWord Word;
-    double Score = 0;
-};
+TScoredWords TSpellCorrector::GetCandidatesRawWithScores(const TWords& sentence, size_t position) const {
+    TScoredWords scoredCandidates;
 
-TWords TSpellCorrector::GetCandidatesRaw(const TWords& sentence, size_t position) const {
     if (position >= sentence.size()) {
-        return TWords();
+        return scoredCandidates;
     }
 
     TWord w = sentence[position];
-
     TWords candidates = Edits2(w);
 
     bool firstLevel = true;
@@ -79,7 +75,7 @@ TWords TSpellCorrector::GetCandidatesRaw(const TWords& sentence, size_t position
     }
 
     if (candidates.empty()) {
-        return candidates;
+        return scoredCandidates;
     }
 
     {
@@ -96,8 +92,6 @@ TWords TSpellCorrector::GetCandidatesRaw(const TWords& sentence, size_t position
     std::unordered_set<TWord, TWordHashPtr> uniqueCandidates(candidates.begin(), candidates.end());
 
     FilterCandidatesByFrequency(uniqueCandidates, w);
-
-    std::vector<TScoredWord> scoredCandidates;
     scoredCandidates.reserve(uniqueCandidates.size());
 
     for (TWord cand: uniqueCandidates) {
@@ -132,8 +126,13 @@ TWords TSpellCorrector::GetCandidatesRaw(const TWords& sentence, size_t position
     std::sort(scoredCandidates.begin(), scoredCandidates.end(), [](TScoredWord w1, TScoredWord w2) {
         return w1.Score > w2.Score;
     });
+    return scoredCandidates;
+}
 
-    candidates.clear();
+TWords TSpellCorrector::GetCandidatesRaw(const TWords& sentence, size_t position) const {
+    TWords candidates;
+    TScoredWords scoredCandidates = GetCandidatesRawWithScores(sentence, position);
+
     for (auto s: scoredCandidates) {
         candidates.push_back(s.Word);
     }
@@ -160,6 +159,22 @@ void TSpellCorrector::FilterCandidatesByFrequency(std::unordered_set<TWord, TWor
         uniqueCandidates.insert(candidateCounts[i].second);
     }
     uniqueCandidates.insert(origWord);
+}
+
+std::vector<std::pair<std::wstring,double> > TSpellCorrector::GetCandidatesWithScores(
+    const std::vector<std::wstring>& sentence,
+    size_t position
+) const {
+
+    TWords words(sentence.begin(), sentence.end());
+    TScoredWords scoredCandidates = GetCandidatesRawWithScores(words, position);
+
+    std::vector<std::pair<std::wstring,double> > results;
+    for (auto s: scoredCandidates) {
+        std::wstring word = std::wstring(s.Word.Ptr, s.Word.Len);
+        results.push_back(std::make_pair(word, s.Score));
+    }
+    return results;
 }
 
 std::vector<std::wstring> TSpellCorrector::GetCandidates(const std::vector<std::wstring>& sentence, size_t position) const {

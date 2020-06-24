@@ -12,8 +12,10 @@ class TSpellCorrector {
 public:
     bool LoadLangModel(const std::string& modelFile);
     bool TrainLangModel(const std::string& textFile, const std::string& alphabetFile, const std::string& modelFile);
+    NJamSpell::TScoredWords GetCandidatesRawWithScores(const NJamSpell::TWords& sentence, size_t position) const;
     NJamSpell::TWords GetCandidatesRaw(const NJamSpell::TWords& sentence, size_t position) const;
     std::vector<std::wstring> GetCandidates(const std::vector<std::wstring>& sentence, size_t position) const;
+    std::vector<std::pair<std::wstring,double> > GetCandidatesWithScores(const std::vector<std::wstring>& sentence, size_t position) const;
     std::wstring FixFragment(const std::wstring& text) const;
     std::wstring FixFragmentNormalized(const std::wstring& text) const;
     void SetPenalty(double knownWordsPenalty, double unknownWordsPenalty);
