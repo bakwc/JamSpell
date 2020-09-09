@@ -69,8 +69,8 @@ def typoTranspose(word):
     l2 = min(len(word) - 1, l1 + d)
     return swapLetter(word, l1, l2)
 
-def typoMerge(word):
-    return word + '+'
+# def typoMerge(word):
+#     return word + '+'
 
 TYPO_TYPES = [REPLACE_PROB, INSERT_PROB, REMOVE_PROB, TRANSPOSE_PROB, MERGE_PROB]
 TYPO_GENERATORS = [typoReplace, typoInsert, typoRemove, typoTranspose, typoReplace]

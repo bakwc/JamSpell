@@ -233,7 +233,7 @@ def evaluateJamspell(modelFile, testText, alphabetFile, maxWords=50000):
     corrector = JamspellCorrector(modelFile)
     random.seed(42)
     originalText = loadText(testText)
-    erroredText = generateTypos(originalText)
+    erroredText = typo_model.generateTypos(originalText)
     assert len(originalText) == len(erroredText)
     originalSentences = generateSentences(originalText)
     erroredSentences = generateSentences(erroredText)
@@ -319,7 +319,7 @@ def main():
     originalTextLen = len(list(originalText))
 
     print('[info] generating typos')
-    erroredText = generateTypos(originalText)
+    erroredText = typo_model.generateTypos(originalText)
     erroredTextLen = len(list(erroredText))
 
     assert originalTextLen == erroredTextLen
