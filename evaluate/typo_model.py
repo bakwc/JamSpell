@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import tqdm
 import random
 import bisect
 from scipy.stats import binom
@@ -10,15 +11,16 @@ import utils
 
 TYPO_PROB = 0.03  # chance of making typo for a single letter
 SECOND_TYPO_CF = 0.2  # chance of making two typos, relative to TYPO_PROB
-REPLACE_PROB = 0.7
-INSERT_PROB = 0.1
-REMOVE_PROB = 0.1
-TRANSPOSE_PROB = 0.1
+REPLACE_PROB = 0.654
+INSERT_PROB = 0.082
+REMOVE_PROB = 0.082
+TRANSPOSE_PROB = 0.082
+MERGE_PROB = 0.1
 TRANSPOSE_DISTANCE_PROB = [0.8, 0.15, 0.04, 0.01]
 EPSILON = 0.001
 
 assert 1.0 >= TYPO_PROB > 0
-assert abs(REPLACE_PROB + INSERT_PROB + REMOVE_PROB + TRANSPOSE_PROB - 1.0) < EPSILON
+assert abs(REPLACE_PROB + INSERT_PROB + REMOVE_PROB + TRANSPOSE_PROB + MERGE_PROB - 1.0) < EPSILON
 
 
 # Randomly selects a value from list [(value, weight), ... ]
@@ -67,9 +69,11 @@ def typoTranspose(word):
     l2 = min(len(word) - 1, l1 + d)
     return swapLetter(word, l1, l2)
 
+def typoMerge(word):
+    return word + '+'
 
-TYPO_TYPES = [REPLACE_PROB, INSERT_PROB, REMOVE_PROB, TRANSPOSE_PROB]
-TYPO_GENERATORS = [typoReplace, typoInsert, typoRemove, typoTranspose]
+TYPO_TYPES = [REPLACE_PROB, INSERT_PROB, REMOVE_PROB, TRANSPOSE_PROB, MERGE_PROB]
+TYPO_GENERATORS = [typoReplace, typoInsert, typoRemove, typoTranspose, typoReplace]
 
 LEN_TO_PROB = {}
 
@@ -101,3 +105,6 @@ def generateTypo(word):
         typoType = weightedChoice(enumerate(TYPO_TYPES))
         word = TYPO_GENERATORS[typoType](word)
     return word
+
+def generateTypos(text):
+    return list(map(generateTypo, tqdm.tqdm(text)))

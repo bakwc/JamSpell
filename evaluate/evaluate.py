@@ -7,6 +7,7 @@ import argparse
 import typo_model
 import time
 import copy
+import tqdm
 from utils import normalize, loadText, generateSentences
 import utils
 
@@ -23,8 +24,6 @@ class STATE:
     SPACE = 3
 
 
-def generateTypos(text):
-    return list(map(typo_model.generateTypo, text))
 
 
 class Corrector(object):
@@ -119,6 +118,12 @@ def evaluateCorrector(correctorName, corrector, originalSentences, erroredSenten
 
     startTime = lastTime = time.time()
     n = 0
+
+    tp = 0.0
+    tn = 0.0
+    fp = 0.0
+    fn = 0.0
+
     for sentID in range(len(originalSentences)):
         originalText = originalSentences[sentID]
         erroredText = erroredSentences[sentID]
@@ -127,24 +132,42 @@ def evaluateCorrector(correctorName, corrector, originalSentences, erroredSenten
             originalWord = originalText[pos]
             fixedCandidates = corrector.correct(erroredText, pos)
             if isinstance(fixedCandidates, list):
-                fixedCandidates = fixedCandidates[:7]
+                fixedCandidates = fixedCandidates #[:7]
                 fixedWord = fixedCandidates[0]
-                fixedWords = set(fixedCandidates)
+                fixedWords = fixedCandidates[:]
             else:
                 fixedWord = fixedCandidates
                 fixedWords = [fixedCandidates]
 
-            # if originalWord != fixedWord:
-            #    print '%s (%s=>%s):\n%s\n\n' % (originalWord, erroredWord, fixedWord, ' '.join(erroredText))
+            #if fixedWord != originalWord:
+                # totalErrors += 1
+                # if originalWord in fixedWords:
+                #     print(u'%s (%s=>%s):' % (originalWord, erroredWord, fixedWord))
+                #     print(u'err text: ' + u' '.join(erroredText))
+                #     print(u'org text: ' + u' '.join(originalText))
+                #     print(u' '.join(fixedWords))
+                #     print('\n')
 
             erroredText[pos] = fixedWord
             n += 1
 
             if erroredWord != originalWord:
+                if fixedWord == originalWord:
+                    tp += 1
+                else:
+                    fn += 1
+
+            if erroredWord == originalWord:
+                if fixedWord == erroredWord:
+                    tn += 1
+                else:
+                    fp += 1
+
+            if erroredWord != originalWord:
                 origErrors += 1
                 if fixedWord == originalWord:
                     fixedErrors += 1
-                if fixedWord != erroredWord and originalWord in fixedCandidates:
+                if originalWord in fixedCandidates:
                     topNfixed += 1
             else:
                 totalNotTouched += 1
@@ -176,12 +199,18 @@ def evaluateCorrector(correctorName, corrector, originalSentences, erroredSenten
         # if fixedWord != originalWord:
         #    print originalWord, erroredWord, fixedWord
 
+    recall = tp / (tp + fn)
+    precision = tp / (tp + fp)
+    f1 = 2.0 * (precision * recall) / (precision + recall)
+
     return float(totalErrors) / n, \
            float(fixedErrors) / origErrors, \
            float(broken) / totalNotTouched, \
            float(topNtotalErrors) / n, \
            float(topNfixed) / origErrors, \
-           time.time() - startTime
+           time.time() - startTime, \
+           (precision, recall, f1)
+
 
 
 def testMode(corrector):
@@ -213,6 +242,34 @@ def evaluateJamspell(modelFile, testText, alphabetFile, maxWords=50000):
     return errorsRate, fixRate, broken, topNerr, topNfix
 
 
+def evaluateChecker(correctors, originalSentences, erroredSentences, maxWords):
+    results = {}
+
+    for correctorName, corrector in correctors.items():
+        errorsRate, fixRate, broken, topNerr, topNfix, execTime, metrics = \
+            evaluateCorrector(correctorName, corrector, originalSentences, erroredSentences, maxWords)
+        results[correctorName] = errorsRate, fixRate, broken, topNerr, topNfix, execTime, metrics
+
+    print('')
+
+    print(
+        '[info] %12s %8s  %8s  %8s  %8s  %8s  %8s  %8s  %8s  %8s' %
+        ('', 'errRate', 'fixRate', 'broken', 'topNerr', 'topNfix', 'pr', 're', 'f1', 'time'))
+    for k, _ in sorted(results.items(), key=lambda x: x[1]):
+        print('[info] %10s  %8.2f%% %8.2f%% %8.2f%% %8.2f%% %8.2f%% %8.2f%% %8.2f%% %8.2f%% %8.2fs' % \
+              (k,
+               100.0 * results[k][0],
+               100.0 * results[k][1],
+               100.0 * results[k][2],
+               100.0 * results[k][3],
+               100.0 * results[k][4],
+               100.0 * results[k][6][0],
+               100.0 * results[k][6][1],
+               100.0 * results[k][6][2],
+               results[k][5]))
+
+
+
 def main():
     parser = argparse.ArgumentParser(description='spelling correctors evaluation')
     parser.add_argument('file', type=str, help='text file to use for evaluation')
@@ -230,7 +287,7 @@ def main():
         utils.loadAlphabet(args.alphabet)
 
     correctors = {
-        'dummy': DummyCorrector(),
+        #'dummy': DummyCorrector(),
     }
     # corrector = correctors['dummy']
 
@@ -278,26 +335,7 @@ def main():
     print('[info] total words: %d' % len(originalText))
     print('[info] evaluating')
 
-    results = {}
-
-    for correctorName, corrector in correctors.items():
-        errorsRate, fixRate, broken, topNerr, topNfix, execTime = \
-            evaluateCorrector(correctorName, corrector, originalSentences, erroredSentences, maxWords)
-        results[correctorName] = errorsRate, fixRate, broken, topNerr, topNfix, execTime
-
-    print('')
-
-    print(
-        '[info] %12s %8s  %8s  %8s  %8s  %8s  %8s' % ('', 'errRate', 'fixRate', 'broken', 'topNerr', 'topNfix', 'time'))
-    for k, _ in sorted(results.items(), key=lambda x: x[1]):
-        print('[info] %10s  %8.2f%% %8.2f%% %8.2f%% %8.2f%% %8.2f%% %8.2fs' % \
-              (k,
-               100.0 * results[k][0],
-               100.0 * results[k][1],
-               100.0 * results[k][2],
-               100.0 * results[k][3],
-               100.0 * results[k][4],
-               results[k][5]))
+    evaluateChecker(correctors, originalSentences, erroredSentences, maxWords)
 
 
 if __name__ == '__main__':
