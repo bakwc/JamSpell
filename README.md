@@ -15,7 +15,17 @@ JamSpell is a spell checking library with following features:
 - **multi-language** - it's written in C++ and available for many languages with swig bindings
 
 ## JamSpellPro
-[jamspell.com](https://jamspell.com) - check out a new jamspell version with better accuracy (neural network model), more languages and priority e-mail support 
+[jamspell.com](https://jamspell.com) - check out a new jamspell version with following features
+ - Improved accuracy ([catboost](**https://catboost.ai**) gradient boosted decision trees candidates ranking model)
+ - Splits merged words
+ - Pre-trained models for many languages (small, medium, large) for:
+`en, ru, de, fr, it, es, tr, uk, pl, nl, pt, hi, no`
+ - Ability to add words / sentences at runtime
+ - Fine-tuning / additional training
+ - Memory optimization for training large models
+ - Static dictionary support
+ - Built-in `Java, C#, Ruby` support
+ - Windows support
 
 ## Content
 - [Benchmarks](#benchmarks)
