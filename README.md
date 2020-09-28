@@ -16,7 +16,7 @@ JamSpell is a spell checking library with following features:
 
 ## JamSpellPro
 [jamspell.com](https://jamspell.com) - check out a new jamspell version with following features
- - Improved accuracy ([catboost](**https://catboost.ai**) gradient boosted decision trees candidates ranking model)
+ - Improved accuracy ([catboost](https://catboost.ai) gradient boosted decision trees candidates ranking model)
  - Splits merged words
  - Pre-trained models for many languages (small, medium, large) for:  
 `en, ru, de, fr, it, es, tr, uk, pl, nl, pt, hi, no`
