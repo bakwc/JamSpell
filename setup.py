@@ -1,4 +1,5 @@
 import os
+import sys
 import re
 from distutils.command.build import build
 from distutils.command.build_ext import build_ext
@@ -27,6 +28,9 @@ jamspell = Extension(
     extra_compile_args=['-std=c++11', '-O2'],
     swig_opts=['-c++'],
 )
+
+if sys.platform == 'darwin':
+    jamspell.extra_compile_args.append('-stdlib=libc++')
 
 class CustomBuild(build):
     def run(self):
