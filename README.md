@@ -14,6 +14,8 @@ JamSpell is a spell checking library with following features:
 - **fast** - near 5K words per second
 - **multi-language** - it's written in C++ and available for many languages with swig bindings
 
+[Colab example](https://colab.research.google.com/drive/1aFk8-7nq3oAp402jjLGLpEb2Nzq210Eo)
+
 ## JamSpellPro
 [jamspell.com](https://jamspell.com) - check out a new jamspell version with following features
  - Improved accuracy ([catboost](https://catboost.ai) gradient boosted decision trees candidates ranking model)
