@@ -1,19 +1,21 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import codecs
 import random
 import argparse
-import typo_model
 import time
 import copy
-from utils import normalize, loadText, generateSentences
-import utils
 
 try:
     import readline
 except:
     pass
+
+from evaluate import typo_model
+from evaluate import utils
+
+from .utils import normalize, loadText, generateSentences
+
 
 
 class STATE:
@@ -186,7 +188,7 @@ def evaluateCorrector(correctorName, corrector, originalSentences, erroredSenten
 
 def testMode(corrector):
     while True:
-        sentence = raw_input(">> ").lower().strip()
+        sentence = input(">> ").lower().strip()
         sentence = normalize(sentence).split()
         if not sentence:
             continue

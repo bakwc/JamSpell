@@ -3,8 +3,10 @@
 
 import random
 import bisect
+
 from scipy.stats import binom
-import utils
+
+from evaluate import utils
 
 # todo: calculate correct typo probabilities
 

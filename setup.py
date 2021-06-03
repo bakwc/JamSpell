@@ -1,11 +1,9 @@
 import os
 import sys
-import re
 from distutils.command.build import build
 from distutils.command.build_ext import build_ext
 from setuptools.command.install import install
 from distutils.spawn import find_executable
-from distutils.version import LooseVersion
 from setuptools import setup
 from setuptools.extension import Extension
 import subprocess
@@ -26,7 +24,7 @@ jamspell = Extension(
         os.path.join('jamspell.i'),
     ],
     extra_compile_args=['-std=c++11', '-O2'],
-    swig_opts=['-c++'],
+    swig_opts=['-c++', '-py3'],
 )
 
 if sys.platform == 'darwin':
@@ -43,11 +41,11 @@ class CustomInstall(install):
         self.run_command('build_ext')
         install.run(self)
 
-class Swig3Ext(build_ext):
+class Swig4Ext(build_ext):
     def find_swig(self):
-        swigBinary = find_executable('swig3.0') or find_executable('swig')
+        swigBinary = find_executable('swig4.0') or find_executable('swig')
         assert swigBinary is not None
-        assert subprocess.check_output([swigBinary, "-version"]).find(b'SWIG Version 3') != -1
+        assert subprocess.check_output([swigBinary, "-version"]).find(b'SWIG Version 4') != -1
         return swigBinary
 
 VERSION = '0.0.12'
@@ -63,7 +61,10 @@ setup(
     long_description='context-based spell checker',
     keywords=['nlp', 'spell', 'spell-checker', 'jamspell'],
     classifiers=[
-        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
         'License :: OSI Approved :: MIT License',
     ],
     py_modules=['jamspell'],
@@ -72,7 +73,7 @@ setup(
     cmdclass={
         'build': CustomBuild,
         'install': CustomInstall,
-        'build_ext': Swig3Ext,
+        'build_ext': Swig4Ext,
     },
     include_package_data=True,
 )
