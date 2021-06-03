@@ -1,4 +1,4 @@
-name: jamspell
+name: jamspell build and test
 
 on: [push]
 
@@ -19,11 +19,6 @@ jobs:
       - name: Install c++ dependencies
         run: |
           sudo apt-get install swig4.0 build-essential cmake libgtest-dev -y
-#          cd /usr/src/gtest
-#          sudo cmake CMakeLists.txt
-#          sudo make
-#          sudo cp *.a /usr/lib
-#          cd -
       - name: Install python dependencies
         run: |
           python -m pip install --upgrade pip

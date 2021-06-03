@@ -12,6 +12,7 @@
 
 *.egg-info/
 build/
+dist/
 jamspell.py
 *.so
 jamspell_wrap.cpp

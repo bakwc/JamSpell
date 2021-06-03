@@ -67,6 +67,7 @@ setup(
         'Programming Language :: Python :: 3.9',
         'License :: OSI Approved :: MIT License',
     ],
+    python_requires='>=3.6',
     py_modules=['jamspell'],
     ext_modules=[jamspell],
     zip_safe=False,
