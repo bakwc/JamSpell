@@ -129,6 +129,14 @@ TScoredWords TSpellCorrector::GetCandidatesRawWithScores(const TWords& sentence,
     return scoredCandidates;
 }
 
+bool TSpellCorrector::WordIsKnown(const std::wstring& word) const {
+    TWord w = LangModel.GetWord(word);
+    if (w.Ptr && w.Len) {
+        return true;
+    }
+    return false;
+}
+
 TWords TSpellCorrector::GetCandidatesRaw(const TWords& sentence, size_t position) const {
     TWords candidates;
     TScoredWords scoredCandidates = GetCandidatesRawWithScores(sentence, position);
