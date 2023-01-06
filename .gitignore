@@ -1,5 +1,4 @@
 .idea/
-*.txt
 *.pyc
 *.aff
 *.dic
@@ -10,3 +9,10 @@
 *.tar.gz
 *.spell
 *.cache
+
+*.egg-info/
+build/
+dist/
+jamspell.py
+*.so
+jamspell_wrap.cpp

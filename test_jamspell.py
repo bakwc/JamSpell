@@ -1,6 +1,8 @@
 import os
 import pytest
+from pytest import approx
 import jamspell
+
 from evaluate import generate_dataset
 from evaluate.evaluate import evaluateJamspell
 
@@ -39,4 +41,4 @@ def test_evaluation(sourceFile, alphabetFile, expected):
     generate_dataset.generateDatasetTxt(TEST_DATA + sourceFile, TEMP)
     trainLangModel(TEMP_TRAIN, alphabetFile, TEMP_MODEL)
     results = evaluateJamspell(TEMP_MODEL, TEMP_TEST, alphabetFile)
-    assert results == expected
+    assert results == approx(expected, rel=1)

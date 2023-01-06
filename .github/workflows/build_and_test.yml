@@ -1,0 +1,35 @@
+name: jamspell build and test
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.6", "3.10", "3.11"]
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install c++ dependencies
+        run: |
+          sudo apt-get install swig4.0 build-essential cmake libgtest-dev -y
+      - name: Install python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements_test.txt
+          mkdir build
+          cd build
+          cmake ..
+          make
+          ls -l
+          cd ..
+          python setup.py install
+      - name: Test with pytest
+        run: |
+          pytest -vv
