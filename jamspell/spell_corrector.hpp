@@ -20,7 +20,7 @@ public:
     std::wstring FixFragment(const std::wstring& text) const;
     std::wstring FixFragmentNormalized(const std::wstring& text) const;
     void SetPenalty(double knownWordsPenalty, double unknownWordsPenalty);
-    void SetMaxCandiatesToCheck(size_t maxCandidatesToCheck);
+    void SetMaxCandidatesToCheck(size_t maxCandidatesToCheck);
     const NJamSpell::TLangModel& GetLangModel() const;
 private:
     void FilterCandidatesByFrequency(std::unordered_set<NJamSpell::TWord, NJamSpell::TWordHashPtr>& uniqueCandidates, NJamSpell::TWord origWord) const;
@@ -37,7 +37,7 @@ private:
     std::unique_ptr<TBloomFilter> Deletes2;
     double KnownWordsPenalty = 20.0;
     double UnknownWordsPenalty = 5.0;
-    size_t MaxCandiatesToCheck = 14;
+    size_t MaxCandidatesToCheck = 14;
 };
 
 

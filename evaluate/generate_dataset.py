@@ -174,7 +174,7 @@ def processSentences(sentences, outFile):
 
 
 def main():
-    parser = argparse.ArgumentParser(description='datset generator')
+    parser = argparse.ArgumentParser(description='dataset generator')
     parser.add_argument('out_file', type=str, help='will be created out_file_train and out_file_test')
     parser.add_argument('-lz', '--leipzig', type=str, help='path to file or dir with Leipzig Corpora files')
     parser.add_argument('-fb2', '--fb2', type=str, help='path to file or dir with files in FB2 format')
