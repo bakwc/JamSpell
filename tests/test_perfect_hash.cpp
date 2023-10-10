@@ -16,13 +16,13 @@ TEST(PerfetHashTest, basicFlow) {
     ph.Init(keys);
 
     ASSERT_TRUE(ph.BucketsNumber() < uint32_t(2.0 * keys.size()));
-    std::set<size_t> backetsUsed;
+    std::set<size_t> bucketsUsed;
 
     for (auto&& s: keys) {
-        backetsUsed.insert(ph.Hash(s));
+        bucketsUsed.insert(ph.Hash(s));
     }
 
-    ASSERT_EQ(keys.size(), backetsUsed.size());
+    ASSERT_EQ(keys.size(), bucketsUsed.size());
 
     std::string serialized;
     {
@@ -38,9 +38,9 @@ TEST(PerfetHashTest, basicFlow) {
         ph2.Load(in);
     }
 
-    backetsUsed.clear();
+    bucketsUsed.clear();
     for (auto&& s: keys) {
-        backetsUsed.insert(ph2.Hash(s));
+        bucketsUsed.insert(ph2.Hash(s));
     }
-    ASSERT_EQ(keys.size(), backetsUsed.size());
+    ASSERT_EQ(keys.size(), bucketsUsed.size());
 }
