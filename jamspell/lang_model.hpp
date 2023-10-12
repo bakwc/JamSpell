@@ -58,6 +58,11 @@ public:
 class TLangModel {
 public:
     bool Train(const std::string& fileName, const std::string& alphabetFile);
+    bool TrainNGrams(const std::string &gram1File,
+                     const std::string &gram2File,
+                     const std::string &gram3File,
+                     const std::string &datasetFile,
+                     const std::string &alphabetFile);
     double Score(const TWords& words) const;
     double Score(const std::wstring& str) const;
     TWord GetWord(const std::wstring& word) const;

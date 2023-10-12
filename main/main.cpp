@@ -8,6 +8,8 @@ using namespace NJamSpell;
 void PrintUsage(const char** argv) {
     std::cerr << "Usage: " << argv[0] << " mode args" << std::endl;
     std::cerr << "    train alphabet.txt dataset.txt resultModel.bin  - train model" << std::endl;
+    std::cerr << "    train_ngrams alphabet.txt grams1.csv grams2.csv grams3.csv dataset.txt resultModel.bin"
+                 "  - load model from 1-, 2-, and 3-grams and then train it on dataset.txt" << std::endl;
     std::cerr << "    score model.bin - input sentences and get score" << std::endl;
     std::cerr << "    correct model.bin - input sentences and get corrected one" << std::endl;
     std::cerr << "    fix model.bin input.txt output.txt - automatically fix txt file" << std::endl;
@@ -19,6 +21,19 @@ int Train(const std::string& alphabetFile,
 {
     TLangModel model;
     model.Train(datasetFile, alphabetFile);
+    model.Dump(resultModelFile);
+    return 0;
+}
+
+int TrainNGrams(const std::string& alphabetFile,
+                const std::string& gram1File,
+                const std::string& gram2File,
+                const std::string& gram3File,
+                const std::string& datasetFile,
+          const std::string& resultModelFile)
+{
+    TLangModel model;
+    model.TrainNGrams(gram1File, gram2File, gram3File, datasetFile, alphabetFile);
     model.Dump(resultModelFile);
     return 0;
 }
@@ -93,6 +108,18 @@ int main(int argc, const char** argv) {
         std::string datasetFile = argv[3];
         std::string resultModelFile = argv[4];
         return Train(alphabetFile, datasetFile, resultModelFile);
+    } else if (mode == "train_ngrams") {
+        if (argc != 8) {
+            PrintUsage(argv);
+            return 42;
+        }
+        std::string alphabetFile = argv[2];
+        std::string gram1File = argv[3];
+        std::string gram2File = argv[4];
+        std::string gram3File = argv[5];
+        std::string datasetFile = argv[6];
+        std::string resultModelFile = argv[7];
+        return TrainNGrams(alphabetFile, gram1File, gram2File, gram3File, datasetFile, resultModelFile);
     } else if (mode == "score") {
         if (argc < 3) {
             PrintUsage(argv);
