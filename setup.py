@@ -1,9 +1,9 @@
 import os
 import sys
-from distutils.command.build import build
-from distutils.command.build_ext import build_ext
+from setuptools.command.build import build
+from setuptools.command.build_ext import build_ext
 from setuptools.command.install import install
-from distutils.spawn import find_executable
+from shutil import which as find_executable
 from setuptools import setup
 from setuptools.extension import Extension
 import subprocess

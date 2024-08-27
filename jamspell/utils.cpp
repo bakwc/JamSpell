@@ -32,7 +32,7 @@ void SaveFile(const std::string& fileName, const std::string& data) {
 }
 
 TTokenizer::TTokenizer()
-    : Locale("en_US.utf-8")
+    : Locale(std::locale::classic())
 {
 }
 
@@ -135,7 +135,7 @@ uint64_t GetCurrentTimeMs() {
     return ms.count();
 }
 
-static const std::locale GLocale("en_US.UTF-8");
+static const std::locale GLocale(std::locale::classic());
 static const std::ctype<wchar_t>& GWctype = std::use_facet<std::ctype<wchar_t>>(GLocale);
 
 void ToLower(std::wstring& text) {
